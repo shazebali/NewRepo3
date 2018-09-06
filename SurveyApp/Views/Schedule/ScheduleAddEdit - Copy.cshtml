@@ -1,0 +1,364 @@
+﻿@using SurveyApp.Models;
+@{
+    ViewBag.Title = "eBit - Schedule Information Editor";
+    months = ViewData["Months"] != null ? ViewData["Months"].ToString() : "";
+    string script = "";
+}
+
+@model SurveyApp.Models.Schedule
+
+@functions{
+    string months;
+    public string getMonthStatus(int monthId)
+    {
+        if (months != "")
+        {
+            foreach (string id in months.Split(','))
+            {
+                if (Convert.ToInt32(id) == monthId)
+                {
+                    return "checked='checked'";
+                }
+            }
+        }
+
+        return "";
+    }
+}
+
+<h2><a href="javascript:void(0);" id="back" class="btnBack"></a> &nbsp;Schedule Information Editor</h2>
+@if (Model.Id > 0)
+{
+    <div><p class="text-danger">Please note if a schedule has already passed then reducing the number of days will not have any effect.</p></div>
+}
+
+<style>
+    ._panel {
+        background: #fafafa;
+        border: solid 1px #cccccc;
+        padding: 10px;
+        border-radius: 6px;
+    }
+
+    .msg.green {
+        color: #00cc00;
+        margin: 0px 0px 6px 0px;
+    }
+
+    .msg.red {
+        color: #cc0000;
+        margin: 0px 0px 6px 0px;
+    }
+
+    .ui-tooltip {
+        min-width: 483px;
+        max-width: 500px;
+        background-color: #333;
+        color: #FFF;
+    }
+</style>
+<br />
+
+@using (Html.BeginForm("ScheduleAddEdit", "Schedule", FormMethod.Post, new { id = "frmAddSchedule", @class = "form-horizontal", style = "width: 700px;padding-left: 24px;" }))
+{
+    @Html.ValidationSummary();
+    @Html.HiddenFor(m => m.Id, new { name = "hdnScheduleId", value = Model.Id })
+    <div id="divValidation" style="display:none;" class="validation-summary-errors"><ul></ul></div>
+    <input type="hidden" id="hdnSendEmail" name="hdnSendEmail" value="true" />
+
+    <div class="form-group">
+        <label class="control-label col-sm-4">Title:*</label>
+        <div class="col-sm-8">
+            @Html.TextBoxFor(m => m.Title, new { placeholder = "Enter Title", @class = "form-control", @maxlength = "100" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-sm-4">Frequency:*</label>
+        <div class="col-sm-8">
+            <div class="radio-inline"><label>@Html.RadioButtonFor(m => m.Frequency, "1", new { name = "optradio", onclick = "$('#divDays').hide();$('#DaysToRepeat').removeClass('inerror');" })Once</label></div>
+            <div class="radio-inline"><label>@Html.RadioButtonFor(m => m.Frequency, "2", new { name = "optradio", onclick = "$('#divDays').show();" })Repeat</label></div>
+        </div>
+    </div>
+
+    <div id="divDays" class="_panel form-group" style="display:none;">
+        <div class="form-group">
+            <label class="control-label col-sm-4">Enter Days To Repeat:*</label>
+            <div class="col-sm-8">
+                @Html.TextBoxFor(m => m.DaysToRepeat, new { placeholder = "Enter No. Of Days", type = "text", pattern = "\\d*", maxlength = "3", @class = "form-control" })
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-sm-4">Active On:*</label>
+        <div class="col-sm-8">
+            <div class="radio-inline"><label>@Html.RadioButtonFor(m => m.ActiveOn, "1", new { name = "optradio", onclick = "$('#divSpecify').hide();" })Enrollment</label></div>
+            <div class="radio-inline"><label>@Html.RadioButtonFor(m => m.ActiveOn, "2", new { name = "optradio", onclick = "$('#divSpecify').show();" })Specify</label></div>
+        </div>
+    </div>
+
+    <div id="divSpecify" class="form-group _panel" style="display:none;">
+        <label class="control-label col-sm-4">Specify Period:*</label>
+        <div class="col-sm-8">
+            <div class="specify" data-toggle="tooltip" title="Please note this selection will be applicable for the future dates.">
+                <table cellpadding="0" cellspacing="0" style="width:100%;">
+                    <tr>
+                        <td>
+                            <div class="monthly">
+                                @Html.DropDownListFor(m => m.Day, new SelectList(ScheduleDay.GetScheduleDays(), "Id", "Value"), "Select Day", new { id = "ddlDays", @class = "form-control ddlperiod", style = "width: 49%;display: inline-block;", onchange = "setPeriodSpecification(1);" })
+                                @Html.DropDownListFor(m => m.Month, new SelectList(ScheduleMonth.GetScheduleMonths(), "Id", "Month"), "Select Month", new { id = "ddlMonths", @class = "form-control ddlperiod", style = "width: 49%;display: inline-block;", onchange = "setPeriodSpecification(1);" })
+                            </div>
+                        </td>
+                        <td style="text-align:center;"><b>&nbsp;OR&nbsp;</b></td>
+                        <td>
+                            <div class="weekly">
+                                @Html.DropDownListFor(m => m.Weekday, new SelectList(ScheduleWeekday.GetScheduleWeekdays(), "Id", "Weekday"), "Select Weekday", new { id = "ddlWeekdays", @class = "form-control ddlperiod", onchange = "setPeriodSpecification(2);" })
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            <div style="margin-top: 10px;border-top: solid 1px #CCC;padding-top: 10px;">
+                                <label class="control-label col-sm-4">Starting Year:*</label>
+                                <div class="col-sm-8">
+                                    @Html.DropDownListFor(m => m.StartingYear, new SelectList(ScheduleYear.GetScheduleYears(), "Id", "Year", Model.StartingYear), "Select Year", new { id = "ddlStartingYear", @class = "form-control ddlperiod", style = "width: 50%;display: inline-block;" })
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-sm-4">Available Until:*</label>
+        <div class="col-sm-8">
+            @Html.TextBoxFor(m => m.AvailableUntil, new { placeholder = "Enter No. Of Days", type = "text", pattern = "\\d*", maxlength = "3", @class = "form-control" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-sm-4">Send Reminder When Survey Schedule Starts:</label>
+        <div class="col-sm-8">
+            <div class="checkbox-inline"><label>@Html.CheckBoxFor(m => m.IsStartReminder, new { name = "chkStartReminder", @checked = "checked" })Yes</label></div>            
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-sm-4">Reminder Frequncey:*</label>
+        <div class="col-sm-8">
+            @Html.TextBoxFor(m => m.ReminderFrequency, new { placeholder = "Enter Frequency", type = "text", pattern = "\\d*", maxlength = "3", @class = "form-control" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-sm-4">Last Reminder:*</label>
+        <div class="col-sm-8">
+            @Html.TextBoxFor(m => m.LastReminder, new { placeholder = "Enter No. Of Days", type = "text", pattern = "\\d*", maxlength = "3", @class = "form-control" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-sm-offset-3 col-sm-8" style="margin-top:10px;">
+            <button type="button" id="btnSaveSchedule" class="btn btn-default">Save Information</button>
+            <button type="button" class="btn btn-default" onclick="location.href='@Url.Action("Index", "Schedule")';">Cancel</button>
+        </div>
+    </div>
+
+}
+
+<script type="text/javascript">
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip({
+            content: function () {
+                return $(this).attr('title').replace(/<br\/>/g, "<br/>");
+            },
+        });
+
+        $("input[type=text]").keyup(function () {
+            $(this).removeClass("inerror");
+        });
+        $(".ddlperiod").change(function () {
+            $(this).removeClass("inerror");
+        });
+
+        $("#frmAddSchedule").find("input[type='radio']").each(function (index, obj) {
+            if ($(obj)[0].checked == true) {
+                $(obj)[0].click();
+                return true;
+            }
+        });
+
+        @if (Model.Id <= 0)
+        {
+            script = "$(\"#frmAddSchedule\").find(\"input[type=text]\").val(\"\")";
+        }
+/**/
+        @Html.Raw(script);
+
+
+        $("#btnSaveSchedule").click(function (e) {
+            if (validateSchedule() == false) {
+                return false;
+            }
+
+            e.preventDefault();
+            $('.loading').show();
+            $('.disablebackground').show();
+
+            bootbox.dialog({
+                message: "Would you like to send “assessment assignment” email to respondents?",
+                title: "Email Confirmation",
+                closeButton: false,
+                onEscape: function () {
+                    $("#hdnSendEmail").val(false);
+                    $("#frmAddSchedule").submit();
+                },
+                buttons: {
+                    success: {
+                        label: "Send",
+                        className: "btn-primary",
+                        callback: function () {
+                            $("#hdnSendEmail").val(true);
+                            $("#frmAddSchedule").submit();
+                        }
+                    },
+                    danger: {
+                        label: "Don't Send",
+                        className: "btn-default",
+                        callback: function () {
+                            $("#hdnSendEmail").val(false);
+                            $("#frmAddSchedule").submit();
+                        }
+                    }
+                }
+            });
+        });
+
+        $(".btnBack").click(function(){
+            bootbox.dialog({
+                message: "Would you like to save the changes?",
+                title: "Save Changes!",
+                closeButton: false,
+                onEscape: function() {
+                    location.href = "@Url.Action("Index", "Schedule")";
+                },
+                buttons: {
+                    success: {
+                        label: "Yes",
+                        className: "btn-primary",
+                        callback: function() {
+                            $("#btnSaveSchedule").click();
+                        }
+                    },
+                    danger: {
+                        label: "No",
+                        className: "btn-default",
+                        callback: function() {
+                            location.href = "@Url.Action("Index", "Schedule")";
+                        }
+                    }
+                }
+            });
+        });
+    });
+
+    function setPeriodSpecification(type) {
+        if (type == 1) {
+            $("#ddlWeekdays").val("");
+        }
+        if (type == 2) {
+            $("#ddlDays").val("");
+            $("#ddlMonths").val("");
+        }
+    }
+
+    function validateSchedule() {
+        /* SCHEDULE VALIDATION */
+        var errors = "";
+        if ($("#Title").val() == "") {
+            $("#Title").addClass("inerror");
+            errors += "<li>Please enter title.</li>";
+        }
+        if ($("#divSpecify").is(":visible")) {
+            if ($("#ddlStartingYear").val() == "") {
+                $("#ddlStartingYear").addClass("inerror");
+                errors += "<li>Please select a starting year for the schedule.</li>";
+            }
+
+            if ($("#ddlWeekdays").val() == "") {
+                if ($("#ddlDays").val() == "") {
+                    $("#ddlDays").addClass("inerror");
+                    errors += "<li>Please select a day for the schedule.</li>";
+                }
+                if ($("#ddlMonths").val() == "") {
+                    $("#ddlMonths").addClass("inerror");
+                    errors += "<li>Please select a month year for the schedule.</li>";
+                }
+            }
+
+        }
+
+        if (document.getElementsByName("Frequency")[0].checked == false && document.getElementsByName("Frequency")[1].checked == false) {
+            //$(document.getElementsByName("Frequency")[0]).closest("div.radio-inline").addClass("inerror");
+            //$(document.getElementsByName("Frequency")[1]).closest("div.radio-inline").addClass("inerror");
+            errors += "<li>Please select frequency.</li>";
+        }
+
+        if ($("#divDays").is(":visible") == true) {
+            if ($("#DaysToRepeat").val() == "") {
+                $("#DaysToRepeat").addClass("inerror");
+                errors += "<li>Please enter no. of days to repeat the schedule.</li>";
+            }
+            if ($("#DaysToRepeat").val() != "" && parseInt($("#DaysToRepeat").val()) <= 0) {
+                $("#DaysToRepeat").addClass("inerror");
+                errors += "<li>Please enter valid no. of days to repeat the schedule.</li>";
+            }
+            if ($("#DaysToRepeat").val() != "" && $("#AvailableUntil").val() != "") {
+                if (parseInt($("#DaysToRepeat").val()) < parseInt($("#AvailableUntil").val())) {
+                    $("#DaysToRepeat").addClass("inerror");
+                    errors += "<li>Survey should be repeated after finishing the current iteration i.e. number of days to repeat should be more than available until days.</li>";
+                }
+            }
+            if ($("#ReminderFrequency").val() != "" && $("#AvailableUntil").val() != "" && $("#LastReminder").val() != "") {
+                if (parseInt($("#AvailableUntil").val()) - parseInt($("#LastReminder").val()) < parseInt($("#ReminderFrequency").val())) {
+                    $("#ReminderFrequency").addClass("inerror");
+                    errors += "<li>Reminder frequency(after adding Last Reminder) can not be more than available until days.</li>";
+                }
+            }
+        }
+
+        if (document.getElementsByName("ActiveOn")[0].checked == false && document.getElementsByName("ActiveOn")[1].checked == false) {
+            //$(document.getElementsByName("ActiveOn")[0]).closest("div.radio-inline").addClass("inerror");
+            //$(document.getElementsByName("ActiveOn")[1]).closest("div.radio-inline").addClass("inerror");
+            errors += "<li>Please select activation type.</li>";
+        }
+
+        if ($("#AvailableUntil").val() == "") {
+            $("#AvailableUntil").addClass("inerror");
+            errors += "<li>Please enter no. of days for schedule availability.</li>";
+        }
+        if ($("#ReminderFrequency").val() == "") {
+            $("#ReminderFrequency").addClass("inerror");
+            errors += "<li>Please enter no. of days for reminder frequency.</li>";
+        }
+        if ($("#LastReminder").val() == "") {
+            $("#LastReminder").addClass("inerror");
+            errors += "<li>Please enter no. of days for last reminder.</li>";
+        }
+
+        if (errors != "") {
+            $("#divValidation").find("ul").empty();
+            $("#divValidation").find("ul").append(errors);
+            $("#divValidation").show();
+            $("#frmAddSchedule").find(".inerror:first").focus();
+            return false;
+        }
+
+        return true;
+    }
+</script>

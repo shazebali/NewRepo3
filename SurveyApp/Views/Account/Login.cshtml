@@ -1,0 +1,311 @@
+﻿@model SurveyApp.Models.LoginModel
+
+@{
+    ViewBag.Title = "eBit - Log in";
+    Layout = null;    
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="google-site-verification" content="SMAwJkKzNtZv3wEFlsIyVn93BxpV5Da2640hBh-CpW0" />
+    <title>Login</title>
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans">
+    <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    <meta name="google-site-verification" content="SMAwJkKzNtZv3wEFlsIyVn93BxpV5Da2640hBh-CpW0" />
+    <link href="~/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/bootstrap/css/bootstrap-theme.css" rel="stylesheet" />
+    <link href="~/Content/jquery-ui.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-2.2.0.min.js"></script>
+    <script src="~/bootstrap/js/bootstrap.js"></script>
+    <script src="~/Scripts/jquery-ui.min.js"></script>
+    <script src="~/Scripts/custom.js"></script>
+    <script src="~/Scripts/bootbox.min.js"></script>
+    <style type="text/css">
+         /*body{
+             font-family: 'Open Sans','Noto Sans', Arial, sans-serif !important;
+         }*/
+         .container .disabled {
+            background-color: #D0D0D0;
+            color: #FFF;
+            border: solid 1px #AAA;
+            cursor: default;
+        }
+         .container .btn-primary.disabled:hover, .btn-primary.disabled:focus {
+            background-color: #D0D0D0;
+            background-position: 0 -15px;
+            border-color: #AAA;
+        }
+        .container .btn-primary.disabled:hover {
+            color: #fff;
+            background-color: #D0D0D0;
+            border-color: #AAA;
+        }
+        .bootbox .modal-dialog{
+            width: 800px;
+        }
+        .bootbox-body{
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="content-wrapper" style="overflow:auto;padding:10px;">
+        <div class="float-left">
+            <p class="site-title">
+                <a href="@(System.Web.Configuration.WebConfigurationManager.AppSettings["_RootPath"].ToString())"><img src="~/Images/at3logo.png"></a>
+            </p>
+        </div>
+        <div class="float-left" style="border-left: solid 2px #00a3e2;padding: 8px 0px 8px 20px;margin-left: 10px;color: #00a3e2;font-weight: normal;text-shadow: 0px 0px 0.050px #00ACAA;">
+            <ul style="margin: 0px 0px 0px 0px;list-style: none;padding: 0px;">
+                <li>Evidence-based care by enabling caregivers to quantify the effects of interventions</li>
+                <li>Integrated care by allowing caregivers to share progress within their network</li>
+            </ul>
+        </div>
+        <div class="float-right">            
+            @*<section id="login">
+                <ul>
+                    <li><a href="/Account/Register" id="registerLink">Register</a></li>
+                    <li><a href="/" id="loginLink">Log in</a></li>
+                </ul>
+
+            </section>*@
+            &nbsp;
+            @*<nav>
+                <ul id="menu">
+                    <li><a href="/Home/Index">Home</a></li>
+                    <li><a href="/Home/About">About</a></li>
+                    <li><a href="/Home/Contact">Contact</a></li>
+                </ul>
+            </nav>*@
+        </div>
+    </div>
+</header>
+<div id="body" style="padding-bottom:0px;">
+    <div class="sessionexpiredshowpopup"></div>
+    <div class="container" style="background:url(../Images/ebitbg.jpg) no-repeat right center;padding-bottom:20px;min-height:420px;width:90%;">
+        <span style="display:none;">@System.DateTime.Now</span>
+        <div class="col-sm-6">
+            @if (String.IsNullOrEmpty(Request.QueryString["ar"]) == false && Convert.ToBoolean(Request.QueryString["ar"]) == true)
+            {
+                <div class="col-sm-12 alert alert-success" style="margin: 20px 0px 0px 0px;">
+                    <p>We have received your request for an eBit account. We'll send you an email when your account is ready.</p>
+                </div>
+                <br />
+            }
+
+            <div class="col-sm-7">
+                <h2 class="form-signin-heading">Please sign in</h2>
+                <section>
+                    @using (Html.BeginForm(new { ReturnUrl = ViewBag.ReturnUrl })) {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true)
+                        
+                        <fieldset>
+                            <legend>Log in Form</legend>
+                            <ol>
+                                <li>
+                                    @Html.LabelFor(m => m.UserName)
+                                    @Html.TextBoxFor(m => m.UserName, new { @class = "form-control", autocomplete = "off" })
+                                    @Html.ValidationMessageFor(m => m.UserName)
+                                </li>
+                                <li>
+                                    @Html.LabelFor(m => m.Password)
+                                    @Html.PasswordFor(m => m.Password, new { @class = "form-control", autocomplete = "off" })
+                                    @Html.ValidationMessageFor(m => m.Password)
+                                </li>
+                                <li>
+                                    @Html.CheckBoxFor(m => m.RememberMe)
+                                    @Html.LabelFor(m => m.RememberMe, new { @class = "checkbox", autocomplete = "off" })
+                                </li>
+                            </ol>
+                            <input type="submit" value="Log in" id="btnLogin" class="btn btn-primary" style="display:none;" />
+                            <input type="button" value="Log in" id="btnSignIn" class="btn btn-primary" onclick="validateUser(this);" />
+                        </fieldset>
+                        <p style="margin-top: 20px;">
+                            @*@Html.ActionLink("Register", "Register") if you don't have an account.*@
+                            <a href="@Url.Action("RequestAccount", "RequestAccount")" style="color: #6260ca;text-decoration: underline;">Request</a> an eBit account if you don't have one.
+                        </p>
+}
+                </section>
+            </div>
+            @*<div class="col-sm-11">
+                <h4>Welcome to eBit</h4>
+                Our mission is to build resilience in children with or at risk of neurodevelopmental disorders through innovative biomedical interventions evaluated in real world settings such as schools.<br /> We work to develop neurodevelopmental, resilience-building interventions and their impact in schools.
+            </div>*@
+ </div>
+        
+</div>
+    <div class="container" style="margin: 0px 0px 10px 0px;width: 100%;border-top: solid 1px #999;color: #333;text-shadow: 0px 0px 0.1px #222">
+        <h4>Welcome to eBit</h4>
+        Our mission is to build resilience in children with or at risk of neurodevelopmental disorders through innovative biomedical interventions evaluated in real world settings such as schools.<br /> We work to develop neurodevelopmental, resilience-building interventions and their impact in schools.
+        @*<h4>Our Approach</h4>
+        <p>Our research team does grant/gift/industry supported clinical trials of novel pharmacologic, nutraceutical agents and brain training interventions in the laboratory and evaluates the effectiveness of these interventions in outcome studies in school settings and clinical practices. Our research involves autism, ADHD, dyslexia, depression, psychosis and other childhood psychiatric disorders.</p>        
+        <p>Our investigator initiated clinical trials study novel biomedical treatments and the biological effects of alternative treatments for neurodevelopmental disorders such as autism such as vitamin B12, vitamin D3, Omega-3s and hyperbaric oxygen treatment.</p>*@        
+    </div>
+</div>
+<footer>
+    <div class="content-wrapper" style="padding:20px;">
+        <div class="float-left">
+            <p>&copy; @DateTime.Now.Year - eBit (Evidence Based Intervention and Treatment)</p>
+        </div>
+    </div>
+</footer>
+    <div class="loading" style="display: none;"><div>Please Wait...</div></div>
+    <div class="disablebackground"></div>
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
+<script type="text/javascript">
+        $(function () {
+            $("form").submit(function () {
+                if ($("#btnSignIn").hasClass("submitted") == false) {
+                    $("#btnSignIn").click();
+                    $(".disablebackground").focus();
+                    return false;
+                } 
+                
+                //if ($("#btnLogin").hasClass("disabled") == true) {
+                //    return false;
+                //}
+                //$("#btnLogin").addClass("disabled");
+            });
+        });
+        function ConsentUser() {
+            this.consentId;
+            this.studyId;
+            this.Title;
+            this.Consent;
+            this.isAgreed;
+        }
+        var arrConsents = new Array();
+
+        function validateUser(elem) {
+            $(".disablebackground").show();
+            $(".loading").show();
+            $("#btnSignIn").addClass("submitted");
+            var txtUserName = $("#UserName").val();
+            var txtPassword = $("#Password").val();
+
+            $.ajax({
+                url: '@Url.Action("User_GetConsents", "Condition")',
+                data: "{'userName': '" + txtUserName + "', 'password': '" + txtPassword + "' }",
+                type: 'POST',
+                async: true,
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    if (data.success == true) {
+                        if (data.Consents != null && data.Consents.length > 0) {
+                            arrConsents = data.Consents;
+                            for (var i = 0; i < arrConsents.length; i++) {
+                                $(".loading").hide();
+                                $(".disablebackground").hide();
+                                showConditions(arrConsents[i].Title, arrConsents[i].Consent, i, arrConsents[i].consentId);
+                            }
+                        }
+                        else {
+                            $("#btnLogin").click();
+                        }
+                    }
+                    else {
+                        $(".loading").hide();
+                        $(".disablebackground").hide();
+                        $("#btnSignIn").removeClass("submitted");
+                        bootbox.alert("Username or Password is not valid.");
+                    }
+                },
+
+                //Options to tell JQuery not to process data or worry about content-type
+                cache: false,
+                processData: false
+            });
+        }
+
+    function showConditions(title, html, index, consentId) {
+        html += "<br/><br/>By checking the box below, I am providing my signature to this consent form.<br/><label><input type='radio' id='chkAgreed_" + consentId + "' name='rdb" + consentId + "' class='agreed' />&nbsp;I am providing consent</label><br/><label><input type='radio' id='chkDisagreed_" + consentId + "' name='rdb" + consentId + "' class='disagreed' />&nbsp;I am not providing consent</label>";
+            bootbox.dialog({                
+                message: html,
+                title: title,
+                closeButton: false,
+                onEscape: function () {
+
+                },
+                buttons: {
+                    success: {
+                        label: "Save",
+                        className: "btn-primary",
+                        callback: function () {
+                            if ($("#chkAgreed_" + consentId)[0].checked == true) {
+                                arrConsents[index].isAgreed = true;
+                                updateConsents(consentId);
+                            }
+                        }
+                    },
+                    danger: {
+                        label: "Cancel",
+                        className: "btn-default",
+                        callback: function () {
+                            
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateConsents(consentId) {
+            var txtUserName = $("#UserName").val();
+            var txtPassword = $("#Password").val();
+
+            $.ajax({
+                url: '@Url.Action("User_UpdateConsents", "Condition")',
+                data: "{'userName': '" + txtUserName + "', 'password': '" + txtPassword + "', 'consentId' : '" + consentId + "' }",
+                type: 'POST',
+                async: false,
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    if (data.success == true && data.msg == "") {
+                        if (areConsentsAgreed() == true) {
+                            $(".disablebackground").show();
+                            $(".loading").show();
+                            $("#btnLogin").click();
+                        }
+                        else {
+                            $(".disablebackground").hide();
+                            $(".loading").hide();
+                        }
+                    }
+                    else {
+                        alert(data.msg);
+                    }
+                },
+
+                cache: false,
+                processData: false
+            });
+        }
+
+    function areConsentsAgreed() {
+        var isSuccess = true;
+        for (var i = 0; i < arrConsents.length; i++) {
+            if (arrConsents[i].isAgreed == false) {
+                isSuccess = false;
+            }
+        }
+
+        return isSuccess;
+    }
+
+    
+    </script>
+</body>
+
+</html>

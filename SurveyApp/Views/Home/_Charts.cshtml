@@ -1,0 +1,5325 @@
+﻿
+@using System.Data;
+@using SurveyApp.Models;
+
+@{
+    int studyId = String.IsNullOrEmpty(Request.QueryString["studyId"]) != true ? Convert.ToInt32(Request.QueryString["studyId"]) : 0;
+    int childId = String.IsNullOrEmpty(Request.QueryString["childIdts"]) != true ? Convert.ToInt32(Request.QueryString["childIdts"]) : 0;
+    string studyName = String.IsNullOrEmpty(Request.QueryString["studyName"]) != true ? Request.QueryString["studyName"].ToString() : "";
+    string childNamets = String.IsNullOrEmpty(Request.QueryString["child"]) != true ? Request.QueryString["child"].ToString() : "";
+
+    string[] roles = Roles.GetRolesForUser(User.Identity.Name);
+    string role = roles.Length > 0 ? roles[0] : "";
+    bool isAssignedToParent = false, isAssignedToTeacher = false, isAssignedToStudent = false, isAssignedToParentTeacher = false;
+    //string childName = "";
+    //if(childId > 0)
+    //{
+    //    using (var cChild = new ChildContext())
+    //    {
+    //        Child objChildTS = cChild.Children.Where(c => c.Id == childId).FirstOrDefault();
+    //        childName = objChildTS.Name;
+    //    }
+    //}
+
+
+    DataSet dsCharts = SurveyApp.DataHelper.DashboardGetGraphs(studyId, WebSecurity.CurrentUserId, childId);
+
+    if (dsCharts.Tables.Count > 7 && dsCharts.Tables[7] != null)
+    {
+        dtSurveys = dsCharts.Tables[7];
+    }
+
+    string dASP = "", pASP = "", tASP = "";
+    string dABC = "", pABC = "", tABC = "", pSRS = "", tSRS = "";
+    string dPEDsql = "", pPEDsql = "";
+    string dPEDsqlS = "", pPEDsqlS = "";
+    string dSSiSStudent = "", sssis = "";
+    string dSCQ = "", pSCQ = "";
+    string dSCQTeacher = "", tSCQTeacher = "";
+    string dCareGiver = "", pCareGiver = "";
+    string dPES = "", pPES = "";
+    string dGSI = "", pGSI = "";
+    string dTR = "", tTR = "", dtAnxiety = "", tsAnxiety = "", tgAnxiety = "";
+    string dAPRS = "", tAPRS = "";
+    string dWT = "", tWT = "";
+    string dSLP = "", pSLP = "", tSLP = "", dInsom = "", pInsom = "", dConnor = "", pConnor = "", dtConnor = "", tConnor = "";
+    string dpFeed = "", pFeed = "", dtFeed = "", tFeed = "", dpPAS = "", pPAS = "";
+
+    string dpABCg = "", aspABCg = "", tstpABCg = "", unpABCg = "", vspABCg = "", qpABCg = "";
+    string dtABCg = "", astABCg = "", tsttABCg = "", untABCg = "", vstABCg = "", qtABCg = "";
+
+    string dpSRSg = "", aspSRSg = "", tstpSRSg = "", unpSRSg = "", vspSRSg = "", qpSRSg = "";
+    string dtSRSg = "", astSRSg = "", tsttSRSg = "", untSRSg = "", vstSRSg = "", qtSRSg = "";
+
+    string dpPQLg = "", aspPQLg = "", tstpPQLg = "";
+    string dpWLCg = "", aspWLCg = "", tstpWLCg = "";
+
+    string dpADAM = "", dtADAM = "", pADAM = "", tADAM = "";
+    string dpVanderbilt = "", dtVanderbilt = "", pVanderbilt = "", tVanderbilt = "";
+
+    string pvD = "", pvAdapting = "", pvCFH = "", pvCFS = "", pvLAU = "", pvLIC = "", pvPAULT = "", pvSectionA = "", pvSectionB = "", pvSectionC = "", pvRAW = "", pvRTO = "", pvT = "", pvULM = "", pvUSM = "";
+    string tvD = "", tvCS = "", tvE = "", tvFM = "", tvGM = "", tvIR = "", tvN = "", tvP = "", tvPAL = "", tvSectionA = "", tvSectionB = "", tvSectionC = "", tvR = "", tvSC = "", tvW = "";
+    //Auditory Sensitivity Taste/Smell Sensitivity  Underresponsiveness Visual Sensitivity  Questionnaire
+
+
+    /* Strengths and Difficulties Questionnaire */
+    string dpSnD = "", pSnD = "", dpExIn = "", pExternalising = "", pInternalising = "", dtSnD = "", tSnD = "", dtExIn = "", tExternalising = "", tInternalising = "";
+
+    /* CAS Academic Progress: Math and Science */
+    string dCASmath = "", tCASmath = "";
+
+    /* CAS Academic Progress: Other Skills */
+    string dCASskills = "", tCASskills = "";
+
+    /* CAS Grit and Resilience Scale */
+    string dpCasGrit = "", pCasGrit = "", dtCasGrit = "", tCasGrit = "";
+
+    /* LIFE EVENTS */
+    //List<LifeEventChart> lstABCPTLifeEvents = new List<LifeEventChart>();
+    //int indexLE = 0;
+    string tQuarterly = "", dQuarterly = "";
+
+    /*Vanderbilt ADHD Scale – Parent*/
+    string dVanderbiltADHD = "", pVanderbiltADHD = "";
+
+    string dtSSISg = "", AssertionTg = "", BullyingTg = "", CommunicationTg = "", CooperationTg = "", EmpathyTg = "", EngagementTg = "", ExternalizingTg = "",
+           HyperactivityInattentionTg = "", InternalizingTg = "", ResponsibilityTg = "", SelfcontrolTg = "", SpectrumPartATg = "", SpectrumPartBTg = "";
+
+    string dtSSISc = "", AcademicCompetenceTg = "", ProblemBehaviorsTg = "", SocialSkillsTg = "";
+
+    string dtSSISpg = "", AssertionPg = "", BullyingPg = "", CommunicationPg = "", CooperationPg = "", EmpathyPg = "", EngagementPg = "", ExternalizingPg = "",
+           HyperactivityInattentionPg = "", InternalizingPg = "", ResponsibilityPg = "", SelfcontrolPg = "", SpectrumPartAPg = "", SpectrumPartBPg = "";
+
+    string dtSSISPc = "", ProblemBehaviorsPg = "", SocialSkillsPg = "";
+
+    #region populatingGraphs
+    if (dsCharts != null && dsCharts.Tables != null && dsCharts.Tables.Count > 0)
+    {
+        #region Aberrant Behavior Checklist Social Responsiveness Scale
+        DataView viewABCvsSRS = new DataView(dsCharts.Tables[8]);
+        DataTable dtDistinctDatesABCvsSRS = viewABCvsSRS.ToTable(true, "ScheduleDate");
+        DataRow[] drsDatesABCvsSRS = dtDistinctDatesABCvsSRS.Select();
+
+        foreach (DataRow drABCvsSRS in drsDatesABCvsSRS)
+        {
+            dABC += "'" + (drABCvsSRS["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(drABCvsSRS["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            DataRow[] drABCP = dsCharts.Tables[0].Select("SURVEYid = 4 AND ScheduleDate = '" + drABCvsSRS["ScheduleDate"] + "'");
+            if (drABCP.Length > 0)
+            {
+                foreach (DataRow dr in drABCP)
+                {
+                    pABC += dr["Score"] + ",";
+                }
+            }
+            else
+            {
+                pABC += 0 + ",";
+            }
+
+            DataRow[] drABCT = dsCharts.Tables[1].Select("SURVEYid = 4 AND ScheduleDate = '" + drABCvsSRS["ScheduleDate"] + "'");
+            if (drABCT.Length > 0)
+            {
+                foreach (DataRow dr in drABCT)
+                {
+                    tABC += dr["Score"] + ",";
+                }
+            }
+            else
+            {
+                tABC += 0 + ",";
+            }
+
+
+            DataRow[] drSRSP = dsCharts.Tables[0].Select("SURVEYid = 5 AND ScheduleDate = '" + drABCvsSRS["ScheduleDate"] + "'");
+            if (drSRSP.Length > 0)
+            {
+                foreach (DataRow dr in drSRSP)
+                {
+                    pSRS += dr["Score"] + ",";
+                }
+            }
+            else
+            {
+                pSRS += 0 + ",";
+            }
+
+            DataRow[] drSRST = dsCharts.Tables[1].Select("SURVEYid = 5 AND ScheduleDate = '" + drABCvsSRS["ScheduleDate"] + "'");
+            if (drSRST.Length > 0)
+            {
+                foreach (DataRow dr in drSRST)
+                {
+                    tSRS += dr["Score"] + ",";
+                }
+            }
+            else
+            {
+                tSRS += 0 + ",";
+            }
+        }
+        #endregion
+
+        #region Abbreviated Sensory Profile
+        DataRow[] drASPP = dsCharts.Tables[0].Select("SURVEYid = 1");
+        foreach (DataRow dr in drASPP)
+        {
+            dASP += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            pASP += dr["Score"] + ",";
+        }
+        DataRow[] drASPT = dsCharts.Tables[1].Select("SURVEYid = 1");
+        foreach (DataRow dr in drASPT)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dASP.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dASP += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            tASP += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region Anxiety Depression and Mood Scale
+        DataRow[] drPADAM = dsCharts.Tables[0].Select("SURVEYid = 35");
+        foreach (DataRow dr in drPADAM)
+        {
+            dpADAM += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            pADAM += dr["Score"] + ",";
+        }
+        DataRow[] drTADAM = dsCharts.Tables[1].Select("SURVEYid = 35");
+        foreach (DataRow dr in drTADAM)
+        {
+            dtADAM += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            tADAM += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region Vanderbilt Adhd Diagnostic Teacher Rating Scale
+        DataRow[] drPVanderbilt = dsCharts.Tables[0].Select("SURVEYid = 34");
+        foreach (DataRow dr in drPVanderbilt)
+        {
+            dpVanderbilt += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            pVanderbilt += dr["Score"] + ",";
+        }
+        DataRow[] drTVanderbilt = dsCharts.Tables[1].Select("SURVEYid = 34");
+        foreach (DataRow dr in drTVanderbilt)
+        {
+            dtVanderbilt += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            tVanderbilt += dr["Score"] + ",";
+        }
+
+        DataRow[] drVanderbiltADHD = dsCharts.Tables[0].Select("SURVEYid = 56");
+        foreach (DataRow dr in drVanderbiltADHD)
+        {
+            dVanderbiltADHD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            pVanderbiltADHD += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region Short Language Profile (Parent)
+        DataRow[] drSLPP = dsCharts.Tables[0].Select("SURVEYid = 10");
+        foreach (DataRow dr in drSLPP)
+        {
+            dSLP += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            pSLP += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region Insomnia Severity Index (Parent)
+        DataRow[] drInsom = dsCharts.Tables[0].Select("SURVEYid = 12");
+        foreach (DataRow dr in drInsom)
+        {
+            dInsom += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            pInsom += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region Connor-Davidson Resilience Scale 10 (Parent)
+        DataRow[] drConnor = dsCharts.Tables[0].Select("SURVEYid = 13");
+        foreach (DataRow dr in drConnor)
+        {
+            dConnor += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            pConnor += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region Connor-Davidson Resilience Scale 10 (Teacher)
+        DataRow[] drtConnor = dsCharts.Tables[1].Select("SURVEYid = 13");
+        foreach (DataRow dr in drtConnor)
+        {
+            dtConnor += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            tConnor += dr["Score"] + ",";
+        }
+        #endregion
+
+
+        #region Feedback Questionnaire (Parent)
+        DataRow[] drpFeedback = dsCharts.Tables[0].Select("SURVEYid = 15");
+        foreach (DataRow dr in drpFeedback)
+        {
+            dpFeed += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            pFeed += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region Feedback Questionnaire (Teacher)
+        DataRow[] drtFeedback = dsCharts.Tables[1].Select("SURVEYid = 15");
+        foreach (DataRow dr in drtFeedback)
+        {
+            dtFeed += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            tFeed += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region Parent Assessment Summary (Parent)
+        DataRow[] drpPAS = dsCharts.Tables[0].Select("SURVEYid = 48");
+        foreach (DataRow dr in drpPAS)
+        {
+            dpPAS += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            pPAS += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region Weekly Teacher
+        DataRow[] drWT = dsCharts.Tables[1].Select("SURVEYid = 24");
+        foreach (DataRow dr in drWT)
+        {
+            dWT += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            tWT += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region PedsQL-Parent Report for Children(8-12)
+        DataRow[] drPEDsqlP = dsCharts.Tables[0].Select("SURVEYid IN (6 ,7, 8, 9)");
+        foreach (DataRow dr in drPEDsqlP)
+        {
+            dPEDsql += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            pPEDsql += dr["Score"] + ",";
+        }
+        #endregion
+        #region PedsQL-Student Report for Children(19 yrs and above)
+        DataRow[] drPEDsqlS = dsCharts.Tables[2].Select("SURVEYid IN (45)");
+        foreach (DataRow dr in drPEDsqlS)
+        {
+            dPEDsqlS += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            pPEDsqlS += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region Social Skills Improvement System
+        DataRow[] drSsisStudent = dsCharts.Tables[2].Select("SURVEYid IN (62, 63)");
+        foreach (DataRow dr in drSsisStudent)
+        {
+            dSSiSStudent += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            sssis += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region SCQ
+        DataRow[] drSCQP = dsCharts.Tables[0].Select("SURVEYid IN (11)");
+        foreach (DataRow dr in drSCQP)
+        {
+            dSCQ += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            pSCQ += dr["Score"] + ",";
+        }
+        DataRow[] drSCQT = dsCharts.Tables[1].Select("SURVEYid IN (11)");
+        foreach (DataRow dr in drSCQT)
+        {
+            dSCQTeacher += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            tSCQTeacher += dr["Score"] + ",";
+        }
+        #endregion
+
+
+        #region Caregiver Strain Questionnaire
+        DataRow[] drCareGiverP = dsCharts.Tables[0].Select("SURVEYid = 2");
+        foreach (DataRow dr in drCareGiverP)
+        {
+            dCareGiver += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            pCareGiver += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region Family Empowerment Scale
+        DataRow[] drPESrP = dsCharts.Tables[0].Select("SURVEYid = 14");
+        foreach (DataRow dr in drPESrP)
+        {
+            dPES += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            pPES += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region GI Severity Index
+        DataRow[] drGSIP = dsCharts.Tables[0].Select("SURVEYid = 3");
+        foreach (DataRow dr in drGSIP)
+        {
+            dGSI += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            pGSI += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region School Anxiety Scale – Teacher Report
+        DataRow[] drTeacherReport = dsCharts.Tables[1].Select("SURVEYid = 50");
+        foreach (DataRow dr in drTeacherReport)
+        {
+            dTR += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            tTR += dr["Score"] + ",";
+        }
+
+        DataRow[] drsAnxiety = dsCharts.Tables[4].Select("QuestionGroup = 'Social Anxiety' AND SURVEYid = 50");
+        foreach (DataRow dr in drsAnxiety)
+        {
+            dtAnxiety += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            tsAnxiety += dr["Score"] + ",";
+        }
+        DataRow[] drgAnxiety = dsCharts.Tables[4].Select("QuestionGroup = 'Generalized Anxiety' AND SURVEYid = 50");
+        foreach (DataRow dr in drgAnxiety)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtAnxiety.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtAnxiety += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            tgAnxiety += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region Academic Progress Rating Scales
+        DataRow[] drAPRST = dsCharts.Tables[1].Select("SURVEYid = 27");
+        foreach (DataRow dr in drAPRST)
+        {
+            dAPRS += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            tAPRS += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region Aberrant  Behaviour Checklist : Parent Quarterly Trend
+        DataRow[] drASBC = dsCharts.Tables[3].Select("QuestionGroup = 'Irritability' AND SURVEYid = 4");
+        foreach (DataRow dr in drASBC)
+        {
+            dpABCg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            aspABCg += dr["Score"] + ",";
+        }
+        DataRow[] drTSTP = dsCharts.Tables[3].Select("QuestionGroup = 'Lethargy' AND SURVEYid = 4");
+        foreach (DataRow dr in drTSTP)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dpABCg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dpABCg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            tstpABCg += dr["Score"] + ",";
+        }
+        DataRow[] drSteros = dsCharts.Tables[3].Select("QuestionGroup = 'Stereotypy' AND SURVEYid = 4");
+        foreach (DataRow dr in drSteros)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dpABCg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dpABCg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            unpABCg += dr["Score"] + ",";
+        }
+        DataRow[] drHypers = dsCharts.Tables[3].Select("QuestionGroup = 'Hyperactivity' AND SURVEYid = 4");
+        foreach (DataRow dr in drHypers)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dpABCg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dpABCg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            vspABCg += dr["Score"] + ",";
+        }
+        DataRow[] drInps = dsCharts.Tables[3].Select("QuestionGroup = 'Inappropriate Speech' AND SURVEYid = 4");
+        foreach (DataRow dr in drInps)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dpABCg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dpABCg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            qpABCg += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region Aberrant  Behaviour Checklist : Teacher Quarterly Trend
+        DataRow[] drIrrisT = dsCharts.Tables[4].Select("QuestionGroup = 'Irritability' AND SURVEYid = 4");
+        foreach (DataRow dr in drIrrisT)
+        {
+            dtABCg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            astABCg += dr["Score"] + ",";
+        }
+        DataRow[] drLetharsT = dsCharts.Tables[4].Select("QuestionGroup = 'Lethargy' AND SURVEYid = 4");
+        foreach (DataRow dr in drLetharsT)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtABCg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtABCg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            tsttABCg += dr["Score"] + ",";
+        }
+        DataRow[] drSterosT = dsCharts.Tables[4].Select("QuestionGroup = 'Stereotypy' AND SURVEYid = 4");
+        foreach (DataRow dr in drSterosT)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtABCg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtABCg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            untABCg += dr["Score"] + ",";
+        }
+        DataRow[] drHypersT = dsCharts.Tables[4].Select("QuestionGroup = 'Hyperactivity' AND SURVEYid = 4");
+        foreach (DataRow dr in drHypersT)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtABCg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtABCg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            vstABCg += dr["Score"] + ",";
+        }
+        DataRow[] drInpsT = dsCharts.Tables[4].Select("QuestionGroup = 'Inappropriate Speech' AND SURVEYid = 4");
+        foreach (DataRow dr in drInpsT)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtABCg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtABCg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            qtABCg += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region Social Responsiveness Scale(SRS) sub scale : Parent Quarterly Trend
+        DataView view = new DataView(dsCharts.Tables[3]);
+        DataTable dtDistinctDates = view.ToTable(true, "ScheduleDate", "SURVEYid");
+        DataRow[] drsDates = dtDistinctDates.Select("SURVEYid = 5", "ScheduleDate ASC");
+
+
+
+        foreach (DataRow drDate in drsDates)
+        {
+            DataRow[] drAwareness = dsCharts.Tables[3].Select("QuestionGroup = 'Social Awareness' AND SURVEYid = 5 AND ScheduleDate = '" + drDate["ScheduleDate"] + "'");
+            foreach (DataRow dr in drAwareness)
+            {
+                dpSRSg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+                aspSRSg += dr["Score"] + ",";
+            }
+            if (drAwareness.Length == 0) { aspSRSg += 0 + ","; }
+            DataRow[] drCognition = dsCharts.Tables[3].Select("QuestionGroup = 'Social Cognition' AND SURVEYid = 5 AND ScheduleDate = '" + drDate["ScheduleDate"] + "'");
+            foreach (DataRow dr in drCognition)
+            {
+                if (dr["ScheduleDate"] != DBNull.Value && dpSRSg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+                {
+                    dpSRSg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+                }
+                tstpSRSg += dr["Score"] + ",";
+            }
+            if (drCognition.Length == 0) { tstpSRSg += 0 + ","; }
+            DataRow[] drCommunication = dsCharts.Tables[3].Select("QuestionGroup = 'Social Communication' AND SURVEYid = 5 AND ScheduleDate = '" + drDate["ScheduleDate"] + "'");
+            foreach (DataRow dr in drCommunication)
+            {
+                if (dr["ScheduleDate"] != DBNull.Value && dpSRSg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+                {
+                    dpSRSg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+                }
+                unpSRSg += dr["Score"] + ",";
+            }
+            if (drCommunication.Length == 0) { unpSRSg += 0 + ","; }
+            DataRow[] drMotivation = dsCharts.Tables[3].Select("QuestionGroup = 'Social Motivation' AND SURVEYid = 5 AND ScheduleDate = '" + drDate["ScheduleDate"] + "'");
+            foreach (DataRow dr in drMotivation)
+            {
+                if (dr["ScheduleDate"] != DBNull.Value && dpSRSg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+                {
+                    dpSRSg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+                }
+                vspSRSg += dr["Score"] + ",";
+            }
+            if (drMotivation.Length == 0) { vspSRSg += 0 + ","; }
+            DataRow[] drBahaviour = dsCharts.Tables[3].Select("QuestionGroup = 'Restricted Interests and Repetitive Bahaviour' AND SURVEYid = 5 AND ScheduleDate = '" + drDate["ScheduleDate"] + "'");
+            foreach (DataRow dr in drBahaviour)
+            {
+                if (dr["ScheduleDate"] != DBNull.Value && dpSRSg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+                {
+                    dpSRSg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+                }
+                qpSRSg += dr["Score"] + ",";
+            }
+            if (drBahaviour.Length == 0) { qpSRSg += 0 + ","; }
+        }
+
+        #endregion
+
+        #region Social Responsiveness Scale(SRS) sub scale : Teacher Quarterly Trend
+        DataRow[] drAwarenessT = dsCharts.Tables[4].Select("QuestionGroup = 'Social Awareness' AND SURVEYid = 5");
+        foreach (DataRow dr in drAwarenessT)
+        {
+            dtSRSg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            astSRSg += dr["Score"] + ",";
+        }
+        DataRow[] drCognitionT = dsCharts.Tables[4].Select("QuestionGroup = 'Social Cognition' AND SURVEYid = 5");
+        foreach (DataRow dr in drCognitionT)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSRSg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSRSg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            tsttSRSg += dr["Score"] + ",";
+        }
+        DataRow[] drCommunicationT = dsCharts.Tables[4].Select("QuestionGroup = 'Social Communication' AND SURVEYid = 5");
+        foreach (DataRow dr in drCommunicationT)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSRSg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSRSg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            untSRSg += dr["Score"] + ",";
+        }
+        DataRow[] drMotivationT = dsCharts.Tables[4].Select("QuestionGroup = 'Social Motivation' AND SURVEYid = 5");
+        foreach (DataRow dr in drMotivationT)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSRSg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSRSg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            vstSRSg += dr["Score"] + ",";
+        }
+        DataRow[] drBahaviourT = dsCharts.Tables[4].Select("QuestionGroup = 'Restricted Interests and Repetitive Bahaviour' AND SURVEYid = 5");
+        foreach (DataRow dr in drBahaviourT)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSRSg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSRSg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            qtSRSg += dr["Score"] + ",";
+        }
+        #endregion
+
+        //#region PedsQL Parent Report : Parent Quarterly Trend
+        //DataRow[] drPedSQL0812 = dsCharts.Tables[16].Select("SurveyID = 8");
+        //foreach (DataRow dr in drPedSQL0812)
+        //{
+        //    dpPQLg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+        //    aspPQLg += dr["Score"] + ",";
+        //}
+        //#endregion
+
+        //#region * When level changes for Child
+        //DataRow[] drDSM1T = dsCharts.Tables[17].Select("QuestionGroup = 'DSM Level 1'");
+        //foreach (DataRow dr in drDSM1T)
+        //{
+        //    dpWLCg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+        //    aspWLCg += dr["Score"] + ",";
+        //}
+        //DataRow[] drDSM2T = dsCharts.Tables[17].Select("QuestionGroup = 'DSM Level 2'");
+        //foreach (DataRow dr in drDSM2T)
+        //{
+        //    tstpWLCg += dr["Score"] + ",";
+        //}
+        //#endregion
+
+
+        #region VindelandParent
+        DataRow[] pvDates = dsCharts.Tables[3].Select("QuestionGroup = 'Adapting' AND SURVEYid = 46");
+        foreach (DataRow dr in pvDates)
+        {
+            pvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            pvAdapting += dr["Score"] + ",";
+        }
+        DataRow[] drCaring = dsCharts.Tables[3].Select("QuestionGroup = 'Caring For Home' AND SURVEYid = 46");
+        foreach (DataRow dr in drCaring)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && pvD.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                pvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            pvCFH += dr["Score"] + ",";
+        }
+        DataRow[] drSelf = dsCharts.Tables[3].Select("QuestionGroup = 'Caring For Self' AND SURVEYid = 46");
+        foreach (DataRow dr in drSelf)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && pvD.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                pvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            pvCFS += dr["Score"] + ",";
+        }
+        DataRow[] drListening = dsCharts.Tables[3].Select("QuestionGroup = 'Listening And Understanding' AND SURVEYid = 46");
+        foreach (DataRow dr in drListening)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && pvD.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                pvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            pvLAU += dr["Score"] + ",";
+        }
+        DataRow[] drLiing = dsCharts.Tables[3].Select("QuestionGroup = 'Living In Community' AND SURVEYid = 46");
+        foreach (DataRow dr in drLiing)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && pvD.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                pvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            pvLIC += dr["Score"] + ",";
+        }
+        DataRow[] drplaying = dsCharts.Tables[3].Select("QuestionGroup = 'Playing And Using Leisure Time' AND SURVEYid = 46");
+        foreach (DataRow dr in drplaying)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && pvD.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                pvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            pvPAULT += dr["Score"] + ",";
+        }
+        DataRow[] drseca = dsCharts.Tables[3].Select("QuestionGroup = 'Problem Behaviors - Section A (Parent)' AND SURVEYid = 46");
+        foreach (DataRow dr in drseca)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && pvD.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                pvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            pvSectionA += dr["Score"] + ",";
+        }
+        DataRow[] drsecb = dsCharts.Tables[3].Select("QuestionGroup = 'Problem Behaviors - Section B (Parent)' AND SURVEYid = 46");
+        foreach (DataRow dr in drsecb)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && pvD.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                pvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            pvSectionB += dr["Score"] + ",";
+        }
+        DataRow[] drsecc = dsCharts.Tables[3].Select("QuestionGroup = 'Problem Behaviors - Section C (Parent)' AND SURVEYid = 46");
+        foreach (DataRow dr in drsecc)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && pvD.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                pvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            pvSectionC += dr["Score"] + ",";
+        }
+        DataRow[] drread = dsCharts.Tables[3].Select("QuestionGroup = 'Reading and Writing' AND SURVEYid = 46");
+        foreach (DataRow dr in drread)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && pvD.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                pvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            pvRAW += dr["Score"] + ",";
+        }
+        DataRow[] drrto = dsCharts.Tables[3].Select("QuestionGroup = 'Relating To Others' AND SURVEYid = 46");
+        foreach (DataRow dr in drrto)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && pvD.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                pvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            pvRTO += dr["Score"] + ",";
+        }
+        DataRow[] drTaling = dsCharts.Tables[3].Select("QuestionGroup = 'Talking' AND SURVEYid = 46");
+        foreach (DataRow dr in drTaling)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && pvD.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                pvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            pvT += dr["Score"] + ",";
+        }
+        DataRow[] drulm = dsCharts.Tables[3].Select("QuestionGroup = 'Using Large Muscles' AND SURVEYid = 46");
+        foreach (DataRow dr in drulm)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && pvD.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                pvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            pvULM += dr["Score"] + ",";
+        }
+        DataRow[] drusm = dsCharts.Tables[3].Select("QuestionGroup = 'Using Small Muscles' AND SURVEYid = 46");
+        foreach (DataRow dr in drusm)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && pvD.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                pvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            pvUSM += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region VindelandTeacher
+        DataRow[] tvDates = dsCharts.Tables[4].Select("QuestionGroup = 'Coping Skills' AND SURVEYid = 47");
+        foreach (DataRow dr in tvDates)
+        {
+            tvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            tvCS += dr["Score"] + ",";
+        }
+        DataRow[] drExpressive = dsCharts.Tables[4].Select("QuestionGroup = 'Expressive' AND SURVEYid = 47");
+        foreach (DataRow dr in drExpressive)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && tvD.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                tvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            tvE += dr["Score"] + ",";
+        }
+        DataRow[] Fine = dsCharts.Tables[4].Select("QuestionGroup = 'Fine Motor' AND SURVEYid = 47");
+        foreach (DataRow dr in Fine)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && tvD.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                tvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            tvFM += dr["Score"] + ",";
+        }
+        DataRow[] Gross = dsCharts.Tables[4].Select("QuestionGroup = 'Gross Motor' AND SURVEYid = 47");
+        foreach (DataRow dr in Gross)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && tvD.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                tvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            tvGM += dr["Score"] + ",";
+        }
+        DataRow[] Interpersonal = dsCharts.Tables[4].Select("QuestionGroup = 'Interpersonal Reslationships' AND SURVEYid = 47");
+        foreach (DataRow dr in Interpersonal)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && tvD.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                tvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            tvIR += dr["Score"] + ",";
+        }
+        DataRow[] Numeric = dsCharts.Tables[4].Select("QuestionGroup = 'Numeric' AND SURVEYid = 47");
+        foreach (DataRow dr in Numeric)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && tvD.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                tvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            tvN += dr["Score"] + ",";
+        }
+        DataRow[] drsecat = dsCharts.Tables[4].Select("QuestionGroup = 'Problem Behaviors - Section A (Teacher)' AND SURVEYid = 47");
+        foreach (DataRow dr in drsecat)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && tvD.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                tvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            tvSectionA += dr["Score"] + ",";
+        }
+        DataRow[] drsecbt = dsCharts.Tables[4].Select("QuestionGroup = 'Problem Behaviors - Section B (Teacher)' AND SURVEYid = 47");
+        foreach (DataRow dr in drsecbt)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && tvD.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                tvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            tvSectionB += dr["Score"] + ",";
+        }
+        DataRow[] drsecct = dsCharts.Tables[4].Select("QuestionGroup = 'Problem Behaviors - Section C (Teacher)' AND SURVEYid = 47");
+        foreach (DataRow dr in drsecct)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && tvD.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                tvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            tvSectionC += dr["Score"] + ",";
+        }
+        DataRow[] Personal = dsCharts.Tables[4].Select("QuestionGroup = 'Personal' AND SURVEYid = 47");
+        foreach (DataRow dr in Personal)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && tvD.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                tvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            tvP += dr["Score"] + ",";
+        }
+        DataRow[] Play = dsCharts.Tables[4].Select("QuestionGroup = 'Play and Leisure' AND SURVEYid = 47");
+        foreach (DataRow dr in Play)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && tvD.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                tvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            tvPAL += dr["Score"] + ",";
+        }
+        DataRow[] Receptive = dsCharts.Tables[4].Select("QuestionGroup = 'Receptive' AND SURVEYid = 47");
+        foreach (DataRow dr in Receptive)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && tvD.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                tvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            tvR += dr["Score"] + ",";
+        }
+        DataRow[] School = dsCharts.Tables[4].Select("QuestionGroup = 'School Community' AND SURVEYid = 47");
+        foreach (DataRow dr in School)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && tvD.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                tvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            tvSC += dr["Score"] + ",";
+        }
+        DataRow[] Written = dsCharts.Tables[4].Select("QuestionGroup = 'Written' AND SURVEYid = 47");
+        foreach (DataRow dr in Written)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && tvD.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                tvD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            tvW += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region TeacherQuarterly
+        DataRow[] drQuarterly = dsCharts.Tables[1].Select("SurveyID = 49");
+        foreach (DataRow dr in drQuarterly)
+        {
+            dQuarterly += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            tQuarterly += dr["Score"] + ",";
+        }
+        #endregion
+
+
+        #region CAS Academic Progress: Math and Science
+        DataRow[] drsCASMath = dsCharts.Tables[1].Select("SurveyID = 53");
+        foreach (DataRow dr in drsCASMath)
+        {
+            dCASmath += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            tCASmath += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region CAS Academic Progress: Other Skills
+        DataRow[] drsCASSkills = dsCharts.Tables[1].Select("SurveyID = 54");
+        foreach (DataRow dr in drsCASSkills)
+        {
+            dCASskills += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            tCASskills += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region CAS Grit and Resilience – Parent
+        DataRow[] drsCASGritParent = dsCharts.Tables[0].Select("SurveyID = 55");
+        foreach (DataRow dr in drsCASGritParent)
+        {
+            dpCasGrit += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            pCasGrit += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region CAS Grit and Resilience Scale
+        DataRow[] drsCASGrit = dsCharts.Tables[1].Select("SurveyID = 42");
+        foreach (DataRow dr in drsCASGrit)
+        {
+            dtCasGrit += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            tCasGrit += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region Strengths and Difficulties Questionnaire - PARENT
+        DataRow[] drpSnD = dsCharts.Tables[0].Select("SurveyID = 51");
+        foreach (DataRow dr in drpSnD)
+        {
+            dpSnD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            pSnD += dr["Score"] + ",";
+        }
+        DataRow[] drsExternalisingParent = dsCharts.Tables[3].Select("QuestionGroup = 'Externalising Problems' AND SURVEYid = 51");
+        foreach (DataRow dr in drsExternalisingParent)
+        {
+            dpExIn += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            pExternalising += dr["Score"] + ",";
+        }
+        DataRow[] drsInternalisingParent = dsCharts.Tables[3].Select("QuestionGroup = 'Internalising Problems' AND SURVEYid = 51");
+        foreach (DataRow dr in drsInternalisingParent)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dpExIn.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dpExIn += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            pInternalising += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region Strengths and Difficulties Questionnaire - Teacher
+        DataRow[] drtSnD = dsCharts.Tables[1].Select("SurveyID = 51");
+        foreach (DataRow dr in drtSnD)
+        {
+            dtSnD += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            tSnD += dr["Score"] + ",";
+        }
+        DataRow[] drsExternalisingTeacher = dsCharts.Tables[4].Select("QuestionGroup = 'Externalising Problems' AND SURVEYid = 51");
+        foreach (DataRow dr in drsExternalisingTeacher)
+        {
+            dtExIn += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            tExternalising += dr["Score"] + ",";
+        }
+        DataRow[] drsInternalisingTeacher = dsCharts.Tables[4].Select("QuestionGroup = 'Internalising Problems' AND SURVEYid = 51");
+        foreach (DataRow dr in drsInternalisingTeacher)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtExIn.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtExIn += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            tInternalising += dr["Score"] + ",";
+        }
+        #endregion
+
+
+
+
+        #region Social Skills Improvement System (Teacher) Group
+        DataRow[] drAssertionTg = dsCharts.Tables[10].Select("QuestionGroup = 'Assertion' AND SURVEYid = 65");
+        foreach (DataRow dr in drAssertionTg)
+        {
+            dtSSISg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            AssertionTg += dr["Score"] + ",";
+        }
+        DataRow[] drBullyingTg = dsCharts.Tables[10].Select("QuestionGroup = 'Bullying' AND SURVEYid = 65");
+        foreach (DataRow dr in drBullyingTg)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSSISg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSSISg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            BullyingTg += dr["Score"] + ",";
+        }
+        DataRow[] drCommunTg = dsCharts.Tables[10].Select("QuestionGroup = 'Communication' AND SURVEYid = 65");
+        foreach (DataRow dr in drCommunTg)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSSISg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSSISg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            CommunicationTg += dr["Score"] + ",";
+        }
+        DataRow[] drCooperationTg = dsCharts.Tables[10].Select("QuestionGroup = 'Cooperation' AND SURVEYid = 65");
+        foreach (DataRow dr in drCooperationTg)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSSISg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSSISg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            CooperationTg += dr["Score"] + ",";
+        }
+        DataRow[] drEmpathyTg = dsCharts.Tables[10].Select("QuestionGroup = 'Empathy' AND SURVEYid = 65");
+        foreach (DataRow dr in drEmpathyTg)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSSISg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSSISg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            EmpathyTg += dr["Score"] + ",";
+        }
+
+        DataRow[] drEngagementTg = dsCharts.Tables[10].Select("QuestionGroup = 'Engagement' AND SURVEYid = 65");
+        foreach (DataRow dr in drEngagementTg)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSSISg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSSISg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            EngagementTg += dr["Score"] + ",";
+        }
+        DataRow[] drExternalizingTg = dsCharts.Tables[10].Select("QuestionGroup = 'Externalizing' AND SURVEYid = 65");
+        foreach (DataRow dr in drExternalizingTg)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSSISg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSSISg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            ExternalizingTg += dr["Score"] + ",";
+        }
+        DataRow[] drHyperactivityInattentionTg = dsCharts.Tables[10].Select("QuestionGroup = 'Hyperactivity/Inattention' AND SURVEYid = 65");
+        foreach (DataRow dr in drHyperactivityInattentionTg)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSSISg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSSISg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            HyperactivityInattentionTg += dr["Score"] + ",";
+        }
+        DataRow[] drInternalizingTg = dsCharts.Tables[10].Select("QuestionGroup = 'Internalizing' AND SURVEYid = 65");
+        foreach (DataRow dr in drInternalizingTg)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSSISg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSSISg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            InternalizingTg += dr["Score"] + ",";
+        }
+        DataRow[] drResponsibilityTg = dsCharts.Tables[10].Select("QuestionGroup = 'Responsibility' AND SURVEYid = 65");
+        foreach (DataRow dr in drResponsibilityTg)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSSISg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSSISg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            ResponsibilityTg += dr["Score"] + ",";
+        }
+        DataRow[] drSelfcontrolTg = dsCharts.Tables[10].Select("QuestionGroup = 'Self-control' AND SURVEYid = 65");
+        foreach (DataRow dr in drSelfcontrolTg)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSSISg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSSISg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            SelfcontrolTg += dr["Score"] + ",";
+        }
+        DataRow[] drSpectrumPartATg = dsCharts.Tables[10].Select("QuestionGroup = 'Spectrum Part A' AND SURVEYid = 65");
+        foreach (DataRow dr in drSpectrumPartATg)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSSISg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSSISg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            SpectrumPartATg += dr["Score"] + ",";
+        }
+        DataRow[] drSpectrumPartBTg = dsCharts.Tables[10].Select("QuestionGroup = 'Spectrum Part B' AND SURVEYid = 65");
+        foreach (DataRow dr in drSpectrumPartBTg)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSSISg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSSISg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            SpectrumPartBTg += dr["Score"] + ",";
+        }
+        #endregion
+
+
+        #region Social Skills Improvement System (Teacher) Section
+        DataRow[] drAcademicCompetenceTg = dsCharts.Tables[11].Select("QuestionGroup = 'Academic Competence' AND SURVEYid = 65");
+        foreach (DataRow dr in drAcademicCompetenceTg)
+        {
+            dtSSISc += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            AcademicCompetenceTg += dr["Score"] + ",";
+        }
+        DataRow[] drProblemBehaviorsTg = dsCharts.Tables[11].Select("QuestionGroup = 'Problem Behaviors' AND SURVEYid = 65");
+        foreach (DataRow dr in drProblemBehaviorsTg)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSSISc.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSSISc += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            ProblemBehaviorsTg += dr["Score"] + ",";
+        }
+        DataRow[] drSocialSkillsTg = dsCharts.Tables[11].Select("QuestionGroup = 'Social Skills' AND SURVEYid = 65");
+        foreach (DataRow dr in drSocialSkillsTg)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSSISc.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSSISc += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            SocialSkillsTg += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region Social Skills Improvement System (Parent) Group
+        DataRow[] drAssertionPg = dsCharts.Tables[12].Select("QuestionGroup = 'Assertion' AND SURVEYid = 64");
+        foreach (DataRow dr in drAssertionPg)
+        {
+            dtSSISpg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            AssertionPg += dr["Score"] + ",";
+        }
+        DataRow[] drBullyingPg = dsCharts.Tables[12].Select("QuestionGroup = 'Bullying' AND SURVEYid = 64");
+        foreach (DataRow dr in drBullyingPg)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSSISpg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSSISpg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            BullyingPg += dr["Score"] + ",";
+        }
+        DataRow[] drCommunPg = dsCharts.Tables[12].Select("QuestionGroup = 'Communication' AND SURVEYid = 64");
+        foreach (DataRow dr in drCommunPg)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSSISpg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSSISpg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            CommunicationPg += dr["Score"] + ",";
+        }
+        DataRow[] drCooperationPg = dsCharts.Tables[12].Select("QuestionGroup = 'Cooperation' AND SURVEYid = 64");
+        foreach (DataRow dr in drCooperationPg)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSSISpg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSSISpg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            CooperationPg += dr["Score"] + ",";
+        }
+        DataRow[] drEmpathyPg = dsCharts.Tables[12].Select("QuestionGroup = 'Empathy' AND SURVEYid = 64");
+        foreach (DataRow dr in drEmpathyPg)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSSISpg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSSISpg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            EmpathyPg += dr["Score"] + ",";
+        }
+
+        DataRow[] drEngagementPg = dsCharts.Tables[12].Select("QuestionGroup = 'Engagement' AND SURVEYid = 64");
+        foreach (DataRow dr in drEngagementPg)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSSISpg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSSISpg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            EngagementPg += dr["Score"] + ",";
+        }
+        DataRow[] drExternalizingPg = dsCharts.Tables[12].Select("QuestionGroup = 'Externalizing' AND SURVEYid = 64");
+        foreach (DataRow dr in drExternalizingPg)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSSISpg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSSISpg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            ExternalizingPg += dr["Score"] + ",";
+        }
+        DataRow[] drHyperactivityInattentionPg = dsCharts.Tables[12].Select("QuestionGroup = 'Hyperactivity/Inattention' AND SURVEYid = 64");
+        foreach (DataRow dr in drHyperactivityInattentionPg)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSSISpg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSSISpg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            HyperactivityInattentionPg += dr["Score"] + ",";
+        }
+        DataRow[] drInternalizingPg = dsCharts.Tables[12].Select("QuestionGroup = 'Internalizing' AND SURVEYid = 64");
+        foreach (DataRow dr in drInternalizingPg)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSSISpg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSSISpg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            InternalizingPg += dr["Score"] + ",";
+        }
+        DataRow[] drResponsibilityPg = dsCharts.Tables[12].Select("QuestionGroup = 'Responsibility' AND SURVEYid = 64");
+        foreach (DataRow dr in drResponsibilityPg)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSSISpg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSSISpg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            ResponsibilityPg += dr["Score"] + ",";
+        }
+        DataRow[] drSelfcontrolPg = dsCharts.Tables[12].Select("QuestionGroup = 'Self-control' AND SURVEYid = 64");
+        foreach (DataRow dr in drSelfcontrolPg)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSSISpg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSSISpg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            SelfcontrolPg += dr["Score"] + ",";
+        }
+        DataRow[] drSpectrumPartAPg = dsCharts.Tables[12].Select("QuestionGroup = 'Spectrum Part A' AND SURVEYid = 64");
+        foreach (DataRow dr in drSpectrumPartAPg)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSSISpg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSSISpg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            SpectrumPartAPg += dr["Score"] + ",";
+        }
+        DataRow[] drSpectrumPartBPg = dsCharts.Tables[12].Select("QuestionGroup = 'Spectrum Part B' AND SURVEYid = 64");
+        foreach (DataRow dr in drSpectrumPartBPg)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSSISpg.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSSISpg += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            SpectrumPartBPg += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region Social Skills Improvement System (Parent) Section
+        DataRow[] drAcademicCompetencePg = dsCharts.Tables[13].Select("QuestionGroup = 'Social Skills' AND SURVEYid = 64");
+        foreach (DataRow dr in drAcademicCompetencePg)
+        {
+            dtSSISPc += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            SocialSkillsPg += dr["Score"] + ",";
+        }
+        DataRow[] drProblemBehaviorsPg = dsCharts.Tables[13].Select("QuestionGroup = 'Problem Behaviors' AND SURVEYid = 64");
+        foreach (DataRow dr in drProblemBehaviorsPg)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtSSISPc.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtSSISPc += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            ProblemBehaviorsPg += dr["Score"] + ",";
+        }
+        #endregion
+    }
+    #endregion
+
+}
+
+@functions{
+    DataTable dtSurveys;
+    public bool isSurveyAssigned(int surveyId, string roleType, string roleTypeOther = "", int? surveyIdOther = null)
+    {
+        bool isSurveyFound = false;
+
+        if (dtSurveys.Rows.Count > 0)
+        {
+            foreach (DataRow dr in dtSurveys.Rows)
+            {
+                if (Convert.ToInt32(dr["SurveyId"]) == surveyId && (Convert.ToBoolean(dr["AssignedTo" + roleType]) == true || (roleTypeOther != "" && Convert.ToBoolean(dr["AssignedTo" + roleTypeOther]) == true)))
+                {
+                    isSurveyFound = true;
+                }
+                if (surveyIdOther.HasValue)
+                {
+                    if (Convert.ToInt32(dr["SurveyId"]) == surveyIdOther && (Convert.ToBoolean(dr["AssignedTo" + roleType]) == true || (roleTypeOther != "" && Convert.ToBoolean(dr["AssignedTo" + roleTypeOther]) == true)))
+                    {
+                        isSurveyFound = true;
+                    }
+                }
+            }
+        }
+
+        return isSurveyFound;
+    }
+}
+
+
+
+
+
+
+@if (role != "" && role != "Parent")
+{
+    <script type="text/javascript">
+    $(function () {
+    //-----------------------------------------Weekly Teacher----------------------------------------
+    $('#divWeeklyTeacher').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Weekly Teacher'
+        },
+        /*subtitle: {
+            text: '*Higher is better'
+        },*/
+        xAxis: {
+            categories: [@Html.Raw(dWT.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(tWT.TrimEnd(','))],
+            color: '#00cc00'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
+
+    <script type="text/javascript">
+    $(function () {
+    //-----------------------------------------ABC VS SRS Line Chart----------------------------------------
+    $('#ABCSRScontainer').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'ABC vs SRS <span style="font-size:13px;">(Parent vs Teacher)</span>'
+        },
+        subtitle: {
+            text: '*Lower is Better'
+        },
+        xAxis: {
+            categories: [@Html.Raw(dABC.Trim(','))]
+            @*,plotLines: [
+                @foreach(LifeEventChart objLEC in lstABCPTLifeEvents)
+                {
+                    @Html.Raw("{color: '#93CDDD', width: 2, value: ["+ objLEC.IndexOnChart +"], dashStyle: 'LongDash', label: { text: '"+ objLEC.EventsName +"' }, ID: 'LF"+ objLEC.IndexOnChart +"'},")
+                }
+            ]*@
+        },
+        yAxis: {
+            max:200,
+            plotLines: [{
+                value: 195, color: 'black', dashStyle: 'shortdash', width: 1, label: { align: "right", text: 'SRS Max(195)', style: { "color": "#333333", "fontSize": "10px" } }
+            },
+            {
+                value: 140, color: 'black', dashStyle: 'shortdash', width: 1, label: { align: "right", text: 'ABC Max(174)', style: { "color": "#333333", "fontSize": "10px" } }
+            }],
+
+
+
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Parents ABC Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(pABC.Trim(','))],
+            color: 'rgb(144, 237, 125)'
+
+        }, {
+            name: 'Teachers ABC Scores',
+            marker: {
+                symbol: 'diamond'
+            },
+            data: [@Html.Raw(tABC.Trim(','))],
+            color: '#434348'
+
+        }, {
+            name: 'Parents SRS Scores',
+            marker: {
+                symbol: 'circle'
+            },
+            data: [@Html.Raw(pSRS.Trim(','))],
+            color: 'rgb(247, 163, 92)'
+
+        }, {
+            name: 'Teachers SRS Scores',
+            marker: {
+                symbol: 'triangle'
+            },
+            data: [@Html.Raw(tSRS.Trim(','))],
+            color: 'rgb(124, 181, 236)'
+        }]
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
+
+    <script type="text/javascript">
+    $(function () {
+    //-----------------------------------------ABC Sub Categories-Teacher----------------------------------------
+    $('#ABCSubCategoryTeacher').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Aberrant  Behaviour Checklist'
+        },
+        subtitle: {
+            text: 'Teacher Quarterly Trend'
+        },
+        xAxis: {
+            categories: [@Html.Raw(dtABCg.Trim(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Irritability/Agitation',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(astABCg.Trim(','))],
+            color: '#73B3EF'
+
+        }, {
+            name: 'Lethargy, Social Withdrawl',
+            marker: {
+                symbol: 'diamond'
+            },
+            data: [@Html.Raw(tsttABCg.Trim(','))],
+            color: '#67F97C'
+
+        }, {
+            name: 'Sterotypic Behavior',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(untABCg.Trim(','))],
+            color: '#FF9E4F'
+
+        }, {
+            name: 'Hyperactivity/Noncompliance',
+            marker: {
+                symbol: 'diamond'
+            },
+            data: [@Html.Raw(vstABCg.Trim(','))],
+            color: '#8778EC'
+        }
+
+        , {
+            name: 'Inappropriate Speech',
+            marker: {
+                symbol: 'diamond'
+            },
+            data: [@Html.Raw(qtABCg.Trim(','))],
+            color: '#434348'
+        }], yAxis: {
+            max: 50,
+            plotLines: [{
+                value: 48, color: 'black', dashStyle: 'shortdash', width: 1, label: { align: "right", text: 'Max(48)', style: { "color": "#8778EC", "fontSize": "10px" } }
+            },
+            {
+                value: 12, color: 'black', dashStyle: 'shortdash', width: 1, label: { align: "right", text: 'Max(12)', style: { "color": "#434348", "fontSize": "10px" } }
+            },
+            {
+                value: 45, color: 'black', dashStyle: 'shortdash', width: 1, label: { align: "right", userHTML: true, text: ' <br> Max(45)', style: { "color": "#73B3EF", "fontSize": "10px" } }
+            },
+            {
+                value: 48, color: 'black', dashStyle: 'shortdash', width: 1, label: { align: "right",userHTML:true, text: ' <br> Max(48)', style: { "color": "#67F97C", "fontSize": "10px" } }
+            },
+            {
+                value: 21, color: 'black', dashStyle: 'shortdash', width: 1, label: { align: "right", text: 'Max(21)', style: { "color": "#FF9E4F", "fontSize": "10px" } }
+            }]
+        }
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
+
+    <script type="text/javascript">
+    $(function () {
+    //-----------------------------------------Social Responsiveness Scale(SRS) sub scale----------------------------------------
+    $('#SRSSubScaleTeacher').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Social Responsiveness Scale <span style="font-size:13px;">(sub scale)</span>'
+        },
+        subtitle: {
+            text: '*Lower is Better'
+        },
+        xAxis: {
+            categories: [@Html.Raw(dtSRSg.Trim(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Social Awareness',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(astSRSg.Trim(','))],
+            color: '#73B3EF'
+
+        }, {
+            name: 'Social Cognition',
+            marker: {
+                symbol: 'diamond'
+            },
+            data: [@Html.Raw(tsttSRSg.Trim(','))],
+            color: '#67F97C'
+
+        }, {
+            name: 'Social Communication',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(untSRSg.Trim(','))],
+            color: '#FF9E4F'
+
+        }, {
+            name: 'Social Motivation',
+            marker: {
+                symbol: 'diamond'
+            },
+            data: [@Html.Raw(vstSRSg.Trim(','))],
+            color: '#8778EC'
+        }
+
+        , {
+            name: 'Restricted Interests and Repetitive Bahaviour',
+            marker: {
+                symbol: 'diamond'
+            },
+            data: [@Html.Raw(qtSRSg.Trim(','))],
+            color: '#434348'
+        }], yAxis: {
+            max: 70,
+            plotLines: [{
+                value: 24, color: 'black', dashStyle: 'shortdash', width: 1, label: { align: "right", userHTML: true, text: ' <br> Max(24)', style: { "color": "#73B3EF", "fontSize": "10px" } }
+            },
+            {
+                value: 36, color: 'black', dashStyle: 'shortdash', width: 1, label: { align: "right", text: 'Max(36)', style: { "color": "#67F97C", "fontSize": "10px" } }
+            },
+            {
+                value: 63, color: 'black', dashStyle: 'shortdash', width: 1, label: { align: "right", text: 'Max(63)', style: { "color": "#FF9E4F", "fontSize": "10px" } }
+            },
+            {
+                value: 36, color: 'black', dashStyle: 'shortdash', width: 1, label: { align: "right", userHTML: true, text: ' <br> Max(36)', style: { "color": "#8778EC", "fontSize": "10px"} }
+            },
+            {
+                value: 36, color: 'black', dashStyle: 'shortdash', width: 1, label: { align: "right", userHTML: true, text: ' <br>.<br>.Max(36)', style: { "color": "#434348", "fontSize": "10px" } }
+            }]
+        }
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
+
+    <script type="text/javascript">
+    $(function () {
+    //-----------------------------------------Social Responsiveness Scale(SRS) sub scale----------------------------------------
+        $('#divTeacherVineland').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Vineland-3 (Teacher)'
+        },
+        subtitle: {
+            text: 'Comprehensive Teacher Form'
+        },
+        xAxis: {
+            categories: [@Html.Raw(tvD.Trim(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Coping Skills',
+            marker: {
+                symbol: 'circle'
+            },
+            data: [@Html.Raw(tvCS.Trim(','))],
+            color: '#73B3EF'
+
+        }, {
+            name: 'Expressive',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(tvE.Trim(','))],
+            color: '#67F97C'
+
+        }
+        , {
+            name: 'Interpersonal Reslationships',
+            marker: {
+                symbol: 'triangle-down'
+            },
+            data: [@Html.Raw(tvIR.Trim(','))],
+            color: '#434348'
+        }
+        , {
+            name: 'Numeric',
+            marker: {
+                symbol: 'circle'
+            },
+            data: [@Html.Raw(tvN.Trim(','))],
+            color: '#73B3EF'
+        }
+        , {
+            name: 'Problem Behaviors - Section A',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(tvSectionA.Trim(','))],
+            color: '#67F97C'
+        }, {
+            name: 'Problem Behaviors - Section B',
+            marker: {
+                symbol: 'triangle'
+            },
+            data: [@Html.Raw(tvSectionB.Trim(','))],
+            color: '#FF9E4F'
+        }
+        , {
+            name: 'Problem Behaviors - Section C',
+            marker: {
+                symbol: 'diamond'
+            },
+            data: [@Html.Raw(tvSectionC.Trim(','))],
+            color: '#8778EC'
+        }
+        , {
+            name: 'Personal',
+            marker: {
+                symbol: 'triangle-down'
+            },
+            data: [@Html.Raw(tvP.Trim(','))],
+            color: '#434348'
+        }
+        , {
+            name: 'Play and Leisure',
+            marker: {
+                symbol: 'circle'
+            },
+            data: [@Html.Raw(tvPAL.Trim(','))],
+            color: '#73B3EF'
+        }
+    , {
+        name: 'Receptive',
+        marker: {
+            symbol: 'square'
+        },
+        data: [@Html.Raw(tvR.Trim(','))],
+        color: '#67F97C'
+    }
+    , {
+        name: 'School Community',
+        marker: {
+            symbol: 'triangle'
+        },
+        data: [@Html.Raw(tvSC.Trim(','))],
+        color: '#FF9E4F'
+    }
+    , {
+        name: 'Written',
+        marker: {
+            symbol: 'diamond'
+        },
+        data: [@Html.Raw(tvW.Trim(','))],
+        color: '#8778EC'
+    }
+        ]
+
+
+            , yAxis: {
+
+        }
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
+
+    <script type="text/javascript">
+    $(function () {
+    //-----------------------------------------Abbreviated Sensory Profile- Parent & Teacher----------------------------------------
+    $('#AbbreviatedSensoryProfile').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Abbreviated Sensory Profile <span style="font-size:13px;">(Parent vs Teacher)</span>'
+        },
+        subtitle: {
+            text: '*Lower is Better'
+        },
+        xAxis: {
+            categories: [@Html.Raw(dASP.Trim(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Parent SPL',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(pASP.Trim(','))],
+            color: '#73B3EF'
+
+        }, {
+            name: 'Teacher SPL',
+            marker: {
+                symbol: 'diamond'
+            },
+            data: [@Html.Raw(tASP.Trim(','))],
+            color: '#434348'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
+
+    <script type="text/javascript">
+    $(function () {
+    //-----------------------------------------Social Communication Questionnaire----------------------------------------
+    $('#divSCQTeacher').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Social communication Questionnaire – life time'
+        },
+        subtitle: {
+            //text: '*Higher is better'
+        },
+        xAxis: {
+            categories: [@Html.Raw(dSCQTeacher.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(tSCQTeacher.TrimEnd(','))],
+            color: '#00cc00'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
+
+    <script type="text/javascript">
+    $(function () {
+    //-----------------------------------------Academic Progress DSM Level 1----------------------------------------
+    $('#AcademicProgressDSMLevel1').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Academic Progress'
+        },
+        subtitle: {
+            text: '*High is better'
+        },
+        xAxis: {
+            categories: [@Html.Raw(dAPRS.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(tAPRS.TrimEnd(','))],
+            color: '#73B3EF'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
+
+    <script type="text/javascript">
+    $(function () {
+        //-----------------------------------------Anxiety Depression and Mood Scale----TEACHER------------------------------------
+    $('#tADAM').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Anxiety Depression and Mood Scale'
+        },
+        //subtitle: {
+        //    text: '*Lower is Better'
+        //},
+        xAxis: {
+            categories: [@Html.Raw(dtADAM.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(tADAM.TrimEnd(','))],
+            color: '#cc0000'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
+
+
+    <script type="text/javascript">
+    $(function () {
+        //-----------------------------------------Strengths and Difficulties Questionnaire----TEACHER------------------------------------
+    $('#divSnDTeacher').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Strengths and Difficulties Questionnaire (Total Score)'
+        },
+        subtitle: {
+            text: '*Lower is Better'
+        },
+        xAxis: {
+            categories: [@Html.Raw(dtSnD.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'circle'
+            },
+            data: [@Html.Raw(tSnD.TrimEnd(','))],
+            color: '#cc0000'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
+
+    <script type="text/javascript">
+    $(function () {
+        //-----------------------------------------Vanderbilt Adhd Diagnostic Teacher Rating Scale----TEACHER------------------------------------
+        $('#tVanderbilt').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Vanderbilt Adhd Diagnostic Teacher Rating Scale'
+        },
+        //subtitle: {
+        //    text: '*Lower is Better'
+        //},
+        xAxis: {
+            categories: [@Html.Raw(dtVanderbilt.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(tVanderbilt.TrimEnd(','))],
+            color: '#cc0000'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
+
+    <script type="text/javascript">
+    $(function () {
+    //-----------------------------------------PedsQL-Parent----------------------------------------
+    $('#PedsQLParentS').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Peds Quality of Life (19yrs and above)'
+        },
+        subtitle: {
+            text: '*Higher is better'
+        },
+        xAxis: {
+            categories: [@Html.Raw(dPEDsqlS.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(pPEDsqlS.TrimEnd(','))],
+            color: '#00cc00'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
+
+    <script type="text/javascript">
+    $(function () {
+    //-----------------------------------------PedsQL-Parent----------------------------------------
+        $('#divSSISStudent').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Social Skills Improvement System'
+        },
+        subtitle: {
+            text: '*Higher is better'
+        },
+        xAxis: {
+            categories: [@Html.Raw(dSSiSStudent.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(sssis.TrimEnd(','))],
+            color: '#00cc00'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
+
+    <script type="text/javascript">
+    $(function () {
+    //-----------------------------------------PedsQL-Parent----------------------------------------
+    $('#divTQuerterly').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'CAS Academic Progress: Reading and Writing'
+        },
+        xAxis: {
+            categories: [@Html.Raw(dQuarterly.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(tQuarterly.TrimEnd(','))],
+            color: '#00cc00'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
+
+    <script type="text/javascript">
+    $(function () {
+        //-----------------------------------------CAS Academic Progress: Math and Science----------------------------------------
+    $('#divCasMaths').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'CAS Academic Progress: Math and Science'
+        },
+        xAxis: {
+            categories: [@Html.Raw(dCASmath.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(tCASmath.TrimEnd(','))],
+            color: '#00cc00'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
+
+    <script type="text/javascript">
+    $(function () {
+        //-----------------------------------------CAS Academic Progress: Other Skills----------------------------------------
+    $('#divCasSkills').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'CAS Academic Progress: Other Skills'
+        },
+        xAxis: {
+            categories: [@Html.Raw(dCASskills.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(tCASskills.TrimEnd(','))],
+            color: '#00cc00'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
+
+    <script type="text/javascript">
+    $(function () {
+        //-----------------------------------------CAS Grit and Resilience Scale----------------------------------------
+    $('#divCasGritTeacher').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'CAS Grit and Resilience Scale'
+        },
+        xAxis: {
+            categories: [@Html.Raw(dtCasGrit.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(tCasGrit.TrimEnd(','))],
+            color: '#00cc00'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
+
+
+    <script type="text/javascript">
+    $(function () {
+        //-----------------------------------------Connor-Davidson Resilience Scale 10--Teacher--------------------------------------
+        $('#divtConnor').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Connor-Davidson Resilience Scale 10'
+        },
+        //subtitle: {
+        //    text: '*Lower is Better'
+        //},
+        xAxis: {
+            categories: [@Html.Raw(dtConnor.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(tConnor.TrimEnd(','))],
+            color: '#cc0000'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
+
+    <script type="text/javascript">
+    $(function () {
+        //-----------------------------------------Feedback Questionnaire--Teacher--------------------------------------
+        $('#divtFeedback').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Feedback Questionnaire'
+        },
+        //subtitle: {
+        //    text: 'Parents'
+        //},
+        xAxis: {
+            categories: [@Html.Raw(dtFeed.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(tFeed.TrimEnd(','))],
+            color: '#cc0000'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
+
+    <script type="text/javascript">
+    $(function () {
+        //-----------------------------------------School Anxiety Scale – Teacher Report ----------------------------------------
+        $('#divAnxientyGroups').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'School Anxiety Scale – Teacher Report'
+        },
+        subtitle: {
+            text: ''
+        },
+        xAxis: {
+            categories: [@Html.Raw(dtAnxiety.Trim(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Social Anxiety',
+            marker: {
+                symbol: 'circle'
+            },
+            data: [@Html.Raw(tsAnxiety.Trim(','))],
+            color: '#73B3EF'
+
+        }, {
+            name: 'Generalized Anxiety',
+            marker: {
+                symbol: 'circle'
+            },
+            data: [@Html.Raw(tgAnxiety.Trim(','))],
+            color: '#67F97C'
+
+        }]
+            , yAxis: {
+
+        }
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
+
+    <script type="text/javascript">
+    $(function () {
+        //-----------------------------------------Strengths and Difficulties Questionnaire GROUPS – Teacher ----------------------------------------
+        $('#divSnDGroupsTeacher').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Strengths and Difficulties Questionnaire (Subscales)'
+        },
+        subtitle: {
+            text: '*Lower is better'
+        },
+        xAxis: {
+            categories: [@Html.Raw(dtExIn.Trim(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Externalising Problems',
+            marker: {
+                symbol: 'circle'
+            },
+            data: [@Html.Raw(tExternalising.Trim(','))],
+            color: '#73B3EF'
+
+        }, {
+            name: 'Internalising Problems',
+            marker: {
+                symbol: 'circle'
+            },
+            data: [@Html.Raw(tInternalising.Trim(','))],
+            color: '#67F97C'
+
+        }]
+            , yAxis: {
+
+        }
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
+
+    <script type="text/javascript">
+    $(function () {
+    //-----------------------------------------Social Skills Improvement System (Teacher) Group Wise----------------------------------------
+        $('#divSSISTeacherGroup').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Social Skills Improvement System (Teacher)'
+        },
+        subtitle: {
+            text: ''
+        },
+        xAxis: {
+            categories: [@Html.Raw(dtSSISg.Trim(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Assertion',
+            marker: {
+                symbol: 'circle'
+            },
+            data: [@Html.Raw(AssertionTg.Trim(','))],
+            color: '#73B3EF'
+
+        }, {
+                name: 'Bullying',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(BullyingTg.Trim(','))],
+            color: '#67F97C'
+
+        }
+        , {
+            name: 'Communication',
+            marker: {
+                symbol: 'triangle-down'
+            },
+            data: [@Html.Raw(CommunicationTg.Trim(','))],
+            color: '#434348'
+        }
+        , {
+            name: 'Cooperation',
+            marker: {
+                symbol: 'circle'
+            },
+            data: [@Html.Raw(CooperationTg.Trim(','))],
+            color: '#73B3EF'
+        }
+        , {
+            name: 'Empathy',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(EmpathyTg.Trim(','))],
+            color: '#67F97C'
+        }, {
+            name: 'Engagement',
+            marker: {
+                symbol: 'triangle'
+            },
+            data: [@Html.Raw(EngagementTg.Trim(','))],
+            color: '#FF9E4F'
+        }
+        , {
+            name: 'Externalizing',
+            marker: {
+                symbol: 'diamond'
+            },
+            data: [@Html.Raw(ExternalizingTg.Trim(','))],
+            color: '#8778EC'
+        }
+        , {
+            name: 'Hyperactivity/Inattention',
+            marker: {
+                symbol: 'triangle-down'
+            },
+            data: [@Html.Raw(HyperactivityInattentionTg.Trim(','))],
+            color: '#434348'
+        }
+        , {
+            name: 'Internalizing',
+            marker: {
+                symbol: 'circle'
+            },
+            data: [@Html.Raw(InternalizingTg.Trim(','))],
+            color: '#73B3EF'
+        }
+    , {
+        name: 'Responsibility',
+        marker: {
+            symbol: 'square'
+        },
+        data: [@Html.Raw(ResponsibilityTg.Trim(','))],
+        color: '#67F97C'
+    }
+    , {
+        name: 'Self-control',
+        marker: {
+            symbol: 'triangle'
+        },
+        data: [@Html.Raw(SelfcontrolTg.Trim(','))],
+        color: '#FF9E4F'
+    }
+    , {
+        name: 'Spectrum Part A',
+        marker: {
+            symbol: 'diamond'
+        },
+        data: [@Html.Raw(SpectrumPartATg.Trim(','))],
+        color: '#8778EC'
+        }
+    , {
+        name: 'Spectrum Part B',
+        marker: {
+            symbol: 'diamond'
+        },
+        data: [@Html.Raw(SpectrumPartBTg.Trim(','))],
+        color: '#8778EC'
+    }
+        ]
+
+
+            , yAxis: {
+
+        }
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
+
+    <script type="text/javascript">
+    $(function () {
+    //-----------------------------------------Social Skills Improvement System (Teacher) Section Wise----------------------------------------
+        $('#divSSISTeacherSection').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Social Skills Improvement System (Teacher)'
+        },
+        subtitle: {
+            text: ''
+        },
+        xAxis: {
+            categories: [@Html.Raw(dtSSISc.Trim(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Academic Competence',
+            marker: {
+                symbol: 'circle'
+            },
+            data: [@Html.Raw(AcademicCompetenceTg.Trim(','))],
+            color: '#73B3EF'
+
+        }, {
+                name: 'Problem Behaviors',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(ProblemBehaviorsTg.Trim(','))],
+            color: '#67F97C'
+
+        }
+        , {
+            name: 'Social Skills',
+            marker: {
+                symbol: 'triangle-down'
+            },
+            data: [@Html.Raw(SocialSkillsTg.Trim(','))],
+            color: '#434348'
+        }
+        ]
+
+
+            , yAxis: {
+
+        }
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
+}
+
+<script type="text/javascript">
+    $(function () {
+        //-----------------------------------------CAS Grit and Resilience – Parent----------------------------------------
+        $('#divCasGritParent').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'CAS Grit and Resilience - Parent'
+        },
+        xAxis: {
+            categories: [@Html.Raw(dpCasGrit.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(pCasGrit.TrimEnd(','))],
+            color: '#00cc00'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        //-----------------------------------------Strengths and Difficulties Questionnaire----PARENT------------------------------------
+    $('#divSnDParent').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Strengths and Difficulties Questionnaire (Total Score)'
+        },
+        subtitle: {
+            text: '*Lower is Better'
+        },
+        xAxis: {
+            categories: [@Html.Raw(dpSnD.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'circle'
+            },
+            data: [@Html.Raw(pSnD.TrimEnd(','))],
+            color: '#cc0000'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        //-----------------------------------------Strengths and Difficulties Questionnaire GROUPS – Parent ----------------------------------------
+        $('#divSnDGroupsParent').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Strengths and Difficulties Questionnaire (Subscales)'
+        },
+        subtitle: {
+            text: '*Lower is better'
+        },
+        xAxis: {
+            categories: [@Html.Raw(dpExIn.Trim(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Externalising Problems',
+            marker: {
+                symbol: 'circle'
+            },
+            data: [@Html.Raw(pExternalising.Trim(','))],
+            color: '#73B3EF'
+
+        }, {
+            name: 'Internalising Problems',
+            marker: {
+                symbol: 'circle'
+            },
+            data: [@Html.Raw(pInternalising.Trim(','))],
+            color: '#67F97C'
+
+        }]
+            , yAxis: {
+
+        }
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+</script>
+
+<script type="text/javascript">
+    $(function () {
+    //-----------------------------------------ABC Sub Categories-Parents----------------------------------------
+    $('#ABCSubCategoriesParent').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Aberrant  Behaviour Checklist'
+        },
+        subtitle: {
+            text: '*Lower is Better'
+        },
+        xAxis: {
+            categories: [@Html.Raw(dpABCg.Trim(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Irritability/Agitation',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(aspABCg.Trim(','))],
+            color: '#73B3EF'
+
+        }, {
+            name: 'Letargy, Social Withdrawl',
+            marker: {
+                symbol: 'diamond'
+            },
+            data: [@Html.Raw(tstpABCg.Trim(','))],
+            color: '#67F97C'
+
+        }, {
+            name: 'Sterotypic Behavior',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(unpABCg.Trim(','))],
+            color: '#FF9E4F'
+
+        }, {
+            name: 'Hyperactivity/Noncompliance',
+            marker: {
+                symbol: 'diamond'
+            },
+            data: [@Html.Raw(vspABCg.Trim(','))],
+            color: '#8778EC'
+        }
+
+        , {
+            name: 'Inappropriate Speech',
+            marker: {
+                symbol: 'diamond'
+            },
+            data: [@Html.Raw(qpABCg.Trim(','))],
+            color: '#434348'
+        }],
+        yAxis:{
+            max: 50,
+            plotLines: [{
+                value: 48, color: 'black', dashStyle: 'shortdash', width: 1, label: { align: "right", text: 'Max(48)', style: { "color": "#8778EC", "fontSize": "10px" } }
+            },
+            {
+                value: 12, color: 'black', dashStyle: 'shortdash', width: 1, label: { align: "right", text: 'Max(12)', style: { "color": "#434348", "fontSize": "10px" } }
+            },
+            {
+                value: 45, color: 'black', dashStyle: 'shortdash', width: 1, label: { align: "right", userHTML: true, text: ' <br> Max(45)', style: { "color": "#73B3EF", "fontSize": "10px" } }
+            },
+            {
+                value: 48, color: 'black', dashStyle: 'shortdash', width: 1, label: { align: "right", userHTML: true, text: ' <br> Max(48)', style: { "color": "#67F97C", "fontSize": "10px" } }
+            },
+            {
+                value: 21, color: 'black', dashStyle: 'shortdash', width: 1, label: { align: "right", text: 'Max(21)', style: { "color": "#FF9E4F", "fontSize": "10px" } }
+            }]
+        }
+
+
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+</script>
+
+<script type="text/javascript">
+    $(function () {
+    //-----------------------------------------Social Responsiveness Scale(SRS) sub scale----------------------------------------
+    $('#SRSSubScale').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Social Responsiveness Scale <span style="font-size:13px;">(sub scale)</span>'
+        },
+        subtitle: {
+            text: '*Lower is Better'
+        },
+        xAxis: {
+            categories: [@Html.Raw(dpSRSg.Trim(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Social Awareness',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(aspSRSg.Trim(','))],
+            color: '#73B3EF'
+
+        }, {
+            name: 'Social Cognition',
+            marker: {
+                symbol: 'diamond'
+            },
+            data: [@Html.Raw(tstpSRSg.Trim(','))],
+            color: '#67F97C'
+
+        }, {
+            name: 'Social Communication',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(unpSRSg.Trim(','))],
+            color: '#FF9E4F'
+
+        }, {
+            name: 'Social Motivation',
+            marker: {
+                symbol: 'diamond'
+            },
+            data: [@Html.Raw(vspSRSg.Trim(','))],
+            color: '#8778EC'
+        }
+
+        , {
+            name: 'Restricted Interests and Repetitive Bahaviour',
+            marker: {
+                symbol: 'diamond'
+            },
+            data: [@Html.Raw(qpSRSg.Trim(','))],
+            color: '#434348'
+        }],yAxis: {
+            max: 70,
+            plotLines: [{
+                value: 24, color: 'black', dashStyle: 'shortdash', width: 1, label: { align: "right", userHTML: true, text: ' <br> Max(24)', style: { "color": "#73B3EF", "fontSize": "10px" } }
+            },
+            {
+                value: 36, color: 'black', dashStyle: 'shortdash', width: 1, label: { align: "right", text: 'Max(36)', style: { "color": "#67F97C", "fontSize": "10px" } }
+            },
+            {
+                value: 63, color: 'black', dashStyle: 'shortdash', width: 1, label: { align: "right", text: 'Max(63)', style: { "color": "#FF9E4F", "fontSize": "10px" } }
+            },
+            {
+                value: 36, color: 'black', dashStyle: 'shortdash', width: 1, label: { align: "right", userHTML: true, text: ' <br> Max(36)', style: { "color": "#8778EC", "fontSize": "10px" } }
+            },
+            {
+                value: 36, color: 'black', dashStyle: 'shortdash', width: 1, label: { align: "right", userHTML: true, text: ' <br>.<br>.Max(36)', style: { "color": "#434348", "fontSize": "10px" } }
+            }]
+        }
+
+
+
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+</script>
+
+<script type="text/javascript">
+    $(function () {
+    //-----------------------------------------Social Responsiveness Scale(SRS) sub scale----------------------------------------
+        $('#divParentVineland').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Vineland-3 (Parent)'
+        },
+        subtitle: {
+            text: 'Comprehensive Parent/Caregiver Form'
+        },
+        xAxis: {
+            categories: [@Html.Raw(pvD.Trim(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Adapting',
+            marker: {
+                symbol: 'circle'
+            },
+            data: [@Html.Raw(pvAdapting.Trim(','))],
+            color: '#73B3EF'
+
+        }, {
+            name: 'Caring For Home',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(pvCFH.Trim(','))],
+            color: '#67F97C'
+
+        }, {
+            name: 'Caring For Self',
+            marker: {
+                symbol: 'triangle'
+            },
+            data: [@Html.Raw(pvCFS.Trim(','))],
+            color: '#FF9E4F'
+
+        }, {
+            name: 'Listening And Understanding',
+            marker: {
+                symbol: 'diamond'
+            },
+            data: [@Html.Raw(pvLAU.Trim(','))],
+            color: '#8778EC'
+        }
+
+        , {
+            name: 'Living In Community',
+            marker: {
+                symbol: 'triangle-down'
+            },
+            data: [@Html.Raw(pvLIC.Trim(','))],
+            color: '#434348'
+        }
+        , {
+            name: 'Playing And Using Leisure Time',
+            marker: {
+                symbol: 'circle'
+            },
+            data: [@Html.Raw(pvPAULT.Trim(','))],
+            color: '#73B3EF'
+        }
+        , {
+            name: 'Problem Behaviors - Section A',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(pvSectionA.Trim(','))],
+            color: '#67F97C'
+        }, {
+            name: 'Problem Behaviors - Section B',
+            marker: {
+                symbol: 'triangle'
+            },
+            data: [@Html.Raw(pvSectionB.Trim(','))],
+            color: '#FF9E4F'
+        }
+        , {
+            name: 'Problem Behaviors - Section C',
+            marker: {
+                symbol: 'diamond'
+            },
+            data: [@Html.Raw(pvSectionC.Trim(','))],
+            color: '#8778EC'
+        }
+        , {
+            name: 'Reading and Writing',
+            marker: {
+                symbol: 'triangle-down'
+            },
+            data: [@Html.Raw(pvRAW.Trim(','))],
+            color: '#434348'
+        }
+        , {
+            name: 'Relating To Others',
+            marker: {
+                symbol: 'circle'
+            },
+            data: [@Html.Raw(pvRTO.Trim(','))],
+            color: '#73B3EF'
+        }
+    , {
+        name: 'Talking',
+        marker: {
+            symbol: 'square'
+        },
+        data: [@Html.Raw(pvT.Trim(','))],
+        color: '#67F97C'
+    }
+        ]
+
+
+            , yAxis: {
+
+        }
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+</script>
+
+<script type="text/javascript">
+    $(function () {
+    //-----------------------------------------PedsQL-Parent----------------------------------------
+    $('#PedsQLParent').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Peds Quality of Life'
+        },
+        subtitle: {
+            text: '*Higher is better'
+        },
+        xAxis: {
+            categories: [@Html.Raw(dPEDsql.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(pPEDsql.TrimEnd(','))],
+            color: '#00cc00'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+</script>
+
+<script type="text/javascript">
+    $(function () {
+    //-----------------------------------------Social Communication Questionnaire----------------------------------------
+    $('#divSCQ').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Social communication Questionnaire – life time'
+        },
+        subtitle: {
+            //text: '*Higher is better'
+        },
+        xAxis: {
+            categories: [@Html.Raw(dSCQ.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(pSCQ.TrimEnd(','))],
+            color: '#00cc00'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+</script>
+
+<script type="text/javascript">
+    $(function () {
+    //-----------------------------------------CaregiverStrainQuesionaire----------------------------------------
+    $('#CaregiverStrainQuesionaire').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Caregiver Strain Quesionnaire'
+        },
+        subtitle: {
+            text: '*Lower is Better'
+        },
+        xAxis: {
+            categories: [@Html.Raw(dCareGiver.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(pCareGiver.TrimEnd(','))],
+            color: '#cc0000'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+</script>
+
+<script type="text/javascript">
+    $(function () {
+    //-----------------------------------------CaregiverStrainQuesionaire----------------------------------------
+    $('#FamilyEmpowementScale').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Family Empowerment Scale'
+        },
+        subtitle: {
+            text: '*Higher is better'
+        },
+        xAxis: {
+            categories: [@Html.Raw(dPES.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(pPES.TrimEnd(','))],
+            color: '#00cc00'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+</script>
+
+<script type="text/javascript">
+    $(function () {
+    //-----------------------------------------GI Severity Index----------------------------------------
+    $('#GISeverityIndex').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'GI Severity Index'
+        },
+        subtitle: {
+            text: '*Lower is Better'
+        },
+        xAxis: {
+            categories: [@Html.Raw(dGSI.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(pGSI.TrimEnd(','))],
+            color: '#cc0000'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        //-----------------------------------------School Anxiety Scale – Teacher Report ----------------------------------------
+    $('#divTeacherReport').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'School Anxiety Scale – Teacher Report '
+        },
+        subtitle: {
+            text: ''
+        },
+        xAxis: {
+            categories: [@Html.Raw(dTR.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'circle'
+            },
+            data: [@Html.Raw(tTR.TrimEnd(','))],
+            color: '#67F97C'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        //-----------------------------------------Anxiety Depression and Mood Scale--PARENT--------------------------------------
+    $('#pADAM').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Anxiety Depression and Mood Scale'
+        },
+        //subtitle: {
+        //    text: '*Lower is Better'
+        //},
+        xAxis: {
+            categories: [@Html.Raw(dpADAM.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(pADAM.TrimEnd(','))],
+            color: '#cc0000'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        //-----------------------------------------Vanderbilt Adhd Diagnostic Teacher Rating Scale--PARENT--------------------------------------
+        $('#pVanderbilt').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Vanderbilt Adhd Diagnostic Teacher Rating Scale'
+        },
+        //subtitle: {
+        //    text: '*Lower is Better'
+        //},
+        xAxis: {
+            categories: [@Html.Raw(dpVanderbilt.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(pVanderbilt.TrimEnd(','))],
+            color: '#cc0000'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        //-----------------------------------------Vanderbilt ADHD Scale – Parent--------------------------------------
+        $('#divpVanderbiltADHD').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Vanderbilt ADHD Scale – Parent'
+        },
+        //subtitle: {
+        //    text: '*Lower is Better'
+        //},
+        xAxis: {
+            categories: [@Html.Raw(dVanderbiltADHD.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(pVanderbiltADHD.TrimEnd(','))],
+            color: '#73B3EF'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        //-----------------------------------------Short Language Profile--PARENT--------------------------------------
+        $('#divpSLP').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Short Language Profile '
+        },
+        //subtitle: {
+        //    text: '*Lower is Better'
+        //},
+        xAxis: {
+            categories: [@Html.Raw(dSLP.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(pSLP.TrimEnd(','))],
+            color: '#cc0000'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        //-----------------------------------------Insomnia Severity Index--PARENT--------------------------------------
+        $('#divpInsomn').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Insomnia Severity Index'
+        },
+        //subtitle: {
+        //    text: '*Lower is Better'
+        //},
+        xAxis: {
+            categories: [@Html.Raw(dInsom.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(pInsom.TrimEnd(','))],
+            color: '#cc0000'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        //-----------------------------------------Connor-Davidson Resilience Scale 10--PARENT--------------------------------------
+        $('#divpConnor').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Connor-Davidson Resilience Scale 10'
+        },
+        //subtitle: {
+        //    text: 'Parents'
+        //},
+        xAxis: {
+            categories: [@Html.Raw(dConnor.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(pConnor.TrimEnd(','))],
+            color: '#cc0000'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        //-----------------------------------------Feedback Questionnaire--PARENT--------------------------------------
+        $('#divpFeedback').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Feedback Questionnaire'
+        },
+        //subtitle: {
+        //    text: 'Parents'
+        //},
+        xAxis: {
+            categories: [@Html.Raw(dpFeed.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(pFeed.TrimEnd(','))],
+            color: '#cc0000'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        //-----------------------------------------Parent Assessment Summary--PARENT--------------------------------------
+        $('#divpPAS').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Parent Assessment Summary'
+        },
+        //subtitle: {
+        //    text: 'Parents'
+        //},
+        xAxis: {
+            categories: [@Html.Raw(dpPAS.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(pPAS.TrimEnd(','))],
+            color: '#cc0000'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+</script>
+
+
+
+<style type="text/css">
+    .voffset {
+        margin-top: 10px;
+    }
+
+    .graphTabs ul {
+        margin: 0px;
+        list-style: none;
+        padding: 0px;
+    }
+
+    .graphTabs li a {
+        text-align: left;
+        border: 1px solid transparent;
+        padding: 10px 15px;
+        display: block;
+        position: relative;
+        text-shadow: none;
+        text-decoration: none;
+        color: #333;
+        min-width: 141px;
+        position: relative;
+        z-index: 1111;
+        background-color: #FFF;
+    }
+
+    .graphTabs li:first-child a {
+        /*border-top: solid 1px #CCC;*/
+    }
+
+    .graphTabs li a:hover {
+        background-color: #c7d1d6;
+    }
+
+    .graphTabs li a.selected {
+        /*background-color: #c7d1d6;*/
+        border-right: none;
+        cursor: default;
+        border-top: solid 1px #CCC;
+        border-left: solid 1px #CCC;
+        border-bottom: solid 1px #CCC;
+        right: -1px;
+    }
+
+    .gDetails .surveygraph {
+        border-bottom: solid 1px #EDEDED;
+    }
+</style>
+
+<h3 style="text-transform:capitalize;">@studyName @(childNamets != "" ? "(" + childNamets + ")" : "") - Statistical Analysis</h3>
+
+
+@if (childId == 0 || childId != 0)
+{
+    var c = dsCharts.Tables[5].Rows.Count;
+    DataRow[] drABCGroup = dsCharts.Tables[5].Select("SURVEYid = 4");
+    string temp = "{name: '#name#',marker: {symbol: 'circle'},data: [#min#, #max# ]}",
+           ABCg = "";
+    DataRow[] drSRSGroup = dsCharts.Tables[5].Select("SURVEYid = 5");
+    string SRSg = "";
+
+    foreach (DataRow dr in drABCGroup)
+    {
+        ABCg += temp.Replace("#name#", dr["Name"].ToString()).Replace("#min#", dr["minScore"].ToString()).Replace("#max#", dr["maxScore"].ToString()) + ",";
+    }
+    foreach (DataRow dr in drSRSGroup)
+    {
+        SRSg += temp.Replace("#name#", dr["Name"].ToString()).Replace("#min#", dr["minScore"].ToString()).Replace("#max#", dr["maxScore"].ToString()) + ",";
+    }
+    ABCg = ABCg.TrimEnd(',');
+    SRSg = SRSg.TrimEnd(',');
+
+
+    <script type="text/javascript">
+    $(function () {
+        //-----------------------------------------Abbreviated Sensory Profile- Parent & Teacher----------------------------------------
+            $('.dvABCGroup').highcharts({
+                chart: {
+                    type: 'spline',
+                    backgroundColor: null
+                },
+                title: {
+                    text: 'Aberrant  Behaviour Checklist <span style="font-size:13px;">(Base line vs Current)</span>'
+                },
+                subtitle: {
+                    text: '*Lower is Better'
+                },
+                xAxis: {
+                    categories: ['Base Line<br>*Study Start', 'Current']
+                },
+                yAxis: {
+                    title: {
+                        text: 'Scores'
+                    },
+                    labels: {
+                        formatter: function () {
+                            return this.value + '';
+                        }
+                    }
+                },
+                tooltip: {
+                    crosshairs: true,
+                    shared: true
+                },
+                plotOptions: {
+                    spline: {
+                        marker: {
+                            radius: 4,
+                            lineColor: '#666666',
+                            lineWidth: 1
+                        }
+                    }
+                },
+                credits: {
+                    enabled: false
+                },
+                series: [@Html.Raw(ABCg)
+                    ]
+        });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
+
+
+
+    <script type="text/javascript">
+            $(function(){
+                //-----------------------------------------Abbreviated Sensory Profile- Parent & Teacher----------------------------------------
+                $('.dvSRSGroup').highcharts({
+                    chart: {
+                        type: 'spline',
+                        backgroundColor: null
+                    },
+                    title: {
+                        text: 'Social Responsiveness Scale <span style="font-size:13px;">(Base line vs Current)</span>'
+                    },
+                    subtitle: {
+                        text: '*Lower is Better'
+                    },
+                    xAxis: {
+                        categories: ['Base Line<br>*Study Start', 'Current']
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Scores'
+                        },
+                        labels: {
+                            formatter: function () {
+                                return this.value + '';
+                            }
+                        }
+                    },
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true
+                    },
+                    plotOptions: {
+                        spline: {
+                            marker: {
+                                radius: 4,
+                                lineColor: '#666666',
+                                lineWidth: 1
+                            }
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [@Html.Raw(SRSg)
+                    ]
+                });
+                //-----------------------------------------End----------------------------------------
+            });
+    </script>
+
+    <script type="text/javascript">
+    $(function () {
+    //-----------------------------------------Social Skills Improvement System (Parent) Group Wise----------------------------------------
+        $('#divSSISParentGroup').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Social Skills Improvement System (Parent)'
+        },
+        subtitle: {
+            text: ''
+        },
+        xAxis: {
+            categories: [@Html.Raw(dtSSISpg.Trim(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Assertion',
+            marker: {
+                symbol: 'circle'
+            },
+            data: [@Html.Raw(AssertionPg.Trim(','))],
+            color: '#73B3EF'
+
+        }, {
+                name: 'Bullying',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(BullyingPg.Trim(','))],
+            color: '#67F97C'
+
+        }
+        , {
+            name: 'Communication',
+            marker: {
+                symbol: 'triangle-down'
+            },
+            data: [@Html.Raw(CommunicationPg.Trim(','))],
+            color: '#434348'
+        }
+        , {
+            name: 'Cooperation',
+            marker: {
+                symbol: 'circle'
+            },
+            data: [@Html.Raw(CooperationPg.Trim(','))],
+            color: '#73B3EF'
+        }
+        , {
+            name: 'Empathy',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(EmpathyPg.Trim(','))],
+            color: '#67F97C'
+        }, {
+            name: 'Engagement',
+            marker: {
+                symbol: 'triangle'
+            },
+            data: [@Html.Raw(EngagementPg.Trim(','))],
+            color: '#FF9E4F'
+        }
+        , {
+            name: 'Externalizing',
+            marker: {
+                symbol: 'diamond'
+            },
+            data: [@Html.Raw(ExternalizingPg.Trim(','))],
+            color: '#8778EC'
+        }
+        , {
+            name: 'Hyperactivity/Inattention',
+            marker: {
+                symbol: 'triangle-down'
+            },
+            data: [@Html.Raw(HyperactivityInattentionPg.Trim(','))],
+            color: '#434348'
+        }
+        , {
+            name: 'Internalizing',
+            marker: {
+                symbol: 'circle'
+            },
+            data: [@Html.Raw(InternalizingPg.Trim(','))],
+            color: '#73B3EF'
+        }
+    , {
+        name: 'Responsibility',
+        marker: {
+            symbol: 'square'
+        },
+        data: [@Html.Raw(ResponsibilityPg.Trim(','))],
+        color: '#67F97C'
+    }
+    , {
+        name: 'Self-control',
+        marker: {
+            symbol: 'triangle'
+        },
+        data: [@Html.Raw(SelfcontrolPg.Trim(','))],
+        color: '#FF9E4F'
+    }
+    , {
+        name: 'Spectrum Part A',
+        marker: {
+            symbol: 'diamond'
+        },
+        data: [@Html.Raw(SpectrumPartAPg.Trim(','))],
+        color: '#8778EC'
+        }
+    , {
+        name: 'Spectrum Part B',
+        marker: {
+            symbol: 'diamond'
+        },
+        data: [@Html.Raw(SpectrumPartBPg.Trim(','))],
+        color: '#8778EC'
+    }
+        ]
+
+
+            , yAxis: {
+
+        }
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
+
+    <script type="text/javascript">
+    $(function () {
+    //-----------------------------------------Social Skills Improvement System (Parent) Section Wise----------------------------------------
+        $('#divSSISParentSection').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Social Skills Improvement System (Parent)'
+        },
+        subtitle: {
+            text: ''
+        },
+        xAxis: {
+            categories: [@Html.Raw(dtSSISc.Trim(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+                name: 'Problem Behaviors',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(ProblemBehaviorsPg.Trim(','))],
+            color: '#67F97C'
+
+        }
+        , {
+            name: 'Social Skills',
+            marker: {
+                symbol: 'triangle-down'
+            },
+            data: [@Html.Raw(SocialSkillsPg.Trim(','))],
+            color: '#434348'
+        }
+        ]
+
+
+            , yAxis: {
+
+        }
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
+
+
+
+
+
+
+    var cTeacher = dsCharts.Tables[6].Rows.Count;
+    DataRow[] drABCGroupTeacher = dsCharts.Tables[6].Select("SURVEYid = 4");
+    string tempTeacher = "{name: '#name#',marker: {symbol: 'circle'},data: [#min#, #max# ]}",
+           ABCgTeacher = "";
+    DataRow[] drSRSGroupTeacher = dsCharts.Tables[6].Select("SURVEYid = 5");
+    string SRSgTeacher = "";
+
+    foreach (DataRow dr in drABCGroupTeacher)
+    {
+        ABCgTeacher += tempTeacher.Replace("#name#", dr["Name"].ToString()).Replace("#min#", dr["minScore"].ToString()).Replace("#max#", dr["maxScore"].ToString()) + ",";
+    }
+    foreach (DataRow dr in drSRSGroupTeacher)
+    {
+        SRSgTeacher += tempTeacher.Replace("#name#", dr["Name"].ToString()).Replace("#min#", dr["minScore"].ToString()).Replace("#max#", dr["maxScore"].ToString()) + ",";
+    }
+    ABCgTeacher = ABCgTeacher.TrimEnd(',');
+    SRSgTeacher = SRSgTeacher.TrimEnd(',');
+
+
+    <script type="text/javascript">
+            $(function () {
+                //-----------------------------------------Abbreviated Sensory Profile- Parent & Teacher----------------------------------------
+                $('.dvABCGroupTeacher').highcharts({
+                    chart: {
+                        type: 'spline',
+                        backgroundColor: null
+                    },
+                    title: {
+                        text: 'Aberrant  Behaviour Checklist <span style="font-size:13px;">(Base line vs Current)</span>'
+                    },
+                    subtitle: {
+                        text: '*Lower is Better'
+                    },
+                    xAxis: {
+                        categories: ['Base Line<br>*Study Start', 'Current']
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Scores'
+                        },
+                        labels: {
+                            formatter: function () {
+                                return this.value + '';
+                            }
+                        }
+                    },
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true
+                    },
+                    plotOptions: {
+                        spline: {
+                            marker: {
+                                radius: 4,
+                                lineColor: '#666666',
+                                lineWidth: 1
+                            }
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [@Html.Raw(ABCgTeacher)
+                    ]
+                });
+                //-----------------------------------------End----------------------------------------
+            });
+    </script>
+
+
+    <script type="text/javascript">
+            $(function () {
+            //-----------------------------------------Abbreviated Sensory Profile- Parent & Teacher----------------------------------------
+        $('.dvSRSGroupTeacher').highcharts({
+                chart: {
+                    type: 'spline',
+                    backgroundColor: null
+                },
+                title: {
+                    text: 'Social Responsiveness Scale <span style="font-size:13px;">(Base line vs Current)</span>'
+                },
+                subtitle: {
+                    text: '*Lower is Better'
+                },
+                xAxis: {
+                    categories: ['Base Line<br>*Study Start', 'Current']
+                },
+                yAxis: {
+                    title: {
+                        text: 'Scores'
+                    },
+                    labels: {
+                        formatter: function () {
+                            return this.value + '';
+                        }
+                    }
+                },
+                tooltip: {
+                    crosshairs: true,
+                    shared: true
+                },
+                plotOptions: {
+                    spline: {
+                        marker: {
+                            radius: 4,
+                            lineColor: '#666666',
+                            lineWidth: 1
+                        }
+                    }
+                },
+                credits: {
+                    enabled: false
+                },
+                series: [@Html.Raw(SRSgTeacher)
+                ]
+            });
+            //-----------------------------------------End----------------------------------------
+    });
+    </script>
+
+
+}
+
+<table cellpadding="0" cellspacing="0" style="width:100%;">
+    <tr>
+        <td style="width: 14%;vertical-align: top;">
+            <div class="graphTabs" style="margin-top: 40px;">
+                <ul class="graphSections">
+                    <li>
+                        <a class="selected" href="#3" onclick="showGraphsSection(this, 1);">Parent</a>
+                    </li>
+                    @if (role != "" && role != "Parent")
+                    {
+                        <li>
+                            <a href="#4" onclick="showGraphsSection(this, 2);">Teacher</a>
+                        </li>
+                        <li>
+                            <a href="#5" onclick="showGraphsSection(this, 3);">Parent/Teacher</a>
+                        </li>
+                        if (isSurveyAssigned(24, "Teacher"))
+                        {
+                            <li>
+                                <a href="#6" onclick="showGraphsSection(this, 4);">Weekly Teacher</a>
+                            </li>
+                            isAssignedToTeacher = true;
+                        }
+                        <li>
+                            <a href="#7" onclick="showGraphsSection(this, 5);">Life Events</a>
+                        </li>
+                        <li>
+                            <a href="#8" onclick="showGraphsSection(this, 6);">Student</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </td>
+        <td style="width: 84%;border: solid 1px #CCC;">
+            <div class="gDetails">
+                <div class="row parentdiv" style="overflow:hidden;">
+                    @if (isSurveyAssigned(4, "Parent"))
+                    {
+                        <div class="col-sm-12" style="padding-top:8px;margin:0px 0px 10px 0px;"><div class="dvABCGroup surveygraph" surveyid="4"></div></div>
+                        isAssignedToParent = true;
+                    }
+                    @if (isSurveyAssigned(5, "Parent"))
+                    {
+                        <div class="col-sm-12" style="padding-top:8px;margin:0px 0px 10px 0px;"><div class="dvSRSGroup surveygraph" surveyid="5"></div></div>
+                        isAssignedToParent = true;
+                    }
+                </div>
+                @if (role != "" && role != "Parent")
+                {
+                    <div class="row teacherdiv" style="overflow:hidden;">
+                        @if (isSurveyAssigned(4, "Teacher"))
+                        {
+                            <div class="col-sm-12" style="padding-top:8px;margin:0px 0px 10px 0px;"><div class="dvABCGroupTeacher surveygraph" surveyid="4"></div></div>
+                            isAssignedToTeacher = true;
+                        }
+                        @if (isSurveyAssigned(5, "Teacher"))
+                        {
+                            <div class="col-sm-12" style="padding-top:8px;margin:0px 0px 10px 0px;"><div class="dvSRSGroupTeacher surveygraph" surveyid="5"></div></div>
+                            isAssignedToTeacher = true;
+                        }
+                    </div>
+
+                    <div class="row parentteacherdiv" style="overflow:hidden;border-bottom:none;">
+                        @if (isSurveyAssigned(4, "Parent", "Teacher", 5))
+                        {
+                            <div class="col-sm-12 parentteacher" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                                <div id="ABCSRScontainer" style="min-width: 310px; height: 400px; margin: 0 auto" class="surveygraph"></div>
+                            </div>
+                            isAssignedToParentTeacher = true;
+                        }
+                        @if (isSurveyAssigned(1, "Parent", "Teacher"))
+                        {
+                            <div class="col-sm-12 parentteacher" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                                <div id="AbbreviatedSensoryProfile" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="1" class="surveygraph"></div>
+                            </div>
+                            isAssignedToParentTeacher = true;
+                        }
+                    </div>
+                }
+
+
+
+
+                <div class="row parentdiv" style="overflow:hidden;">
+                    @if (isSurveyAssigned(4, "Parent"))
+                    {
+                        <div class="col-sm-12 parent" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                            <div id="ABCSubCategoriesParent" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="4" class="surveygraph"></div>
+                        </div>
+                        isAssignedToParent = true;
+                    }
+                    @if (isSurveyAssigned(5, "Parent"))
+                    {
+                        <div class="col-sm-12 parent" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                            <div id="SRSSubScale" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="5" class="surveygraph"></div>
+                        </div>
+                        isAssignedToParent = true;
+                    }
+                    @if (isSurveyAssigned(55, "Parent"))
+                    {
+                        <div class="col-sm-12 parent" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                            <div id="divCasGritParent" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="55" class="surveygraph"></div>
+                        </div>
+                        isAssignedToParent = true;
+                    }
+                    @if (isSurveyAssigned(64, "Parent"))
+                    {
+                        <div class="col-sm-12 parent" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                            <div id="divSSISParentGroup" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="42" class="surveygraph"></div>
+                        </div>
+                        <div class="col-sm-12 parent" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                            <div id="divSSISParentSection" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="42" class="surveygraph"></div>
+                        </div>
+                        isAssignedToParent = true;
+                    }
+                </div>
+
+                @if (role != "" && role != "Parent")
+                {
+                    <div class="row teacherdiv" style="overflow:hidden;">
+                        @if (isSurveyAssigned(4, "Teacher"))
+                        {
+                            <div class="col-sm-12 teacher" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                                <div id="ABCSubCategoryTeacher" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="4" class="surveygraph"></div>
+                            </div>
+                            isAssignedToTeacher = true;
+                        }
+                        @if (isSurveyAssigned(5, "Teacher"))
+                        {
+                            <div class="col-sm-12 teacher" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                                <div id="SRSSubScaleTeacher" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="5" class="surveygraph"></div>
+                            </div>
+                            isAssignedToTeacher = true;
+                        }
+                        @*<div class="col-sm-6" style="background-color:transparent;">
+                                <div id="ShortLanguageProfile" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+                            </div>*@
+                    </div>
+
+                    <div class="row voffset studentdiv" style="overflow:hidden;border-bottom:none;">
+                        @if (isSurveyAssigned(45, "Student"))
+                        {
+                            <div class="col-sm-12 student" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                                <div id="PedsQLParentS" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="45" class="surveygraph"></div>
+                            </div>
+                            isAssignedToStudent = true;
+                        }
+                    </div>
+                    <div class="row voffset studentdiv" style="overflow:hidden;border-bottom:none;">
+                        @if (isSurveyAssigned(62, "Student"))
+                        {
+                            <div class="col-sm-12 student" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                                <div id="divSSISStudent" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="62" class="surveygraph"></div>
+                            </div>
+                            isAssignedToStudent = true;
+                        }
+                    </div>
+                }
+
+
+                <div class="row parentdiv" style="overflow:hidden;">
+                    @if (isSurveyAssigned(6, "Parent"))
+                    {
+                        <div class="col-sm-12 parent" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                            <div id="PedsQLParent" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="6" class="surveygraph"></div>
+                        </div>
+                        isAssignedToParent = true;
+                    }
+                    @if (isSurveyAssigned(2, "Parent"))
+                    {
+                        <div class="col-sm-12 parent" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                            <div id="CaregiverStrainQuesionaire" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="2" class="surveygraph"></div>
+                        </div>
+                        isAssignedToParent = true;
+                    }
+                </div>
+
+
+
+                @*<div class="row voffset" style="overflow:hidden;padding-top:8px;margin:0px 0px 10px 0px;">
+                        <div class="col-sm-6" style="background-color:transparent;">
+                        <div id="PedsQLParentReport" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+                        </div>
+                    </div>*@
+
+                <div class="row parentdiv" style="overflow:hidden;">
+                    @if (isSurveyAssigned(14, "Parent"))
+                    {
+                        <div class="col-sm-12 parent" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                            <div id="FamilyEmpowementScale" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="14" class="surveygraph"></div>
+                        </div>
+                        isAssignedToParent = true;
+                    }
+                    @if (isSurveyAssigned(3, "Parent"))
+                    {
+                        <div class="col-sm-12 parent" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                            <div id="GISeverityIndex" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="3" class="surveygraph"></div>
+                        </div>
+                        isAssignedToParent = true;
+                    }
+                </div>
+
+                @if (role != "" && role != "Parent")
+                {
+                    <div class="row teacherdiv" style="overflow:hidden;">
+                        @if (isSurveyAssigned(27, "Teacher"))
+                        {
+                            <div class="col-sm-12 teacher" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                                <div id="AcademicProgressDSMLevel1" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="27" class="surveygraph"></div>
+                            </div>
+                            isAssignedToTeacher = true;
+                        }
+                        @*<div class="col-sm-6" style="background-color:transparent;">
+                                <div id="levelchangesforChild" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+                            </div>*@
+                        @if (isSurveyAssigned(11, "Teacher"))
+                        {
+                            <div class="col-sm-12" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                                <div id="divSCQTeacher" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="11" class="surveygraph"></div>
+                            </div>
+                            isAssignedToTeacher = true;
+                        }
+                    </div>
+                }
+
+
+                @if (role != "" && role != "Parent")
+                {
+                    if (isSurveyAssigned(24, "Teacher"))
+                    {
+                        <div class="row voffset weeklydiv" style="border-bottom:none;">
+                            @*@{Html.RenderPartial("~/Views/Home/_WeeklyChart.cshtml", new ViewDataDictionary { { "studyId", studyId }, { "childIdts", childId } });}*@
+                            <div class="col-sm-12 parent" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                                <div id="divWeeklyTeacher" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="24" class="surveygraph"></div>
+                            </div>
+                        </div>
+                        isAssignedToTeacher = true;
+                    }
+
+                    <div class="row voffset lifeeventsdiv" style="border-bottom:none;">
+                        @{Html.RenderPartial("~/Views/Home/_LifeEventsChart.cshtml", new ViewDataDictionary { { "studyId", studyId }, { "childIdts", childId } });}
+                    </div>
+                }
+
+
+                <div class="row parentdiv" style="overflow:hidden;">
+                    @if (isSurveyAssigned(35, "Parent"))
+                    {
+                        <div class="col-sm-12" style="padding-top:8px;margin:0px 0px 10px 0px;"><div id="pADAM" surveyid="35" class="surveygraph"></div></div>
+                        isAssignedToParent = true;
+                    }
+                    @if (isSurveyAssigned(34, "Parent"))
+                    {
+                        <div class="col-sm-12" style="padding-top:8px;margin:0px 0px 10px 0px;"><div id="pVanderbilt" surveyid="34" class="surveygraph"></div></div>
+                        isAssignedToParent = true;
+                    }
+
+                    @if (isSurveyAssigned(56, "Parent"))
+                    {
+                        <div class="col-sm-12" style="padding-top:8px;margin:0px 0px 10px 0px;"><div id="divpVanderbiltADHD" surveyid="56" class="surveygraph"></div></div>
+                        isAssignedToParent = true;
+                    }
+                </div>
+
+                @if (role != "" && role != "Parent")
+                {
+                    <div class="row teacherdiv" style="overflow:hidden;">
+                        @if (isSurveyAssigned(35, "Teacher"))
+                        {
+                            <div class="col-sm-12" style="padding-top:8px;margin:0px 0px 10px 0px;"><div id="tADAM" surveyid="35" class="surveygraph"></div></div>
+                            isAssignedToTeacher = true;
+                        }
+                        @if (isSurveyAssigned(34, "Teacher"))
+                        {
+                            <div class="col-sm-12" style="padding-top:8px;margin:0px 0px 10px 0px;"><div id="tVanderbilt" surveyid="34" class="surveygraph"></div></div>
+                            isAssignedToTeacher = true;
+                        }
+                    </div>
+                }
+
+
+                <div class="row parentdiv" style="overflow:hidden;">
+                    @if (isSurveyAssigned(11, "Parent"))
+                    {
+                        <div class="col-sm-12" style="padding-top:8px;margin:0px 0px 10px 0px;"><div id="divSCQ" surveyid="11" class="surveygraph"></div></div>
+                        isAssignedToParent = true;
+                    }
+                    @if (isSurveyAssigned(10, "Parent"))
+                    {
+                        <div class="col-sm-12" style="padding-top:8px;margin:0px 0px 10px 0px;"><div id="divpSLP" surveyid="10" class="surveygraph"></div></div>
+                        isAssignedToParent = true;
+                    }
+                </div>
+
+                <div class="row parentdiv" style="overflow:hidden;">
+                    @if (isSurveyAssigned(12, "Parent"))
+                    {
+                        <div class="col-sm-12" style="padding-top:8px;margin:0px 0px 10px 0px;"><div id="divpInsomn" surveyid="12" class="surveygraph"></div></div>
+                        isAssignedToParent = true;
+                    }
+                    @if (isSurveyAssigned(13, "Parent"))
+                    {
+                        <div class="col-sm-12" style="padding-top:8px;margin:0px 0px 10px 0px;"><div id="divpConnor" surveyid="13" class="surveygraph"></div></div>
+                        isAssignedToParent = true;
+                    }
+                </div>
+
+                <div class="row parentdiv" style="overflow:hidden;">
+                    @if (isSurveyAssigned(15, "Parent"))
+                    {
+                        <div class="col-sm-12" style="padding-top:8px;margin:0px 0px 10px 0px;"><div id="divpFeedback" surveyid="15" class="surveygraph"></div></div>
+                        isAssignedToParent = true;
+                    }
+                    @if (isSurveyAssigned(48, "Parent"))
+                    {
+                        <div class="col-sm-12" style="padding-top:8px;margin:0px 0px 10px 0px;"><div id="divpPAS" surveyid="48" class="surveygraph"></div></div>
+                        isAssignedToParent = true;
+                    }
+                </div>
+                @*<div class="row voffset">
+                        <div class="col-sm-6" style="background-color:transparent;">
+                        <div id="WeeklyProgressScroe" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+                    </div>
+                        <div class="col-sm-6" style="background-color:transparent;">
+                        <div id="levelchangesforChild2312" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+                    </div>
+                    </div>*@
+                <div class="row parentdiv" style="overflow:hidden;border-bottom:none;">
+                    @if (isSurveyAssigned(46, "Parent"))
+                    {
+                        <div class="col-sm-12" style="padding-top:8px;margin:0px 0px 10px 0px;"><div id="divParentVineland" class="surveygraph" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="46"></div></div>
+                        isAssignedToParent = true;
+                    }
+                    @if (isSurveyAssigned(51, "Parent") || isSurveyAssigned(52, "Parent"))
+                    {
+                        <div class="col-sm-12 parent" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                            <div id="divSnDParent" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="51" class="surveygraph"></div>
+                        </div>
+                        <div class="col-sm-12 parent" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                            <div id="divSnDGroupsParent" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="51" class="surveygraph"></div>
+                        </div>
+                        isAssignedToParent = true;
+                    }
+                </div>
+
+                @if (role != "" && role != "Parent")
+                {
+                    <div class="row teacherdiv" style="overflow:hidden;">
+                        @if (isSurveyAssigned(49, "Teacher"))
+                        {
+                            <div class="col-sm-12" style="padding-top:8px;margin:0px 0px 10px 0px;"><div id="divTQuerterly" surveyid="49" class="surveygraph"></div></div>
+                            isAssignedToTeacher = true;
+                        }
+                        @if (isSurveyAssigned(13, "Teacher"))
+                        {
+                            <div class="col-sm-12" style="padding-top:8px;margin:0px 0px 10px 0px;"><div id="divtConnor" surveyid="13" class="surveygraph"></div></div>
+                            isAssignedToTeacher = true;
+                        }
+                    </div>
+
+                    <div class="row teacherdiv" style="overflow:hidden;">
+                        @if (isSurveyAssigned(15, "Teacher"))
+                        {
+                            <div class="col-sm-12" style="padding-top:8px;margin:0px 0px 10px 0px;"><div id="divtFeedback" surveyid="15" class="surveygraph"></div></div>
+                            isAssignedToTeacher = true;
+                        }
+                    </div>
+
+                    <div class="row teacherdiv" style="overflow:hidden;border-bottom:none;">
+                        @if (isSurveyAssigned(47, "Teacher"))
+                        {
+                            <div class="col-sm-12" style="padding-top:8px;margin:0px 0px 10px 0px;"><div id="divTeacherVineland" class="surveygraph" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="47"></div></div>
+                            isAssignedToTeacher = true;
+                        }
+                        @if (isSurveyAssigned(50, "Teacher"))
+                        {
+                            <div class="col-sm-12 teacher" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                                <div id="divTeacherReport" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="50" class="surveygraph"></div>
+                            </div>
+                            <div class="col-sm-12 teacher" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                                <div id="divAnxientyGroups" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="50" class="surveygraph"></div>
+                            </div>
+                            isAssignedToTeacher = true;
+                        }
+                        @if (isSurveyAssigned(51, "Teacher") || isSurveyAssigned(52, "Teacher"))
+                        {
+                            <div class="col-sm-12 teacher" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                                <div id="divSnDTeacher" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="51" class="surveygraph"></div>
+                            </div>
+                            <div class="col-sm-12 teacher" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                                <div id="divSnDGroupsTeacher" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="51" class="surveygraph"></div>
+                            </div>
+                            isAssignedToTeacher = true;
+                        }
+
+                        @if (isSurveyAssigned(53, "Teacher"))
+                        {
+                            <div class="col-sm-12 teacher" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                                <div id="divCasMaths" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="53" class="surveygraph"></div>
+                            </div>
+                            isAssignedToTeacher = true;
+                        }
+
+                        @if (isSurveyAssigned(54, "Teacher"))
+                        {
+                            <div class="col-sm-12 teacher" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                                <div id="divCasSkills" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="54" class="surveygraph"></div>
+                            </div>
+                            isAssignedToTeacher = true;
+                        }
+                        @if (isSurveyAssigned(42, "Teacher"))
+                        {
+                            <div class="col-sm-12 teacher" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                                <div id="divCasGritTeacher" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="42" class="surveygraph"></div>
+                            </div>
+                            isAssignedToTeacher = true;
+                        }
+                        @if (isSurveyAssigned(65, "Teacher"))
+                        {
+                            <div class="col-sm-12 teacher" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                                <div id="divSSISTeacherGroup" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="42" class="surveygraph"></div>
+                            </div>
+                            <div class="col-sm-12 teacher" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                                <div id="divSSISTeacherSection" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="42" class="surveygraph"></div>
+                            </div>
+                            isAssignedToTeacher = true;
+                        }
+
+
+
+
+                        @if (isAssignedToTeacher == false)
+                        {
+                            <div style="text-align: center;"><p>There is no survey assigned to teacher(s)@(childId > 0 ? " for " + childNamets : "")@(studyId > 0 ? " in " + studyName : "").</p></div>
+                        }
+                    </div>
+                }
+                <div class="parentdiv">
+                    @if (isAssignedToParent == false)
+                    {
+                        <div style="text-align: center;"><p>There is no survey assigned to parent(s)@(childId > 0 ? " for " + childNamets : "")@(studyId > 0 ? " in " + studyName : "").</p></div>
+                    }
+                </div>
+                <div class="studentdiv">
+                    @if (isAssignedToStudent == false)
+                    {
+                        <div style="text-align: center;"><p>There is no survey assigned to student(s)@(childId > 0 ? " for " + childNamets : "")@(studyId > 0 ? " in " + studyName : "").</p></div>
+                    }
+                </div>
+                <div class="parentteacherdiv">
+                    @if (isAssignedToParentTeacher == false)
+                    {
+                        <div style="text-align: center;"><p>There is no survey assigned to parent(s) or teacher(s)@(childId > 0 ? " for " + childNamets : "")@(studyId > 0 ? " in " + studyName : "").</p></div>
+                    }
+                </div>
+
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+<script type="text/javascript">
+    $(function () {
+        $(".teacherdiv").hide();
+        $(".parentteacherdiv").hide();
+        $(".studentdiv").hide();
+        $(".weeklydiv").hide();
+        $(".lifeeventsdiv").hide();
+    });
+
+    function showGraphsSection(elem, type) {
+        $(".parentdiv").hide();
+        $(".teacherdiv").hide();
+        $(".parentteacherdiv").hide();
+        $(".weeklydiv").hide();
+        $(".lifeeventsdiv").hide();
+        $(".studentdiv").hide();
+
+        $(".graphTabs a").removeClass("selected");
+        $(elem).addClass("selected");
+
+        if (type == 1) {
+            $(".parentdiv").show();
+        }
+        else if (type == 2) {
+            $(".teacherdiv").show();
+        }
+        else if (type == 3) {
+            $(".parentteacherdiv").show();
+        }
+        else if (type == 4) {
+            $(".weeklydiv").show();
+        }
+        else if (type == 5) {
+            $(".lifeeventsdiv").show();
+        }
+        else if (type == 6) {
+            $(".studentdiv").show();
+        }
+
+        //$(window).resize();
+    }
+
+    function setGraphsVisibility() {
+        var arr = "";
+        if (arr.length > 0) {
+            $(".surveygraph").each(function (index, obj) {
+                var surveyId = $(obj).attr("surveyid");
+                var isSurveyFound = false;
+                if (surveyId != null && surveyId != undefined) {
+                    for (var i = 0; i < arr.length; i++) {
+
+                        if (surveyId == arr[i]) {
+                            isSurveyFound = true;
+                            break;
+                        }
+                    }
+                    if (isSurveyFound == false) {
+                        $(obj).parent("div.col-sm-12").hide();
+                    }
+                }
+            });
+        }
+    }
+</script>

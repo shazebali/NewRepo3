@@ -1,0 +1,422 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+This file is used by the publish/package process of your Web project. You can customize the behavior of this process
+by editing this MSBuild file. In order to learn more about this please visit http://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <EncryptedPassword>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAA5i6n70M6ZkKYb/dpDV7O9QAAAAACAAAAAAADZgAAwAAAABAAAABLGrrTaxyNIwL6s0HaDdMNAAAAAASAAACgAAAAEAAAAD1OZ+hS8v1lVl5A4gK4djGAAAAAJP3uDthyRage+xUFbmgfOID5o4Va07g3alVWTtyj28/gVaM4vCss3qDZcXXakHw37RC+yKYS+BPAH92CebMJ/yXMz7xbSw68N7lQyKwHitqa+t63FZlJVzRgLDISW6EIN9DiSt4WpzjefeZDjXQjuNts61hJXHuA8mhCG1qw00MUAAAAk8JlohLbji/WCDa9cXvP2Hv8iNQ=</EncryptedPassword>
+    <_PublishTargetUrl>ftp://waws-prod-sn1-025.ftp.azurewebsites.windows.net/site/wwwroot</_PublishTargetUrl>
+  </PropertyGroup>
+  <ItemGroup>
+    <File Include="app_data/jobs/triggered/SurveyReminder/app.publish/SurveyReminder.exe">
+      <publishTime>12/10/2016 06:38:44</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/de/Microsoft.Data.Edm.resources.dll">
+      <publishTime>08/01/2014 16:45:22</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/de/Microsoft.Data.OData.resources.dll">
+      <publishTime>08/01/2014 16:46:44</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/de/Microsoft.Data.Services.Client.resources.dll">
+      <publishTime>08/01/2014 16:48:00</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/de/System.Spatial.resources.dll">
+      <publishTime>08/01/2014 16:43:58</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/es/Microsoft.Data.Edm.resources.dll">
+      <publishTime>08/01/2014 16:45:22</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/es/Microsoft.Data.OData.resources.dll">
+      <publishTime>08/01/2014 16:46:44</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/es/Microsoft.Data.Services.Client.resources.dll">
+      <publishTime>08/01/2014 16:48:00</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/es/System.Spatial.resources.dll">
+      <publishTime>08/01/2014 16:43:58</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/fr/Microsoft.Data.Edm.resources.dll">
+      <publishTime>08/01/2014 16:45:22</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/fr/Microsoft.Data.OData.resources.dll">
+      <publishTime>08/01/2014 16:46:44</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/fr/Microsoft.Data.Services.Client.resources.dll">
+      <publishTime>08/01/2014 16:48:00</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/fr/System.Spatial.resources.dll">
+      <publishTime>08/01/2014 16:43:58</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/it/Microsoft.Data.Edm.resources.dll">
+      <publishTime>08/01/2014 16:45:22</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/it/Microsoft.Data.OData.resources.dll">
+      <publishTime>08/01/2014 16:46:44</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/it/Microsoft.Data.Services.Client.resources.dll">
+      <publishTime>08/01/2014 16:48:00</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/it/System.Spatial.resources.dll">
+      <publishTime>08/01/2014 16:43:58</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/ja/Microsoft.Data.Edm.resources.dll">
+      <publishTime>08/01/2014 16:45:22</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/ja/Microsoft.Data.OData.resources.dll">
+      <publishTime>08/01/2014 16:46:44</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/ja/Microsoft.Data.Services.Client.resources.dll">
+      <publishTime>08/01/2014 16:48:00</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/ja/System.Spatial.resources.dll">
+      <publishTime>08/01/2014 16:43:58</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/ko/Microsoft.Data.Edm.resources.dll">
+      <publishTime>08/01/2014 16:45:22</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/ko/Microsoft.Data.OData.resources.dll">
+      <publishTime>08/01/2014 16:46:44</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/ko/Microsoft.Data.Services.Client.resources.dll">
+      <publishTime>08/01/2014 16:48:00</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/ko/System.Spatial.resources.dll">
+      <publishTime>08/01/2014 16:43:58</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/Microsoft.Azure.WebJobs.dll">
+      <publishTime>01/13/2016 11:37:26</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/Microsoft.Azure.WebJobs.Extensions.dll">
+      <publishTime>01/13/2016 11:42:30</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/Microsoft.Azure.WebJobs.Extensions.SendGrid.dll">
+      <publishTime>01/13/2016 11:42:38</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/Microsoft.Azure.WebJobs.Extensions.SendGrid.xml">
+      <publishTime>01/13/2016 11:42:38</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/Microsoft.Azure.WebJobs.Extensions.xml">
+      <publishTime>01/13/2016 11:42:30</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/Microsoft.Azure.WebJobs.Host.dll">
+      <publishTime>01/13/2016 11:37:40</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/Microsoft.Azure.WebJobs.Host.xml">
+      <publishTime>01/13/2016 11:37:40</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/Microsoft.Azure.WebJobs.xml">
+      <publishTime>01/13/2016 11:37:26</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/Microsoft.Data.Edm.dll">
+      <publishTime>08/01/2014 16:45:22</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/Microsoft.Data.Edm.xml">
+      <publishTime>08/01/2014 16:45:22</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/Microsoft.Data.OData.dll">
+      <publishTime>08/01/2014 16:46:44</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/Microsoft.Data.OData.xml">
+      <publishTime>08/01/2014 16:46:44</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/Microsoft.Data.Services.Client.dll">
+      <publishTime>08/01/2014 16:48:00</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/Microsoft.Data.Services.Client.xml">
+      <publishTime>08/01/2014 16:48:00</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/Microsoft.WindowsAzure.Configuration.dll">
+      <publishTime>12/10/2013 14:02:46</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/Microsoft.WindowsAzure.Configuration.xml">
+      <publishTime>12/10/2013 14:02:46</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/Microsoft.WindowsAzure.Storage.dll">
+      <publishTime>09/16/2014 14:39:42</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/Microsoft.WindowsAzure.Storage.xml">
+      <publishTime>09/16/2014 14:39:42</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/NCrontab.dll">
+      <publishTime>08/18/2014 22:29:28</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/Newtonsoft.Json.dll">
+      <publishTime>06/13/2016 23:06:14</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/Newtonsoft.Json.xml">
+      <publishTime>06/13/2016 23:06:14</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/Properties/webjob-publish-settings.json">
+      <publishTime>08/11/2016 23:23:41</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/Reminder.html">
+      <publishTime>12/02/2016 21:50:34</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/Reminder_Respondent.html">
+      <publishTime>12/08/2016 02:41:48</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/ru/Microsoft.Data.Edm.resources.dll">
+      <publishTime>08/01/2014 16:45:22</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/ru/Microsoft.Data.OData.resources.dll">
+      <publishTime>08/01/2014 16:46:44</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/ru/Microsoft.Data.Services.Client.resources.dll">
+      <publishTime>08/01/2014 16:48:00</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/ru/System.Spatial.resources.dll">
+      <publishTime>08/01/2014 16:43:58</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/SendGrid.CSharp.HTTP.Client.dll">
+      <publishTime>07/19/2016 12:57:20</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/SendGrid.SmtpApi.dll">
+      <publishTime>04/22/2015 17:24:48</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/SendGridMail.dll">
+      <publishTime>12/15/2015 08:04:56</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/settings.job">
+      <publishTime>11/07/2016 21:35:49</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/SurveyReminder.application">
+      <publishTime>12/10/2016 06:38:44</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/SurveyReminder.exe">
+      <publishTime>12/10/2016 06:38:33</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/SurveyReminder.exe.config">
+      <publishTime>12/10/2016 06:33:34</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/SurveyReminder.exe.manifest">
+      <publishTime>12/10/2016 06:38:44</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/SurveyReminder.pdb">
+      <publishTime>12/10/2016 06:38:33</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/SurveyReminder_TemporaryKey.pfx">
+      <publishTime>07/23/2016 02:05:43</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/System.Net.Http.Formatting.dll">
+      <publishTime>01/28/2015 04:02:42</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/System.Net.Http.Formatting.xml">
+      <publishTime>01/28/2015 04:02:42</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/System.Spatial.dll">
+      <publishTime>08/01/2014 16:43:58</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/System.Spatial.xml">
+      <publishTime>08/01/2014 16:43:58</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/System.Threading.Tasks.Dataflow.dll">
+      <publishTime>11/07/2014 18:43:56</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/System.Threading.Tasks.Dataflow.xml">
+      <publishTime>11/07/2014 18:43:56</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/zh-Hans/Microsoft.Data.Edm.resources.dll">
+      <publishTime>08/01/2014 16:45:22</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/zh-Hans/Microsoft.Data.OData.resources.dll">
+      <publishTime>08/01/2014 16:46:44</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/zh-Hans/Microsoft.Data.Services.Client.resources.dll">
+      <publishTime>08/01/2014 16:48:00</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/zh-Hans/System.Spatial.resources.dll">
+      <publishTime>08/01/2014 16:43:58</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/zh-Hant/Microsoft.Data.Edm.resources.dll">
+      <publishTime>08/01/2014 16:45:22</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/zh-Hant/Microsoft.Data.OData.resources.dll">
+      <publishTime>08/01/2014 16:46:44</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/zh-Hant/Microsoft.Data.Services.Client.resources.dll">
+      <publishTime>08/01/2014 16:48:00</publishTime>
+    </File>
+    <File Include="app_data/jobs/triggered/SurveyReminder/zh-Hant/System.Spatial.resources.dll">
+      <publishTime>08/01/2014 16:43:58</publishTime>
+    </File>
+    <File Include="Attachments/Reminder.html">
+      <publishTime>12/02/2016 21:49:47</publishTime>
+    </File>
+    <File Include="Attachments/Reminder_Respondent.html">
+      <publishTime>12/08/2016 02:41:48</publishTime>
+    </File>
+    <File Include="bin/de/Microsoft.Data.Edm.resources.dll">
+      <publishTime>08/01/2014 16:45:22</publishTime>
+    </File>
+    <File Include="bin/de/Microsoft.Data.OData.resources.dll">
+      <publishTime>08/01/2014 16:46:44</publishTime>
+    </File>
+    <File Include="bin/de/Microsoft.Data.Services.Client.resources.dll">
+      <publishTime>08/01/2014 16:48:00</publishTime>
+    </File>
+    <File Include="bin/de/System.Spatial.resources.dll">
+      <publishTime>08/01/2014 16:43:58</publishTime>
+    </File>
+    <File Include="bin/es/Microsoft.Data.Edm.resources.dll">
+      <publishTime>08/01/2014 16:45:22</publishTime>
+    </File>
+    <File Include="bin/es/Microsoft.Data.OData.resources.dll">
+      <publishTime>08/01/2014 16:46:44</publishTime>
+    </File>
+    <File Include="bin/es/Microsoft.Data.Services.Client.resources.dll">
+      <publishTime>08/01/2014 16:48:00</publishTime>
+    </File>
+    <File Include="bin/es/System.Spatial.resources.dll">
+      <publishTime>08/01/2014 16:43:58</publishTime>
+    </File>
+    <File Include="bin/fr/Microsoft.Data.Edm.resources.dll">
+      <publishTime>08/01/2014 16:45:22</publishTime>
+    </File>
+    <File Include="bin/fr/Microsoft.Data.OData.resources.dll">
+      <publishTime>08/01/2014 16:46:44</publishTime>
+    </File>
+    <File Include="bin/fr/Microsoft.Data.Services.Client.resources.dll">
+      <publishTime>08/01/2014 16:48:00</publishTime>
+    </File>
+    <File Include="bin/fr/System.Spatial.resources.dll">
+      <publishTime>08/01/2014 16:43:58</publishTime>
+    </File>
+    <File Include="bin/it/Microsoft.Data.Edm.resources.dll">
+      <publishTime>08/01/2014 16:45:22</publishTime>
+    </File>
+    <File Include="bin/it/Microsoft.Data.OData.resources.dll">
+      <publishTime>08/01/2014 16:46:44</publishTime>
+    </File>
+    <File Include="bin/it/Microsoft.Data.Services.Client.resources.dll">
+      <publishTime>08/01/2014 16:48:00</publishTime>
+    </File>
+    <File Include="bin/it/System.Spatial.resources.dll">
+      <publishTime>08/01/2014 16:43:58</publishTime>
+    </File>
+    <File Include="bin/ja/Microsoft.Data.Edm.resources.dll">
+      <publishTime>08/01/2014 16:45:22</publishTime>
+    </File>
+    <File Include="bin/ja/Microsoft.Data.OData.resources.dll">
+      <publishTime>08/01/2014 16:46:44</publishTime>
+    </File>
+    <File Include="bin/ja/Microsoft.Data.Services.Client.resources.dll">
+      <publishTime>08/01/2014 16:48:00</publishTime>
+    </File>
+    <File Include="bin/ja/System.Spatial.resources.dll">
+      <publishTime>08/01/2014 16:43:58</publishTime>
+    </File>
+    <File Include="bin/ko/Microsoft.Data.Edm.resources.dll">
+      <publishTime>08/01/2014 16:45:22</publishTime>
+    </File>
+    <File Include="bin/ko/Microsoft.Data.OData.resources.dll">
+      <publishTime>08/01/2014 16:46:44</publishTime>
+    </File>
+    <File Include="bin/ko/Microsoft.Data.Services.Client.resources.dll">
+      <publishTime>08/01/2014 16:48:00</publishTime>
+    </File>
+    <File Include="bin/ko/System.Spatial.resources.dll">
+      <publishTime>08/01/2014 16:43:58</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Azure.WebJobs.dll">
+      <publishTime>01/13/2016 11:37:26</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Azure.WebJobs.Extensions.dll">
+      <publishTime>01/13/2016 11:42:30</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Azure.WebJobs.Extensions.SendGrid.dll">
+      <publishTime>01/13/2016 11:42:38</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Azure.WebJobs.Host.dll">
+      <publishTime>01/13/2016 11:37:40</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Data.Edm.dll">
+      <publishTime>08/01/2014 16:45:22</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Data.OData.dll">
+      <publishTime>08/01/2014 16:46:44</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Data.Services.Client.dll">
+      <publishTime>08/01/2014 16:48:00</publishTime>
+    </File>
+    <File Include="bin/Microsoft.WindowsAzure.Configuration.dll">
+      <publishTime>12/10/2013 14:02:46</publishTime>
+    </File>
+    <File Include="bin/Microsoft.WindowsAzure.Storage.dll">
+      <publishTime>09/16/2014 14:39:42</publishTime>
+    </File>
+    <File Include="bin/NCrontab.dll">
+      <publishTime>08/18/2014 22:29:28</publishTime>
+    </File>
+    <File Include="bin/Newtonsoft.Json.dll">
+      <publishTime>06/13/2016 23:06:14</publishTime>
+    </File>
+    <File Include="bin/Properties/webjob-publish-settings.json">
+      <publishTime>08/11/2016 23:23:41</publishTime>
+    </File>
+    <File Include="bin/ru/Microsoft.Data.Edm.resources.dll">
+      <publishTime>08/01/2014 16:45:22</publishTime>
+    </File>
+    <File Include="bin/ru/Microsoft.Data.OData.resources.dll">
+      <publishTime>08/01/2014 16:46:44</publishTime>
+    </File>
+    <File Include="bin/ru/Microsoft.Data.Services.Client.resources.dll">
+      <publishTime>08/01/2014 16:48:00</publishTime>
+    </File>
+    <File Include="bin/ru/System.Spatial.resources.dll">
+      <publishTime>08/01/2014 16:43:58</publishTime>
+    </File>
+    <File Include="bin/SendGrid.CSharp.HTTP.Client.dll">
+      <publishTime>07/19/2016 12:57:20</publishTime>
+    </File>
+    <File Include="bin/SendGrid.SmtpApi.dll">
+      <publishTime>04/22/2015 17:24:48</publishTime>
+    </File>
+    <File Include="bin/SendGridMail.dll">
+      <publishTime>12/15/2015 08:04:56</publishTime>
+    </File>
+    <File Include="bin/settings.job">
+      <publishTime>11/07/2016 21:35:49</publishTime>
+    </File>
+    <File Include="bin/SurveyReminder.exe">
+      <publishTime>12/10/2016 06:38:33</publishTime>
+    </File>
+    <File Include="bin/SurveyReminder_TemporaryKey.pfx">
+      <publishTime>07/23/2016 02:05:43</publishTime>
+    </File>
+    <File Include="bin/System.Net.Http.Formatting.dll">
+      <publishTime>01/28/2015 04:02:42</publishTime>
+    </File>
+    <File Include="bin/System.Spatial.dll">
+      <publishTime>08/01/2014 16:43:58</publishTime>
+    </File>
+    <File Include="bin/System.Threading.Tasks.Dataflow.dll">
+      <publishTime>11/07/2014 18:43:56</publishTime>
+    </File>
+    <File Include="bin/zh-Hans/Microsoft.Data.Edm.resources.dll">
+      <publishTime>08/01/2014 16:45:22</publishTime>
+    </File>
+    <File Include="bin/zh-Hans/Microsoft.Data.OData.resources.dll">
+      <publishTime>08/01/2014 16:46:44</publishTime>
+    </File>
+    <File Include="bin/zh-Hans/Microsoft.Data.Services.Client.resources.dll">
+      <publishTime>08/01/2014 16:48:00</publishTime>
+    </File>
+    <File Include="bin/zh-Hans/System.Spatial.resources.dll">
+      <publishTime>08/01/2014 16:43:58</publishTime>
+    </File>
+    <File Include="bin/zh-Hant/Microsoft.Data.Edm.resources.dll">
+      <publishTime>08/01/2014 16:45:22</publishTime>
+    </File>
+    <File Include="bin/zh-Hant/Microsoft.Data.OData.resources.dll">
+      <publishTime>08/01/2014 16:46:44</publishTime>
+    </File>
+    <File Include="bin/zh-Hant/Microsoft.Data.Services.Client.resources.dll">
+      <publishTime>08/01/2014 16:48:00</publishTime>
+    </File>
+    <File Include="bin/zh-Hant/System.Spatial.resources.dll">
+      <publishTime>08/01/2014 16:43:58</publishTime>
+    </File>
+  </ItemGroup>
+</Project>

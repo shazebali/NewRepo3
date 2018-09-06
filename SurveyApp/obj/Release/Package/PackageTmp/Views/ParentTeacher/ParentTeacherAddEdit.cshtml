@@ -1,0 +1,518 @@
+﻿@using SurveyApp.Models;
+@using System.Data;
+@{
+    ViewBag.Title = "eBit - Respondent Information Editor";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int roleId = 0, teacherRoleId = 0, parentRoleId = 0, studentRoleId = 0, schoolAdminRoleId = 0;
+
+    //if(Model.vw_ParentTeacher.Id > 0){
+    roleId = Model.vw_ParentTeacher.Role;
+    //}
+    DataTable dtRoles = SurveyApp.DataHelper.RolesGetAll().Tables[0];
+
+    parentRoleId = (int)dtRoles.Select("RoleName = 'Parent'")[0]["RoleId"];
+    teacherRoleId = (int)dtRoles.Select("RoleName = 'Teacher'")[0]["RoleId"];
+    studentRoleId = (int)dtRoles.Select("RoleName = 'Student'")[0]["RoleId"];
+    schoolAdminRoleId = (int)dtRoles.Select("RoleName = 'SchoolAdmin'")[0]["RoleId"];
+
+}
+@model SurveyApp.Models.ParentTeacher_Register
+
+@functions{
+        
+}
+
+<script src="~/Scripts/zxcvbn.js"></script>
+<script src="~/Scripts/pwstrength.js"></script>
+<link href="~/Content/scroller/jquery.mCustomScrollbar.min.css" rel="stylesheet" />
+<script src="~/Content/scroller/jquery.mCustomScrollbar.concat.min.js"></script>
+
+<h2><a href="javascript:void(0);" id="back" class="btnBack"></a> &nbsp;User Information Editor</h2>
+<div><p class="text-danger">Please create account for Parents, Teachers and only for those Students who will login to eBit and fill surveys.</p></div>
+@if (string.IsNullOrEmpty(Request.QueryString["email"]) == false)
+{
+    <div class="col-sm-8"><p class="account">If this is a request for an admin account please contact the eBit team <a href="mailto:jessica.wahlberg@ucsf.edu">here</a>.</p></div><br />
+    <script type="text/javascript">
+        $(function () {
+            var emailAccount = "@Request.QueryString["email"]";
+            var nameAccount = "@Request.QueryString["name"]";
+            if (emailAccount != "") {
+                $("#txtUserName").val(emailAccount);
+            }
+            if (nameAccount != "") {
+                $("#parent").val(nameAccount);
+            }
+        });
+    </script>
+}
+
+<style type="text/css">
+    ._panel { background: #fafafa; border: solid 1px #cccccc; padding: 10px; border-radius: 6px; }
+    .msg.green {
+        color: #00cc00;
+        margin: 0px 0px 6px 0px;
+    }
+
+    .msg.red {
+        color: #cc0000;
+        margin: 0px 0px 6px 0px;
+    }
+    .progress {
+        margin-bottom: 0px;
+        margin-top: 2px;
+    }
+    .error-list {
+        display: none;
+    }
+    .password-verdict {
+        position: absolute;
+        bottom: 0px;
+        left: 20px;
+        color: #FFF;
+    }
+    .leftsection {
+        z-index: 10;
+        height: 750px;
+        background-color: #f1f1f1;
+    }
+    .rightsection {
+        z-index: 2;
+        height: 750px;
+        background-color: #f1f1f1;
+    }
+    /*#body {
+        padding: 0px 0px;
+        margin: 0px 10px;
+    }*/
+    .form-group label.reguired::after{
+        content : ":*";
+    }
+    .account{           
+        border: solid 1px #666;
+        padding: 10px;
+        background-color: #fdfdfd;
+    }
+    .account a{
+        text-decoration: underline;
+    }
+</style>
+<script type="text/javascript">
+
+
+    $(function () {
+        $("#ddlSchools").append($("<option></option>").val(-1).html("Other (select to add a new school)"));
+        $("#ddlSchools").on("change", function (e) {
+            if ($(this).val() == -1) {
+                $("#addSchool").slideDown();
+            }
+            else {
+                $("#txtSchoolName").val("");
+                $("#addSchool").slideUp();
+            }
+        });
+
+        var id = $("#hdnParentTeacherId").val();
+        if (id != "" && id != "0") {
+            //disableRegisters();
+        }
+        else {
+            var options = {};
+            options.common = {
+                zxcvbn: true,
+                zxcvbnTerms: ['samurai', 'shogun', 'bushido', 'daisho', 'seppuku']
+            };
+            $("#txtPassword").pwstrength(options);
+        }
+
+
+        $(".checklist").mCustomScrollbar({
+            scrollButtons: { enable: true },
+            theme: "dark-thick",
+            scrollInertia: 700,
+            scrollbarPosition: "inside"
+        });
+
+        $(".btnBack").click(function(){
+            bootbox.dialog({
+                message: "Would you like to save the changes?",
+                title: "Save Changes!",
+                closeButton: false,
+                onEscape: function() {
+                    location.href = "@Url.Action("Index", "ParentTeacher")";
+                },
+                buttons: {
+                    success: {
+                        label: "Yes",
+                        className: "btn-primary",
+                        callback: function() {
+                            $("#btnSaveUser").click();
+                        }
+                    },
+                    danger: {
+                        label: "No",
+                        className: "btn-default",
+                        callback: function() {
+                            location.href = "@Url.Action("Index", "ParentTeacher")";
+                        }
+                    }
+                }
+            });
+        });
+
+    });
+
+    function disableRegisters() {
+        $("#txtUserName").attr("readonly", "readonly");
+        $("#txtPassword").val("*********");
+        $("#txtPassword").attr("readonly", "readonly");
+        $("#txtConfirmPassword").val("*********");
+        $("#txtConfirmPassword").attr("readonly", "readonly");
+    }
+
+    function changeRole(roleType) {
+        if (roleType == "@SurveyApp.Models.SurveyAppRoles.Parent") {
+            $('.divSchool').hide();
+            $("#addSchool").hide();
+            $("#ddlSchools").val("0");
+        }
+        else if (roleType == "@SurveyApp.Models.SurveyAppRoles.Teacher" || roleType == "@SurveyApp.Models.SurveyAppRoles.Student" || roleType == "@SurveyApp.Models.SurveyAppRoles.SchoolAdmin") {
+            $('.divSchool').show();
+            if ($("#ddlSchools").val() == -1) {
+                $("#addSchool").show();
+            }
+        }
+        @*
+        return true;
+        if (roleType == "@SurveyApp.Models.SurveyAppRoles.Parent") {
+            var goOn = confirm("Changing the role may affect the children enrollment. Do you wish to continue?");
+            if (goOn == true) {
+                $('.divSchool').hide();
+                $("#addSchool").hide();
+            }
+            else {
+                $(".roles").find("input[type=radio]")[0].checked = false;
+                $(".roles").find("input[type=radio]")[1].checked = true;
+            }
+        }
+        else if (roleType == "@SurveyApp.Models.SurveyAppRoles.Teacher") {
+            var goOn = confirm("Changing the role may affect the children enrollment. Do you wish to continue?");
+            if (goOn == true) {
+                $('.divSchool').show();
+                if ($("#ddlSchools").val() == -1) {
+                    $("#addSchool").show();
+                }
+            }
+            else {
+                $(".roles").find("input[type=radio]")[1].checked = false;
+                $(".roles").find("input[type=radio]")[0].checked = true;
+            }
+        }*@
+    }
+
+</script>
+<br />
+
+@using (Html.BeginForm("ParentTeacherAddEdit", "ParentTeacher", FormMethod.Post, new { @class = "form-horizontal", style = "width: 600px;height:510px;" }))
+{
+    @*<div style="position: absolute; z-index: 100; width: 600px; height: 510px; background-color: #f1f1f1; "></div>*@
+    <div id="divUserInfo" style="position: absolute;left:30px;">
+        <div style="width: 600px; height: 510px;">
+            @Html.ValidationSummary()
+            @Html.HiddenFor(m => m.vw_ParentTeacher.Id, new { name = "hdnParentTeacherId", id = "hdnParentTeacherId", value = Model.vw_ParentTeacher.Id })
+            <input type="hidden" id="hdnIsEmailSent" name="hdnIsEmailSent" value="false"/>
+
+            <div class="form-group">
+                <label class="control-label col-sm-4"> </label>
+                <div class="col-sm-8" style="text-align: right;">
+                    @Html.ActionLink("Add Study", "StudyAddEdit", "Study", new object { }, new { @class = "btn btn-link" })
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-4">Name:*</label>
+                <div class="col-sm-8">
+                    @Html.TextBoxFor(m => m.vw_ParentTeacher.Name, new { @class = "form-control", id = "parent", placeholder = "User Name", @maxlength = "100" })
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-4" for="gender">Role:*</label>
+                <div class="col-sm-8 roles">
+                    <div class="radio-inline"><label>@Html.RadioButtonFor(m => m.vw_ParentTeacher.Role, parentRoleId.ToString(), new { name = "optradio", onclick = "changeRole('" + SurveyApp.Models.SurveyAppRoles.Parent + "');" })Parent</label></div>
+                    <div class="radio-inline"><label>@Html.RadioButtonFor(m => m.vw_ParentTeacher.Role, teacherRoleId.ToString(), new { name = "optradio", onclick = "changeRole('" + SurveyApp.Models.SurveyAppRoles.Teacher + "');" })Teacher</label></div>
+                    <div class="radio-inline"><label>@Html.RadioButtonFor(m => m.vw_ParentTeacher.Role, studentRoleId.ToString(), new { name = "optradio", onclick = "changeRole('" + SurveyApp.Models.SurveyAppRoles.Student + "');" })Student</label></div>
+                    @if(Roles.IsUserInRole(WebSecurity.CurrentUserName, "Administrator") == true)
+                    {
+                        <div class="radio-inline"><label>@Html.RadioButtonFor(m => m.vw_ParentTeacher.Role, schoolAdminRoleId.ToString(), new { name = "optradio", onclick = "changeRole('" + SurveyApp.Models.SurveyAppRoles.SchoolAdmin + "');" })School Admin</label></div>
+                    }
+                </div>
+            </div>
+            <div class="form-group divSchool" style="@(roleId == teacherRoleId || roleId == studentRoleId || roleId == schoolAdminRoleId ? "" : "display: none;")">
+                <label class="control-label col-sm-4" for="school">School:*</label>
+                <div class="col-sm-8">
+                    @Html.DropDownListFor(m => m.vw_ParentTeacher.SchoolId, new SelectList(School.SchoolGetByUser(WebSecurity.CurrentUserId), "SchoolId", "Name"), "Select school", new { id = "ddlSchools", @class = "form-control", })
+                </div>
+            </div>
+            <div id="addSchool" class="_panel form-group" style="display: none;margin-bottom: 5px;">
+                <div class="msg"></div>
+                <div class="form-group">
+                    <label class="control-label col-sm-4">School Name:*</label>
+                    <div class="col-sm-8">
+                        @Html.TextBoxFor(m => m.vw_ParentTeacher.SchoolName, null, new { id = "txtSchoolName", @class = "form-control txtSchoolName", placeholder = "School Name", maxlength = "100" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-sm-4"> </label>
+                    <div class="col-sm-offset-3 col-sm-8">
+                        <button type="button" class="btn btn-default" onclick="addSchool();">Add School</button>
+                        <button type="button" class="btn btn-default" onclick="$('#addSchool').slideUp();">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-sm-4"> </label>
+                <div class="col-sm-8" style=" text-align: right;">
+                    @if (Model.vw_ParentTeacher.Id > 0)
+                    {
+                        <a href="javascript:void(0);" class="btn btn-link" onclick="showAccountInfo();">Edit Account Information</a>
+                    }                    
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.vw_Register.UserName, new { @class = "control-label col-sm-4 reguired" })
+                <div class="col-sm-8">
+                    @Html.TextBoxFor(m => m.vw_Register.UserName, new { id = "txtUserName", @class = "form-control", placeholder = "Email", autocomplete = "off", @maxlength = "100" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.vw_Register.Password, new { @class = "control-label col-sm-4 reguired" })
+                <div class="col-sm-8">
+                    @if(Model.vw_ParentTeacher.Id > 0)
+                    {
+                        @Html.TextBoxFor(m => m.vw_Register.Password, new { id = "txtPassword", @class = "form-control", placeholder = "Password", @readonly="readonly", autocomplete = (Request.Browser.Browser.ToString().ToLower() == "chrome" ? "new-password" : "off"), value = Model.vw_Register.Password != null ? Model.vw_Register.Password.ToString().Substring(0, Model.vw_Register.Password.Length) : "" })
+                    }
+                    else
+                    {
+                        @Html.TextBoxFor(m => m.vw_Register.Password, new { id = "txtPassword", @class = "form-control", placeholder = "Password", autocomplete = (Request.Browser.Browser.ToString().ToLower() == "chrome" ? "new-password" : "off"), value = Model.vw_Register.Password != null ? Model.vw_Register.Password.ToString().Substring(0, Model.vw_Register.Password.Length) : "" })
+                    }
+
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.vw_Register.ConfirmPassword, new { @class = "control-label col-sm-4 reguired" })
+                <div class="col-sm-8">
+                    @if(Model.vw_ParentTeacher.Id > 0)
+                    {
+                        @Html.TextBoxFor(m => m.vw_Register.ConfirmPassword, new { id = "txtConfirmPassword", @class = "form-control", placeholder = "Confirm Password", @readonly = "readonly", autocomplete = (Request.Browser.Browser.ToString().ToLower() == "chrome" ? "new-password" : "off"), value = Model.vw_Register.Password != null ? Model.vw_Register.Password.ToString().Substring(0, Model.vw_Register.Password.Length) : "" })
+                    }
+                    else
+                    {
+                        @Html.TextBoxFor(m => m.vw_Register.ConfirmPassword, new { id = "txtConfirmPassword", @class = "form-control", placeholder = "Confirm Password", autocomplete = (Request.Browser.Browser.ToString().ToLower() == "chrome" ? "new-password" : "off"), value = Model.vw_Register.Password != null ? Model.vw_Register.Password.ToString().Substring(0, Model.vw_Register.Password.Length) : "" })
+                    }
+
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                <div class="col-sm-offset-3 col-sm-8" style="margin-top:10px;">
+                    <button type="submit" id="btnSaveUser" class="btn btn-default">Save Information</button>
+                    <button type="button" class="btn btn-default" onclick="location.href='@Url.Action("Index", "ParentTeacher")';">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="divAccountInfo" style="position: absolute; left: 620px;display:none;">
+        <div style="width: 600px; height: 510px;">
+            <div id="divErrors" class="validation-summary-errors" style="display:none;">
+                <ul></ul>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-4">User name:*</label>
+                <div class="col-sm-8">
+                    <input autocomplete="off" class="form-control" id="txtEUserName" placeholder="Email" type="text" value="">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-4">Password:*</label>
+                <div class="col-sm-8">
+                    <input autocomplete="@(Request.Browser.Browser.ToString().ToLower() == "chrome" ? "new-password" : "off" )" class="form-control" id="txtEPassword" placeholder="Password" type="text" value="">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-4">Confirm Password:*</label>
+                <div class="col-sm-8">
+                    <input autocomplete="@(Request.Browser.Browser.ToString().ToLower() == "chrome" ? "new-password" : "off" )" class="form-control" id="txtEConfirmPassword" placeholder="Confirm Password" type="text" value="">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-offset-3 col-sm-6">
+                    <button type="button" class="btn btn-default" onclick="updateAccount();">Update Information</button>
+                    <button type="button" class="btn btn-default" onclick="showUserInfo();">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+}
+
+<script type="text/javascript">
+
+    function School() {
+        this.Name = "";
+    }
+
+    function addSchool() {
+        var div = "#addSchool";
+        var msg = $(div).find(".msg");
+
+        var txtSchoolName = $(div).find(".txtSchoolName");
+        if (txtSchoolName.val() == "") {
+            msg.removeClass("green").addClass("red");
+            msg.html("Please provide the following information.");
+
+            txtSchoolName.addClass("inerror");
+            $(div).find(".inerror").first().focus();
+            return false;
+        }
+
+        var objSchool = new School();
+        objSchool.Name = txtSchoolName.val();
+
+        $.ajax({
+            url: '@Url.Action("addSchool", "School")',
+            data: "{'objSchool': '" + JSON.stringify(objSchool) + "' }",
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            success: function (data) {
+                msg.empty();
+                if (data.success == true) {
+                    $("#ddlSchools").append("<option value='" + data.schoolId + "'>" + objSchool.Name + "</option>");
+                    $("#ddlSchools").val(data.schoolId);
+                    txtSchoolName.val("");
+
+                    msg.removeClass("red").addClass("green");
+                    msg.html(objSchool.Name + " is successfully added.");
+                }
+                else {
+                    msg.removeClass("green").addClass("red");
+                    msg.html(data.msg);
+                    checkTimeout(data, 1);
+                }
+            },
+
+            //Options to tell JQuery not to process data or worry about content-type
+            cache: false,
+            processData: false
+        });
+    }
+
+    function showAccountInfo() {
+        $("#txtEUserName").val($("#txtUserName").val());
+        $("#txtEPassword").val($("#txtPassword").val());
+        $("#txtEConfirmPassword").val($("#txtConfirmPassword").val());
+        $(".progress-bar").css("width", "0%");
+        $(".password-verdict").text("");
+
+        $("#divUserInfo").animate({ 'left': -1000 }, 500, function () {
+            if ($("#txtEPassword").hasClass("pwdAdded") == false) {
+                var options = {};
+                options.common = {
+                    zxcvbn: true,
+                    zxcvbnTerms: ['samurai', 'shogun', 'bushido', 'daisho', 'seppuku']
+                };
+
+                $("#txtEPassword").pwstrength(options);
+                $("#txtEPassword").addClass("pwdAdded");
+            }
+        });
+
+        $("#divAccountInfo").show();
+        $("#divAccountInfo").animate({ 'left': 30 }, 500);
+    }
+
+    function showUserInfo() {
+        $("#divAccountInfo").animate({ 'left': 620 }, 500, function () {
+            $("#divAccountInfo").fadeOut();
+        });
+        $("#divUserInfo").animate({ 'left': 30 }, 500);
+    }
+
+    function updateAccount() {
+        var userName = "", newUserName = "", password = "", confirmPassword = "", oldPassword = "", updatePassword = false;
+        userName = $("#txtUserName").val();
+        newUserName = $("#txtEUserName").val();
+
+        password = $("#txtEPassword").val();
+        confirmPassword = $("#txtEConfirmPassword").val();
+
+        oldPassword = $("#txtPassword").val();
+
+        $("#divErrors").hide();
+        $("#divErrors ul").empty();
+
+        if (newUserName == "") {
+            $("#divErrors ul").append("<li>Please provide User Name</li>");
+            $("#divErrors").show();
+            return false;
+        }
+        if (password == "") {
+            $("#divErrors ul").append("<li>Please provide Password</li>");
+            $("#divErrors").show();
+            return false;
+        }
+        if (confirmPassword == "") {
+            $("#divErrors ul").append("<li>Please provide Confirm Password</li>");
+            $("#divErrors").show();
+            return false;
+        }
+        if (password != confirmPassword) {
+            $("#divErrors ul").append("<li>Both passwords do not match</li>");
+            $("#divErrors").show();
+            return false;
+        }
+        if (validateEmail(newUserName) == false) {
+            $("#divErrors ul").append("<li>Please provide valid User Name(email address)</li>");
+            $("#divErrors").show();
+            return false;
+        }
+
+        if (oldPassword != password) {
+            updatePassword = true;
+        }
+
+        $.ajax({
+            url: "@Url.Action("AccountEdit", "Account")",
+            data: "{'userName': '" + userName + "', 'newUserName': '" + newUserName + "', 'password' : '" + password + "', 'updatePassword' : '" + updatePassword + "' }",
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            async: false,
+            success: function (data) {
+                if (data.success == true) {
+                    $("#txtUserName").val(newUserName);
+                    $("#txtPassword").val(password);
+                    $("#txtConfirmPassword").val(password);
+                    showUserInfo();
+                    $("#hdnIsEmailSent").val(true);
+                }
+                else {
+                    $("#divErrors ul").append("<li>We are unable to process your request at this time, please try again or contact our support team.</li>");
+                    $("#divErrors").show();
+                    checkTimeout(data, 1);
+                }
+            },
+            error: function (errors) {
+
+            },
+
+            //Options to tell JQuery not to process data or worry about content-type
+            cache: false,
+            processData: false
+        });
+    }
+</script>

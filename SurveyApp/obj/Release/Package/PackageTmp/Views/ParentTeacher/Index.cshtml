@@ -1,0 +1,81 @@
+﻿@using System.Data;
+@{
+    ViewBag.Title = "eBit - User Manager";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    DataSet dsUsers = SurveyApp.DataHelper.UserManagementGetUsers(WebSecurity.CurrentUserId);
+}
+
+<script type="text/javascript">
+    $(function () {
+        $("#tblUsers").DataTable({ dom: 'Bfrtip', buttons: [{ extend: 'excel', text: "Export to Excel", title: 'Users_List', exportOptions: {  modifier: { search: 'none', order: 'original' }} }], "oLanguage": { "sInfo": "Displaying _START_ to _END_ of _TOTAL_ Users" } });
+    });    
+</script>
+
+
+<div>
+    <h2 class="col-sm-11" style="margin: 0px;padding: 0px;">User Manager</h2>
+    <a href="@Url.Action("ParentTeacherAddEdit", "ParentTeacher")" class="btn btn-default" style="float:right;"><i class="fa fa-user-plus"></i>&nbsp;Add User</a>
+    @*@Html.ActionLink("Add User", "ParentTeacherAddEdit", "ParentTeacher", new object { }, new { @class = "btn btn-default", style = "float:right;" })*@ 
+</div>
+<div style="clear:both;"></div>
+<br />
+<style>
+    .table-hover tbody tr{cursor:pointer;}
+    .ui-tooltip {
+        min-width: 200px;
+        max-width: 400px;
+        background-color: #333;
+        color: #FFF;
+    }
+    #tblUsers .name{text-transform:capitalize;}
+</style>
+<table class="table table-striped table-hover" id="tblUsers">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>School</th>
+            <th>Role</th>
+            <th>Email</th>
+            <th>Children</th>
+            <th>Last Login</th>
+            <th style="width: 50px;">Consent</th>
+            <th style="width: 50px;">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (dsUsers != null && dsUsers.Tables.Count > 0 && dsUsers.Tables[0] != null && dsUsers.Tables[0].Rows.Count > 0)
+        {
+            foreach (DataRow dr in dsUsers.Tables[0].Rows)
+            {
+                if (Convert.ToBoolean(dr["IsAdmin"]) == false)
+                {
+                    <tr onclick="@(Convert.ToBoolean(dr["IsAdmin"]) == true ? "alert('You are not authorized to edit Administrator account');return false;" : "")location.href = '@Url.Action("ParentTeacherAddEdit", "ParentTeacher", new { id = dr["UserId"] })';">
+                        <td class="name">@dr["FullName"]</td>
+                        <td class="name">@dr["SchoolName"]</td>
+                        <td class="name">@dr["RoleName"]</td>
+                        <td>@dr["UserName"]</td>
+                        <td>@dr["Children"]</td>
+                        <td class="text-success">@dr["LastLoginDate"]</td>
+                        <td style="text-align: center;vertical-align:middle;" data-toggle='tooltip'>
+                        @if (dr["Consent"] != DBNull.Value)
+                        {
+                            <i class="ion-eye @(dr["Agreed"] != DBNull.Value ? (Convert.ToBoolean(dr["Agreed"]) == false ? "redeye" : "greeneye") : "redeye")"  data-toggle='tooltip' title="@(dr["Consent"] != DBNull.Value && Convert.ToBoolean(dr["Consent"]) == true ? (dr["Agreed"] != DBNull.Value ? (Convert.ToBoolean(dr["Agreed"]) == false ? "Respondent has not given consent yet." : "Respondent has given the consent" + (dr["AgreeDate"] != DBNull.Value ? " on " + Convert.ToDateTime(dr["AgreeDate"]).ToString("MM/dd/yyyy") : ".")) : "") : "Consent is not required for this respondent.")"></i>
+                        }
+                        </td>
+                        <td style="text-align: center;vertical-align:middle;"><a href="javascript:void(0);" style="@(Convert.ToBoolean(dr["IsAdmin"]) == true ? "display:none;" : "")" class="redCross" onclick="event.stopPropagation();deleteListItem(this, @dr["UserId"], 'user', '@(dr["FullName"] == DBNull.Value ? dr["UserName"].ToString() : dr["FullName"].ToString())');"><i class="ion-close"></i></a></td>
+                    </tr>
+                }
+            }
+        }
+    </tbody>
+</table>
+
+<script type="text/javascript">
+    $('[data-toggle="tooltip"]').tooltip({
+        track: true,
+        content: function () {
+            return $(this).attr('title').replace(/_NEWLINE_/g, "<br/>");
+        },
+    });
+</script>

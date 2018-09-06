@@ -1,0 +1,150 @@
+﻿@using System.Data;
+@{
+    Layout = null;
+
+    int childId = Model != null ? (int)Model : 0;
+    DataSet dsConsents = null;
+    if(childId > 0)
+    {
+        if (String.IsNullOrEmpty(Request.QueryString["sts"]) || (String.IsNullOrEmpty(Request.QueryString["sts"]) == false && Request.QueryString["sts"] != "1")) {
+            dsConsents = SurveyApp.DataHelper.Consent_GetChildConsents(childId);
+        }
+    }
+}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>eBit - Study Consent</title>
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans">
+    <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    <link href="~/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/bootstrap/css/bootstrap-theme.css" rel="stylesheet" />
+    <link href="~/Content/jquery-ui.min.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-2.2.0.min.js"></script>
+    <script src="~/bootstrap/js/bootstrap.js"></script>
+    <script src="~/Scripts/jquery-ui.min.js"></script>
+    <script src="~/Scripts/custom.js"></script>
+    <style type="text/css">
+        body{
+            background-color: #FFF;
+        }
+        .container .disabled {
+            background-color: #D0D0D0;
+            color: #FFF;
+            border: solid 1px #AAA;
+            cursor: default;
+        }
+
+        .container .btn-primary.disabled:hover, .btn-primary.disabled:focus {
+            background-color: #D0D0D0;
+            background-position: 0 -15px;
+            border-color: #AAA;
+        }
+
+        .container .btn-primary.disabled:hover {
+            color: #fff;
+            background-color: #D0D0D0;
+            border-color: #AAA;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="content-wrapper" style="overflow:auto;padding:10px;border-bottom: solid 1px #f1f1f1;background: url(/Images/ebitrainbow.jpg) no-repeat right bottom;background-size: auto 200%;padding-right: 90px;">
+            <div class="float-left">
+                <p class="site-title">
+                    <a href="@(System.Web.Configuration.WebConfigurationManager.AppSettings["_RootPath"].ToString())"><img src="~/Images/at3logo.png"></a>
+                </p>
+            </div>
+            <div class="float-left" style="border-left: solid 2px #00a3e2;padding: 8px 0px 8px 20px;margin-left: 10px;color: #00a3e2;font-weight: normal;text-shadow: 0px 0px 0.050px #00ACAA;">
+                <ul style="margin: 0px 0px 0px 0px;list-style: none;padding: 0px;">
+                    <li>Evidence-based care by enabling caregivers to quantify the effects of interventions</li>
+                    <li>Integrated care by allowing caregivers to share progress within their network</li>
+                </ul>
+            </div>
+        </div>
+    </header>
+    <div id="body" style="padding-bottom:0px;">
+        <div class="container" style="padding-bottom:20px;min-height:420px;width:90%;">
+            <div class="col-sm-12">
+                <div class="col-sm-12" style="text-align:center;">                    
+                    <section>
+                        @if (String.IsNullOrEmpty(Request.QueryString["sts"]) || (String.IsNullOrEmpty(Request.QueryString["sts"]) == false && Request.QueryString["sts"] != "1"))
+                        {
+                            using (Html.BeginForm("Agreed", "Consent", new { cid = ViewBag.Cid, FormMethod.Post }))
+                            {
+                                if(dsConsents != null && dsConsents.Tables != null && dsConsents.Tables[0].Rows.Count > 0)
+                                {
+                                    <h3>Please give consent for following studies.</h3>
+                                    foreach (DataRow dr in dsConsents.Tables[0].Rows)
+                                    {
+                                        <div style="border: solid 1px #CCC;">
+                                            <h5 style="text-transform: capitalize;margin: 0px;border: solid 2px #FFF;padding: 10px;background-color: #333;color: #FFF;">@dr["StudyName"]</h5>
+                                            @Html.Raw(dr["ChildConsent"] != DBNull.Value ? dr["ChildConsent"].ToString() : "")
+                                        </div>
+                                    }
+                                }
+
+                                <div>
+                                    <br /><br />
+                                    By checking the box below, I am providing my signature to this consent form.
+                                    <br />
+                                    <label><input type="radio" id="rdbConsentAgreed" name="rdbConsent" class="agreed" value="1" />&nbsp;I am providing consent</label>
+                                    <br />
+                                    <label><input type="radio" id="rdbConsentDisagreed" name="rdbConsent" class="disagreed" value="0" />&nbsp;I am not providing consent</label>
+                                </div>
+                                <br />
+                                <button type="submit" id="btnSubmit" class="btn btn-primary" style="width: 120px;color: #FFF;">I Agree</button>
+                                <a href="@(System.Web.Configuration.WebConfigurationManager.AppSettings["_RootPath"].ToString())" class="btn btn-default" style="width: 120px;">I Disagree</a>
+                            }
+                        }
+                        else
+                        {
+                            <h3>
+                                Thank you for your participation.
+                            </h3>
+                        }
+                    </section>
+
+                </div>
+
+            </div>
+        </div>
+        <div class="container" style="margin: 0px 0px 10px 0px;width: 100%;border-top: solid 1px #999;color: #333;text-shadow: 0px 0px 0.1px #222">
+            <h4>Welcome to eBit</h4>
+            Our mission is to build resilience in children with or at risk of neurodevelopmental disorders through innovative biomedical interventions evaluated in real world settings such as schools.<br /> We work to develop neurodevelopmental, resilience-building interventions and their impact in schools.
+        </div>
+    </div>
+    <footer>
+        <div class="content-wrapper" style="padding:20px;">
+            <div class="float-left">
+                <p>&copy; @DateTime.Now.Year - eBit (Evidence Based Intervention and Treatment)</p>
+            </div>
+        </div>
+    </footer>
+    @section Scripts {
+        @Scripts.Render("~/bundles/jqueryval")
+    }
+
+    <script type="text/javascript">
+        $(function () {
+            $("#btnSubmit").click(function (e) {
+                if ($("#rdbConsentAgreed")[0].checked == true) {
+                    return true;
+                }
+                else {
+                    alert("Please provide consent.");
+                    e.preventDefault();
+                    return false;
+                }                
+            });
+        });
+    </script>
+</body>
+</html>

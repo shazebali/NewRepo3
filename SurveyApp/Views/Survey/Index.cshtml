@@ -1,0 +1,79 @@
+﻿@model System.Data.DataSet
+@{
+    ViewBag.Title = "eBit - Questionnaire Manager";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    System.Data.DataSet ds = SurveyApp.DataHelper.SurveyGetAll();
+    
+}
+
+<style type="text/css">
+    a.list-group-item:first-child, a.list-group-item:last-child{
+        padding: 10px 15px;
+    }
+    .featured .content-wrapper h2 {
+        background-image: -webkit-linear-gradient(top, #0af 0%, #b9def0 100%);
+        background-image: -o-linear-gradient(top, #00aaff 0%, #4b9dc5 100%);
+        background-image: -webkit-gradient(linear, left top, left bottom, from(#0af), to(#4b9dc5));
+        background-image: linear-gradient(to bottom, #0af 0%, #4b9dc5 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffd9edf7', endColorstr='#ffb9def0', GradientType=0);
+        background-repeat: repeat-x;
+        border-color: #000;
+    }
+</style>
+
+@section featured {
+    <section class="featured">
+        <div class="content-wrapper">
+            <hgroup class="title">
+                <h2>Questionnaire Manager</h2> 
+            </hgroup>
+            <p style="font-size:16px;"> 
+                Find the list of surveys below and click for details.
+            </p>
+        </div>
+    </section>
+}
+<div class="list-group">
+    @foreach (System.Data.DataRow dr in ds.Tables[0].Rows)
+    {
+        if (dr["ID"] != DBNull.Value && (int)dr["ID"] != 21)
+        {
+            string tileprefix = string.Empty;
+            if ((int)dr["ID"] == 6) { tileprefix = " for 2yrs - 4yrs"; }
+            if ((int)dr["ID"] == 7) { tileprefix = " for 5yrs - 7yrs"; }
+            if ((int)dr["ID"] == 8) { tileprefix = " for 8yrs - 12yrs"; }
+            if ((int)dr["ID"] == 9) { tileprefix = " for 13yrs - 18yrs"; }
+            if ((int)dr["ID"] == 45) { tileprefix = " for 19yrs and older"; }
+            if ((int)dr["ID"] == 51) { tileprefix = " for 4yrs - 10yrs"; }
+            if ((int)dr["ID"] == 52) { tileprefix = " for 11yrs - 17yrs"; }
+            if ((int)dr["ID"] == 62) { tileprefix = " for 8yrs - 12yrs"; }
+            if ((int)dr["ID"] == 63) { tileprefix = " for 13yrs - 18yrs"; }
+
+            <a href="@Url.Action("Survey", "Survey", new { surveyID = dr["ID"].ToString() })" class="list-group-item">
+                <strong>Preview:</strong> @dr["Title"].ToString() @tileprefix                
+                @using (Html.BeginForm("DownloadSubmittedData", "Report", FormMethod.Post, new { id = "frmDownloadData", @class = "form-horizontal", style = "display: inline-block;float: right; " }))
+                {
+                    <div>
+                        <input type="hidden" id="hdnSurveyId" name="hdnSurveyId" />
+                        <input type="hidden" id="hdnFileName" name="hdnFileName" />                        
+                        <span href="javascript:void(0);" class="btnSubmit" style="text-decoration:underline;" surveyid="@dr["ID"]" filename="@(dr["Title"].ToString() + "_"+ tileprefix + "_Submitted_Data_Till_" + DateTime.Now.ToString("dd-MMM-yyyy"))">
+                            <i class="fa fa-download">&nbsp;</i>Export Sumitted Data in Excel
+                        </span>
+                    </div>
+                    <script type="text/javascript">
+                        $(function () {
+                            $(".btnSubmit").click(function (e) {
+                                e.preventDefault();
+                                $("#hdnSurveyId").val($(this).attr("surveyid"));
+                                $("#hdnFileName").val($(this).attr("filename"));
+                                $('#frmDownloadData').submit();
+                                return false;
+                            });
+                        });
+                        
+                    </script>
+                }                
+            </a>
+        }
+    }
+</div>

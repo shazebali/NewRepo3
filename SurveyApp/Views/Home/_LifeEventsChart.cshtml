@@ -1,0 +1,112 @@
+﻿@using System.Data;
+@using SurveyApp.Models;
+
+@{ 
+    int studyId = ViewData["studyId"] != null ? Convert.ToInt32(ViewData["studyId"]) : 0;
+    int childId = ViewData["childIdts"] != null ? Convert.ToInt32(ViewData["childIdts"]) : 0;
+
+    bool isAdmin = SurveyApp.Controllers.HomeController.isAdminRole();
+    DataSet dsLifeEvents = SurveyApp.DataHelper.DashboardGetLifeEventChart(studyId, isAdmin == false ? WebSecurity.CurrentUserId : 0, childId);
+        
+}
+
+@if (dsLifeEvents != null && dsLifeEvents.Tables.Count > 0 && dsLifeEvents.Tables[0].Rows.Count > 0)
+{
+    string data = "";
+    int index = 1;
+    List<DateTime> lstEventDates = new List<DateTime>();
+    foreach (DataRow dr in dsLifeEvents.Tables[0].Rows)
+    {
+        bool isDuplicate = false;
+        DateTime dtEventDate = Convert.ToDateTime(dr["EventDate"]);
+        if (lstEventDates.Contains(dtEventDate))
+        {
+            isDuplicate = true;
+        }
+        lstEventDates.Add(dtEventDate);
+
+        string name = dr["Name"].ToString();
+        data += "{event: '" + (dr["EventName"] != DBNull.Value ? dr["EventName"].ToString().Replace("'", "\\'") : dr["EventName"]) + "',x: Date.UTC(" + dtEventDate.Year + ", " + (dtEventDate.Month - 1) + ", " + dtEventDate.Day + "), y:" + (isDuplicate == true ? index + 1 : index) + " , child:'" + name + "'},";
+        //minus 1 from month because UTC.Date take months from 0-11
+        
+    }
+
+
+    <script type="text/javascript">
+        $(function () {
+            $('#divLifeEventsChart').highcharts({
+                chart: {
+                    type: 'scatter',
+                    zoomType: 'xy'
+                },
+                title: {
+                    text: 'Life Events'
+                },                
+                xAxis: {
+                    title: {
+                        enabled: true,
+                        text: 'Event Date'
+                    },
+                    type: 'datetime',
+                    //tickInterval: (24 * 3600 * 1000), // the number of milliseconds in a day
+                    allowDecimals: false,
+                    labels: {
+                        formatter: function () {
+                            return Highcharts.dateFormat('%e %b %Y', (this.value));
+                        }
+                    }
+                },
+                yAxis: {
+                    labels: {
+                        enabled: false
+                    },
+                    title: {
+                        text: null
+                    },
+                    minTickInterval : 1
+                },
+                plotOptions: {
+                    scatter: {
+                        marker: {
+                            radius: 5,
+                            states: {
+                                hover: {
+                                    enabled: true,
+                                    lineColor: 'rgba(70, 78, 243, 0.901961)'
+                                }
+                            }
+                        },
+                        states: {
+                            hover: {
+                                marker: {
+                                    enabled: false
+                                }
+                            }
+                        },
+                        tooltip: {
+                            headerFormat: '<b>{point.key}</b> ',
+                            pointFormat: '<br/>Child: {point.child} <br />Event: {point.event} ',
+                            shared: true,
+                            useHTML: true
+                        },
+                    }
+                },
+                credits: {
+                    enabled: false
+                },
+                series: [{
+                    name: 'Events',
+                    color: 'rgba(70, 78, 243, 0.901961)',
+                    data: [@Html.Raw(data.TrimEnd(','))]
+                }]
+            });
+        });
+    </script>
+
+    <div id="divLifeEventsChart" style="min-width: 310px; height: 400px; max-width: 800px; margin: 0 auto"></div>
+}
+else
+{
+    <div><p style="text-align: center;">There is no life event present for this child</p></div>
+}
+

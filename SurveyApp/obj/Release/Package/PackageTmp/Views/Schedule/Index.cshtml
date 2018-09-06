@@ -1,0 +1,117 @@
+﻿@using System.Data;
+@{
+    ViewBag.Title = "eBit - Schedule Manager";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var dsSchedules = SurveyApp.DataHelper.ScheduleGetAll();
+}
+
+@functions{
+    public string getFrequency(object freq, object daysToRepeat) {
+        if (freq == null)
+        {
+            return "";
+        }
+
+        int frequency = Convert.ToInt32(freq);
+        if (frequency == 1)
+        {
+            return "Once";
+        }
+        else{
+            return "Repeating after " + Convert.ToInt32(daysToRepeat) + " day(s)";
+        }
+    }
+
+    public string getActivationType(object act, object day, object month, object weekday)
+    {
+        if (act == null)
+        {
+            return "";
+        }
+
+        int activation = Convert.ToInt32(act);
+        if (activation == 1)
+        {
+            return "Enrollment";
+        }
+        else
+        {
+            if (weekday != null && weekday != DBNull.Value && Convert.ToInt32(weekday) > 0)
+            {
+                return "Activates every " + SurveyApp.Models.ScheduleWeekday.getWeekdayName(Convert.ToInt32(weekday));
+            }
+            else
+            {
+                string months = "";
+                foreach (string monthId in month.ToString().Split(','))
+                {
+                    months += " " + SurveyApp.Models.ScheduleMonth.getMonthNameShort(Convert.ToInt32(monthId)) + ",";
+                }
+                return "Activates every " + Convert.ToInt32(day) + " of" + months.TrimEnd(',');
+            }
+        }
+    }
+}
+
+<script type="text/javascript">
+    $(function () {
+        $("#tblSchedules").DataTable({ dom: 'Bfrtip', buttons: [{ extend: 'excel', text: "Export to Excel", title: 'Schedules_List', exportOptions: {  modifier: { search: 'none', order: 'original' }} }], "oLanguage": { "sInfo": "Displaying _START_ to _END_ of _TOTAL_ Schedules" } });
+
+        $('[data-toggle="tooltip"]').tooltip({
+            content: function () {
+                return $(this).attr('title').replace(/<br\/>/g, "<br/>");
+            },
+        });
+    });
+</script>
+<style type="text/css">
+    .table-hover tbody tr {
+        cursor: pointer;
+    }
+    .ui-tooltip {max-width: 400px;background-color: #333;color:#FFF;}
+    #tblSchedules .name{text-transform:capitalize;}
+    #tblSchedules .schDetails{
+        /*font-size: 20px;
+        position: absolute;
+        color: #63aa3f;*/
+        text-decoration:underline;
+    }
+</style>
+<div>
+    <h2 class="col-sm-11" style="margin: 0px;padding: 0px;">Schedule Manager</h2>
+    <a href="@Url.Action("ScheduleAddEdit", "Schedule")" class="btn btn-default" style="float:right;"><i class="fa fa-calendar-check-o"></i>&nbsp;Add Schedule</a>
+    @*@Html.ActionLink("Add Schedule", "ScheduleAddEdit", "Schedule", new object { }, new { @class = "btn btn-default", style = "float:right;" })*@
+</div>
+<div style="clear:both;"></div>
+<br />
+<table class="table table-striped table-hover" id="tblSchedules">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Frequency</th>
+            <th>Active On</th>
+            <th>Available Until</th>
+            <th>Reminders</th>
+            <th>Last Reminder</th>
+            <th style="width: 50px;">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (dsSchedules != null && dsSchedules.Tables.Count > 0 && dsSchedules.Tables[0] != null && dsSchedules.Tables[0].Rows.Count > 0)
+        {
+            foreach (DataRow dr in dsSchedules.Tables[0].Rows)
+            {
+                <tr onclick="location.href = '@Url.Action("ScheduleAddEdit", "Schedule", new { id = dr["Id"] })';">
+                    <td class="name">@dr["Title"]</td>
+                    <td>@getFrequency(dr["Frequency"], dr["DaysToRepeat"])</td>
+                    <td>@getActivationType(dr["ActiveOn"], dr["Day"], dr["Month"], dr["Weekday"])</td>
+                    <td>@dr["AvailableUntil"] day(s)</td>
+                    <td><a href="@Url.Action("Index", "Assignment")?schId=@dr["Id"]&name=@Html.Encode(dr["Title"])" onclick="event.stopPropagation();" target="_blank" data-toggle='tooltip' title="Click here to view reminders detail"><i class="ion-android-calendar schDetails"></i>&nbsp;View Details</a></td>
+                    <td>-@dr["LastReminder"] day(s) from last day</td>
+                    <td style="text-align: center;vertical-align:middle;"><a href="javascript:void(0);" class="redCross" onclick="event.stopPropagation();deleteListItem(this, @dr["Id"], 'schedule', '@dr["Title"]');"><i class="ion-close"></i></a></td>
+                </tr>
+            }
+        }
+
+    </tbody>
+</table>

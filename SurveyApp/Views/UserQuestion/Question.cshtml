@@ -1,0 +1,1362 @@
+﻿@model int?
+@{
+    var chiildid = Request.QueryString["ChildId"];
+    DateTime fetchdate = Convert.ToDateTime(String.IsNullOrEmpty(Request.QueryString["perioddate"]) == false ? Request.QueryString["perioddate"] : DateTime.Now.ToShortDateString());
+    System.Data.DataSet dsSurvey = SurveyApp.DataHelper.SurveyGetByID(Model ?? 1);
+    int userId = String.IsNullOrEmpty(Request.QueryString["userId"]) == true ? WebSecurity.CurrentUserId : Convert.ToInt32(Request.QueryString["userId"]);
+    System.Data.DataSet dsQuestions = SurveyApp.DataHelper.QuestionGetbySurveyID(Model ?? 1, Convert.ToInt32(chiildid), userId, fetchdate);
+    var qGroup = "";
+    var SurveyID = Model ?? 1;
+    ViewBag.Title = dsSurvey.Tables[0].Rows[0]["Title"].ToString();
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var childname = Request.QueryString["ChildName"];
+
+    int criid = String.IsNullOrEmpty(Request.QueryString["criid"]) == false ? Convert.ToInt32(Request.QueryString["criid"]) : 0;
+    System.Data.DataSet dsCRIs = null;
+    if (SurveyID == 44 && criid > 0)
+    {
+        dsCRIs = SurveyApp.DataHelper.getClassroomInterventions(criid);
+    }
+
+    int schId = String.IsNullOrEmpty(Request.QueryString["schid"]) == false ? Convert.ToInt32(Request.QueryString["schid"]) : 0;
+    int studyId = String.IsNullOrEmpty(Request.QueryString["stdid"]) == false ? Convert.ToInt32(Request.QueryString["stdid"]) : 0;
+
+    if (studyId > 0)
+    {
+        using (var stdContext = new SurveyApp.Models.StudyContext())
+        {
+            SurveyApp.Models.Study objStudy = stdContext.Studies.Find(studyId);
+            if (objStudy.Status == 2 || objStudy.IsDeleted == true)
+            {
+                Response.Redirect("~/UserQuestion/Index?childIdts=" + chiildid);
+                //Url.Action("Index", "UserQuestion", new { childId = chiildid });
+            }
+        }
+    }
+
+    //for dyamic questions test formation according to child's gender.
+    int gender = 0;
+    if (string.IsNullOrEmpty(Request.QueryString["ChildId"]) == false)
+    {
+        SurveyApp.Models.Child objChild = new SurveyApp.Models.Child();
+        int childId = Convert.ToInt32(Request.QueryString["ChildId"]);
+        if (childId > 0)
+        {
+            var cContext = new SurveyApp.Models.ChildContext();
+            objChild = cContext.Children.Find(childId);
+            gender = objChild.Gender;
+        }
+    }
+
+}
+
+<style type="text/css">
+    .questions {
+        font-size: 12px;
+    }
+
+        .questions h1._title {
+            font-weight: normal;
+            margin: 0px;
+            padding: 0px;
+            font-size: 14px;
+            line-height: 1.3;
+            padding: 10px;
+            border-bottom: solid 1px #f1f1f1;
+            margin-bottom: 10px;
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            left: 0px;
+            background: #C5EEFD;
+        }
+
+    input[type=radio], input[type=checkbox] {
+        margin-right: 4px;
+    }
+
+    .questions ._center label {
+        display: block;
+        /*white-space: nowrap;*/
+        text-align: center;
+        font-size: 12px;
+    }
+
+    .questions ._center input {
+        display: block;
+        margin: 5px auto;
+    }
+
+    .questions ._vcenter {
+        padding-top: 10px;
+        padding-bottom: 5px !important;
+    }
+
+    .questions ._bold {
+        font-weight: bold;
+        padding-bottom: 5px;
+    }
+
+    .questions .showwhen {
+        background-color: #fcfcfc;
+    }
+
+    .questions .q {
+        position: relative;
+    }
+
+        .questions .q:hover {
+            background: #EBF2FD !important;
+        }
+
+        .questions .q.notFilled {
+            border: solid 1px #FFA2A2;
+            background-color: #FFF2F2 !important;
+        }
+
+    ._medlbl {
+        padding-top: 7px;
+        text-align: right;
+        padding-right: 0px;
+        font-weight: bold;
+    }
+
+    ._schlbl {
+        padding-top: 7px;
+        text-align: left;
+        padding-right: 0px;
+        font-weight: bold;
+    }
+
+    .__slider {
+        clear: both;
+    }
+
+    .ui-tooltip {
+        min-width: 500px;
+        max-width: 600px;
+        background-color: #333;
+        color: #FFF;
+    }
+</style>
+@if (SurveyID == 64 || SurveyID == 65)
+{
+    <style type="text/css">
+        .questions .showwhen {
+            background-color: #fffced !important;
+            padding: 2px;
+        }
+
+            .questions .showwhen .subquestion {
+                font-size: 10px;
+                padding-bottom: 0px;
+                padding-top: 5px;
+                text-align: right;
+                font-weight: normal;
+            }
+
+            .questions .showwhen .subanswer {
+                font-size: 10px;
+                padding-bottom: 0px;
+            }
+    </style>
+}
+
+<div class="alert alert-success" id="success-alert" hidden="hidden">
+    <button type="button" class="close" data-dismiss="alert">x</button>
+    <strong>Success! </strong>
+    @(SurveyID == 28 ? "Adverse Reaction" : (SurveyID == 29 ? "Life Event" : (SurveyID == 44 ? "Intervention" : "Survey"))) is submitted successfully
+</div>
+@{
+    string tileprefix = string.Empty;
+    if (SurveyID == 6) { tileprefix = " for 2yrs - 4yrs"; }
+    if (SurveyID == 7) { tileprefix = " for 5yrs - 7yrs"; }
+    if (SurveyID == 8) { tileprefix = " for 8yrs - 12yrs"; }
+    if (SurveyID == 9) { tileprefix = " for 13yrs - 18yrs"; }
+    if (SurveyID == 45) { tileprefix = " for 19yrs and older"; }
+    if (SurveyID == 51) { tileprefix = " for 4yrs - 10yrs"; }
+    if (SurveyID == 52) { tileprefix = " for 11yrs - 17yrs"; }
+}
+<h2><a href="javascript:void(0);" id="back" onclick="goBack(this);"></a> &nbsp;@dsSurvey.Tables[0].Rows[0]["Title"].ToString().Replace("[Child]", childname) @tileprefix</h2>
+<p style="font-size:16px;">
+    @Html.Raw(dsSurvey.Tables[0].Rows[0]["TagLine"].ToString().Replace("[Child]", childname))
+</p>
+<div class="form-group" style="position:relative;">
+    @if (SurveyApp.Controllers.HomeController.isAdminRole())
+    {
+        <div class="disabler" data-toggle='tooltip' title="This questionnaire is assigned to another user, you are not authorized to change it." style="cursor:help;opacity: 0.04;background: #000000;top: 0px;left: 0px;right: 0px;bottom: 0px;position: absolute;z-index: 90;height: 100%;"></div>
+    }
+    <div class='questions list-group'>
+        @{
+            var Title = "";
+        }
+        @foreach (System.Data.DataRow q in dsQuestions.Tables[0].Rows)
+        {
+            var Nclass = q["Nclass"].ToString();
+            var Qclass = q["Qclass"].ToString() + " _bold";
+            var Aclass = q["Aclass"].ToString();
+            var title = q["ScoreCategory"].ToString();
+            if (Title == title)
+            {
+                title = "";
+            }
+            var PAnswers = "";
+            if (dsQuestions.Tables[0].Rows.IndexOf(q) == 0)
+            {
+                PAnswers = q["Answer"].ToString();
+            }
+            else
+            {
+                PAnswers = q["PAnswerLike"].ToString();
+            }
+
+
+            //var a = PAnswers.Split('|');
+
+
+            //var Answer = q["Answer"].ToString();
+            //string value = Array.Find(a, element => element.StartsWith(Answer, StringComparison.Ordinal));
+            //var hidden = value != "" ? "visibility:visible" : "visibility:hidden";
+            //var hidden2 = value != "" ? "display:none;" : "display:block;";
+
+            if (title != "" && (SurveyID == 16 || SurveyID == 21 || SurveyID == 24))
+            {
+                <div class="list-group-item-heading col-sm-12 btn-primary disabled" style="margin-bottom:0px;">
+                    <h4>@Html.Raw(title)</h4>
+                </div>
+            }
+            if (q["PID"].ToString() == string.Empty)
+            {
+
+                <div id="@Html.Raw("q"+q["ID"].ToString())" class="q @Nclass list-group-item">
+
+                    @if (@q["QuestionGroup"].ToString().Trim() != "")
+                    {
+                        <h1 class="_title">@Html.Raw(q["QuestionGroup"].ToString().Trim().Replace("[Child]", childname))</h1>
+                        <div style="visibility:hidden; min-height: 45px; text-indent: 100%;">@Html.Raw(q["QuestionGroup"].ToString().Trim().Replace("[Child]", childname))</div>
+                    }
+
+                    <div class="@Qclass">@Html.Raw(getGenderSpecificText(q["Question"].ToString().Replace("[Child]", childname), gender)) <sup style="color:#cccccc;">[@q["ID"]]</sup></div>
+
+
+
+                    @Html.Raw(Option((int)q["ID"], q["PossibleAnswers"].ToString(), q["InputType"].ToString(), Aclass, q["Score"].ToString(), q["Answer"].ToString()))
+                    <input type="hidden" value="@q["Answer"].ToString()" data-possibleanswers="@q["PAnswerLike"].ToString()" qid="@q["ID"]" id="@Html.Raw("hdn"+q["ID"].ToString())" />
+
+                </div>
+            }
+            else
+            {
+
+                <div style="display:none;" id="@Html.Raw("q"+q["ID"].ToString())" class="q @Nclass showwhen list-group-item" pid="@Html.Raw("q"+q["PID"].ToString())" pans="@Html.Raw(q["PAnswerLike"].ToString())">
+                    @if (@q["QuestionGroup"].ToString().Trim() != "")
+                    {
+                        <h1 class="_title">@Html.Raw(q["QuestionGroup"].ToString().Trim().Replace("[Child]", childname))</h1>
+                        <div style="visibility:hidden; min-height: 45px; text-indent: 100%;">@Html.Raw(q["QuestionGroup"].ToString().Trim().Replace("[Child]", childname))</div>
+                    }
+
+                    <div class="@Qclass">@Html.Raw(getGenderSpecificText(q["Question"].ToString().Replace("[Child]", childname), gender))  <sup style="color:#cccccc;">[@q["ID"]]</sup></div>
+                    @Html.Raw(Option((int)q["ID"], q["PossibleAnswers"].ToString(), q["InputType"].ToString(), Aclass, q["Score"].ToString(), q["Answer"].ToString()))
+                    <input type="hidden" value="@q["Answer"].ToString()" data-possibleanswers="@q["PAnswerLike"].ToString()" qid="@q["ID"]" id="@Html.Raw("hdn"+q["ID"].ToString())" />
+
+                </div>
+            }
+
+            Title = q["ScoreCategory"].ToString();
+        }
+    </div>
+    @if (SurveyApp.Controllers.HomeController.isAdminRole())
+    {
+        <div style="clear:both;"></div>
+    }
+
+</div>
+
+@{
+    var btnsubmit_text = "";
+    if (SurveyID == 28)
+    {
+        btnsubmit_text = "Submit Adverse Reaction";
+    }
+    else if (SurveyID == 29)
+    {
+        btnsubmit_text = "Submit Life Events";
+    }
+    else if (SurveyID == 44)
+    {
+        btnsubmit_text = "Submit Intervention";
+    }
+    else
+    {
+        btnsubmit_text = "Submit Survey";
+    }
+}
+
+
+<div style="margin:20px ;">
+    &nbsp;
+    <table style="width:100%;table-layout:fixed;border-collapse:collapse;">
+        <tr>
+            <td style="width:155px;padding:0px;">
+                @if (SurveyApp.Controllers.HomeController.isAdminRole())
+                {
+                    <a href="javascript:void(0);" data-toggle='tooltip' title="This questionnaire is assigned to another user, you are not authorized to change it." style="text-transform: uppercase; background-color: #CCC;border-radius:3px;padding:8px 15px;color:#ffffff;border:none;text-shadow:none;font-size:14px;cursor: help;text-decoration: none !important;">@btnsubmit_text</a>
+                }
+                else
+                {
+                    <input id="SurveySubmit" type="submit" value="@btnsubmit_text" style="text-transform: uppercase; background: #4285F4;border-radius:3px;padding:8px 15px;color:#ffffff;border:none;text-shadow:none;font-size:14px;" />
+                }
+            </td>
+            <td style="padding: 0px;"></td>
+        </tr>
+
+    </table>
+
+</div>
+
+@{
+    if (SurveyID != 28 && SurveyID != 29 && SurveyID != 44)
+    {
+        Html.RenderPartial("~/Views/Survey/_PercentCompletion.cshtml");
+    }
+}
+@section scripts{
+
+    <script type="text/javascript">
+        var SurveryID = @SurveyID;
+        $(window).load(function(){
+            setCompletionDiv();
+            var sec = "@Request.QueryString["sec"]";
+            if(sec == "1"){
+                $('html, body').animate({ scrollTop: $("#q546").offset().top - 63 }, 2000);
+            }
+            else if(sec == "2"){
+                $('html, body').animate({ scrollTop: $("#q1185").offset().top - 63 }, 2000);
+            }
+        });
+        $(function () {
+
+
+            var score;
+            $("._datepicker").datepicker(
+                {
+                    onSelect: function(dateText, inst) {
+                        var date = $(this).val();
+                        var txt = $("#q" + $(this).attr("qid") + "_0").val();
+                        txt = (txt==date?"":"|" + txt + "|");
+                        $("#hdn" + $(this).attr("qid")).val(txt + "" + date).trigger('change');
+                    }
+                });
+            $("._datepickermed").datepicker(
+            {
+                onSelect: function(dateText, inst) {
+                    var date = $(this).val();
+                    var qid = $(this).attr("qid");
+                    saveTmedValues(qid);
+                }
+
+            });
+            $("#success-alert").hide();
+            //var childname = decodeURI(GetQueryStringValues()['ChildName']);
+            //$(this).html().replace("[Child]", childname);
+
+            syncStrips();
+            pageloadtrigger();
+
+
+            $("input[type=radio], input[type=checkbox]").bind("click", function () {
+
+                qid = $(this).attr("qid");
+                 score=  $(this).attr("data-score");
+                if ($(this).prop("type") == "radio" || $(this).prop("type") == "checkbox") {
+                    var group = $(this).closest(".q").find("input:checked");
+
+                    $("#hdn" + qid).val("");
+                    group.each(function () {
+
+                        $("#hdn" + qid).val($("#hdn" + qid).val() + "|" + this.value).trigger('change');
+                    });
+                    if (group.length == 0) {
+                        $("#hdn" + qid).trigger('change');
+                    }
+                    if ($("#hdn" + qid).val().length > 0) { $("#hdn" + qid).val($("#hdn" + qid).val().substr(1)); $("#hdn" + qid).closest(".q").removeClass("notFilled"); }
+                }
+            });
+            $("select").change(function () {
+
+                if ($(this).attr("data-tmed") == "tmed") {
+
+                    var qid = $(this).attr("qid")
+                    if (this.value == "other") {
+
+                        $('[data-md=m9' + qid + ']').show();
+                    }
+                    saveTmedValues(qid);
+
+                }
+                else {
+
+                    $("#hdn" + $(this).attr("qid")).val("|" + this.value).trigger('change');
+                }
+            });
+
+            $("textarea, input[type=text]").blur(function () {
+                if ($(this).hasClass("hasDatepicker") == true || $(this).hasClass("_txtdatepicker")) { return; }
+                if ($(this).attr("data-tmed") == "tmed" || $(this).attr("data-sch") == "tsch" || $(this).attr("data-schdiet") == "tschdiet") {
+
+                    var qid = $(this).attr("qid")
+                    if ($(this).attr("data-tmed") == "tmed") {
+
+                        saveTmedValues(qid);
+                    }
+
+                    if ($(this).attr("data-sch") == "tsch") {
+
+                        var at1 = $('[data-id=t1' + qid + ']').val();
+                        var at2 = $('[data-id=t2' + qid + ']').val();
+                        var at3 = $('[data-id=t3' + qid + ']').val();
+                        var at4 = $('[data-id=t4' + qid + ']').val();
+
+                        var allanst = "|" + at1 + "|" + at2 + "|" + at3 + "|" + at4;
+                        $("#hdn" + $(this).attr("qid")).val(allanst).trigger('change');
+                    }
+                    if ($(this).attr("data-schdiet") == "tschdiet") {
+
+                        var at1 = $('[data-id=t1' + qid + ']').val();
+                        var at2 = $('[data-id=t2' + qid + ']').val();
+                        var at3 = $('[data-id=t3' + qid + ']').val();
+
+                        var allanst = "|" + at1 + "|" + at2 + "|" + at3;
+                        $("#hdn" + $(this).attr("qid")).val(allanst).trigger('change');
+                    }
+                }
+
+                else {
+                    if (SurveryID == 60 || SurveryID == 61) {
+                        $("#hdn" + $(this).attr("qid")).val(this.value).trigger('change');
+                    }
+                    else {
+                        var oldval = $("#hdn" + $(this).attr("qid")).val();
+                        if (this.value != "") {
+                            var newval = "|" + this.value;
+                            $("#hdn" + $(this).attr("qid")).val(oldval + newval).trigger('change');
+                        }
+                    }
+
+                }
+            });
+
+            function saveTmedValues(qid)
+            {
+
+
+                var a1 = $('[data-md=m1' + qid + ']').val();
+                var a2 = $('[data-md=m2' + qid + ']').val();
+                var a3 = $('[data-md=m4' + qid + ']').val();
+                var a4 = $('[data-md=m5' + qid + ']').val();
+
+                var a5 = $('[data-md=m6' + qid + ']').val();
+                var a6 = $('[data-md=m7' + qid + ']').val();
+                var a7 = $('[data-md=m8' + qid + ']').val();
+                var a8 = $('[data-md=m9' + qid + ']').val();
+
+
+                var allans = "|" + a1 + "|" + a2 + "|" + a3 + "|" + a4 + "|" + a5 + "|" + a6 + "|" + a7 + "|" + a8;
+
+                var v = $(this).attr("qid");
+                if (a1 == "" && a2 == "" && a3 == "" && a4 == "" && a5 == "0" && a6 == "0" && a7 == "0" && a8 == "") { }
+                else {
+                    $("#hdn" + qid).val(allans).trigger('change');
+                }
+            }
+            function pageloadtrigger(){
+
+
+                $("input[type=hidden]").each(function(){
+
+                    var qid = $(this).attr("qid");
+                    var chk="q"+qid;
+                    if(qid!=null){
+
+                        var ans = $(this).val();
+                        if (ans != "") {
+
+                            EnableDisableChild(qid, ans);
+                        }
+
+
+
+                    }
+
+                });
+
+
+
+            }
+
+
+            function showStrips() {
+                $(".q").css("background", "");
+                $(".q:visible:odd").css("background", "#f9f9f9");
+                //$(".q").css('display','block');
+            }
+
+
+
+            $("input[type=hidden]").change(function () {
+
+                var ans = this.value.length > 0 ? (SurveryID == 60 || SurveryID == 61 ? this.value : this.value.substr(1)) : "";
+
+           var qid = $(this).attr("qid");
+           var multians=ans.split('|')
+           if(multians.length > 1)
+           {
+               for (var i = 1; i < multians.length; i++) {
+                   score=parseInt(score)
+                   ++score;
+                   break;
+               }
+           }
+
+                var scor=score;
+                var childId= GetQueryStringValues()['ChildId'];
+                var SurID = GetQueryStringValues()['surveyID'];
+
+                EnableDisableChild(qid, ans);
+                setCompletionDiv();
+                if(SurveryID!=28 && SurveryID!=29){
+                    savequestions(qid, ans, (SurveryID == 27 && ans == "" ? 0 : score), childId, SurID,"SaveUpdate");
+                }
+            });
+
+            $(".__slider").each(function (){
+                var defaultvalue = $(this).attr("value");
+                var itemcount=parseInt($(this).attr("length"));
+                defaultvalue = (defaultvalue/itemcount) * 700;
+                $(this).slider({
+     range: "min",
+      value: 0,
+      min: 0,
+      max: 700,
+                    value:defaultvalue,
+      slide: function( event, ui ) {
+          var items=parseInt($(this).attr("length"));
+          var qid=$(this).attr("qid");
+                        var lblvalue='';
+                        var lblscore=0;
+          $('label[for^="q'+ qid +'_"]').css("color","#cccccc");
+          for(var i=0;i<=items;i++){
+              var step=700/(items+1);
+              if(ui.value <= (i+1) * step && ui.value > (i) * step){
+                  $('label[for="q'+ qid +'_'+i+'"]').css("color","#000000");
+                                lblvalue = $('label[for="q'+ qid +'_'+i+'"]').text();
+                                lblscore =  $('label[for="q'+ qid +'_'+i+'"]').attr("data-score");
+              }
+          }
+
+          if(ui.value==0){
+            $('label[for^="q'+ qid +'_"]').css("color","#333333");
+          }
+          else{
+                            score= lblscore;
+                            $("#hdn" + $(this).attr("qid")).val("|"+lblvalue);
+          }
+                    },
+                    stop: function(event,ui){
+
+                        $("#hdn" + $(this).attr("qid")).trigger('change');
+      }
+                })});
+});
+
+
+        function EnableDisableChild(qid, ans) {
+
+            if (ans == "") { $("[pid=q" + qid + "]").slideUp(); }
+            $("[pid=q" + qid + "]").each(function () {
+                if (hasAnswer(ans, $(this).attr("pans"))) {
+                    $(this).slideDown("fast", function () { syncStrips(); });
+                }
+                else {
+                    $(this).slideUp("fast", function () { //to hide childs if any
+                        var childid = $(this).attr("id"); syncStrips();
+
+                        if (childid.trim() != '') {
+                            $("[pid=" + childid + "]").slideUp("fast", function () { //to hide childs if any
+                                var childid = $(this).attr("id"); syncStrips();
+
+                                if (childid.trim() != '') {
+                                    $("[pid=" + childid + "]").slideUp("fast", function () { //to hide childs if any
+                                        var childid = $(this).attr("id"); syncStrips();
+
+                                        if (childid.trim() != '') {
+                                            $("[pid=" + childid + "]").slideUp();
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
+
+
+
+        }
+
+
+        function GetQueryStringValues() {
+            var vars = [], hash;
+            var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+            for (var i = 0; i < hashes.length; i++) {
+                hash = hashes[i].split('=');
+                vars.push(encodeURI(hash[0]));
+                vars[hash[0]] = hash[1];
+            }
+            return vars;
+        }
+
+        function syncStrips() {
+            $(".q").css("background", "");
+            $(".q:visible:odd").css("background", "#f9f9f9");
+        }
+        function hasAnswer(ans1, ans2) {
+            var a1 = ans1.split('|');
+            var a2 = ans2.split('|');
+            var a3 = concatArraysUniqueWithSort(a1, a2);
+            return (a3.length < a1.length + a2.length);
+
+        }
+        var concatArraysUniqueWithSort = function (thisArray, otherArray) {
+            var newArray = thisArray.concat(otherArray).sort(function (a, b) {
+                return a > b ? 1 : a < b ? -1 : 0;
+            });
+
+            return newArray.filter(function (item, index) {
+                return newArray.indexOf(item) === index;
+            });
+        };
+        function enableDate(elm, id_date) {
+            if (elm.checked) {
+                $("." + id_date).removeAttr("disabled", "disabled");
+            }
+            else {
+                $("." + id_date).val('');
+                $("." + id_date).attr("disabled", "disabled");
+            }
+        }
+        function enabletextDate(elm, id_date) {
+            if (elm.value.trim() !='' ) {
+                $("#" + id_date).removeAttr("disabled", "disabled");
+            }
+            else {
+                $("#" + id_date).attr("disabled", "disabled");
+            }
+        }
+
+        function setCompletionDiv() {
+            if (SurveryID == 29 || SurveryID ==28 || SurveryID ==44) {return;}
+            var noQ = 0, nofQ = 0;
+            $(".questions").find(".q:visible").find("input[type=hidden]").each(function(index, obj){
+                if($(obj).val() != ""){
+                    nofQ++;
+                }
+                noQ++;
+            });
+
+            var percentage = (Math.round((nofQ / noQ) * 100).toFixed(0));
+
+            setCompletionPercentage(percentage);
+        }
+
+
+        $("#SurveySubmit").click(function (e) {
+
+            e.preventDefault();
+
+            var flag = true;
+            var SurID = GetQueryStringValues()['surveyID'];
+            if(SurID !=28 && SurID!=29 && SurID != 44){
+                $(".questions").find(".q:visible").find("input[type=hidden]").each(function (index, obj) {
+
+                    if ($(obj).val() != "") {
+                        $(obj).closest(".q").removeClass("notFilled");
+                    }
+                    else {
+                        $(obj).closest(".q").addClass("notFilled");
+                        flag = false;
+                    }
+                });
+            }
+            setCompletionDiv();
+
+            $('#b1').closest('li').css('background', '#FCD6DF').css('border-right', 'solid 5px #cc0000;');
+
+            if (flag) {
+                bootbox.confirm("Are you sure to submit this @(SurveyID == 28 ? "Adverse Reaction" : (SurveyID == 29 ? "Life Event" : (SurveyID == 44 ? "Intervention" : "Survey")))?", function (confirmed) {
+                    if (confirmed == true) {
+
+
+                        var childId = GetQueryStringValues()['ChildId'];
+
+                        if (SurID == 28) {
+                            savequestionsAdverseReaction(childId);
+                        }
+                        else if(SurID == 29){
+                            savequestionsLifeEvents(childId);
+                        }
+                        else if(SurID == 44){
+                            savequestionsCI(childId, @criid);
+                        }
+                        else {
+                            savequestions(null, null, null, childId, SurID, "SubmitStatus")
+                        }
+                        $("#success-alert").fadeTo(2000, 500).slideUp(500, function () {
+                            $(this).show();
+                            $("#success-alert").alert('close');
+                            location.href = "@Url.Action("Index", "UserQuestion")?childIdts="+childId +"#1";
+                        });
+
+                    }
+                    else{
+                        location.href = "@Html.Raw(Request.UrlReferrer != null && Request.UrlReferrer.ToString() != "" ? Request.UrlReferrer.ToString() : Url.Action("Index", "UserQuestion") + "?childIdts=" + chiildid)#1";
+                    }
+                });
+            }
+            else{
+                $('html, body').animate({ scrollTop: $(".notFilled").offset().top - 63 }, 500);
+            }
+
+
+        });
+
+
+        function savequestions(qid, ansid, s, cid, SurID, status) {
+
+            var noQ = 0, nofQ = 0;
+            $(".questions").find(".q:visible").find("input[type=hidden]").each(function(index, obj){
+                //$(".questions").find("input[type=hidden]").each(function(index, obj){
+                if($(obj).val() != ""){
+                    nofQ++;
+                }
+                noQ++;
+            });
+
+            var prcnt = (Math.round((nofQ / noQ) * 100).toFixed(0)) + "%";
+
+            var url = "/UserQuestion/SaveUserQuestion";
+            var period = "@(String.IsNullOrEmpty(Request.QueryString["sec"]) == true ? (String.IsNullOrEmpty(Request.QueryString["perioddate"]) == true ? "" : Request.QueryString["perioddate"].ToString()) : DateTime.Now.ToString())";
+            var schId = @schId;
+
+            $.post(url, { QuestionID: qid, AnswerID: ansid, score: s, childid: cid, SurveyID: SurID, statusparm: status, percentage : prcnt, scheduleDate : period, scheduleId : schId }, function (data) {
+                checkTimeout(data, 0);
+            });
+    }
+    function savequestionsAdverseReaction(cid){
+        var AdverseReaction = $("#q861_0").val().trim();
+        var DateOccured = $("#q862_0").val().trim();
+        var DateResolved = $("#q863_0").val().trim();
+        var Medication = $("#q865_0").val().trim();
+        var DateStart = $("#q866_0").val().trim();
+        var DateEnd = $("#q867_0").val().trim();
+        var DateSubmitted = '@DateTime.Now.ToShortDateString()';
+        var ChildID = cid;
+
+        var url = "/UserQuestion/savequestionsAdverseReaction";
+
+        $.post(url, { AdverseReaction: AdverseReaction,
+            DateOccured: DateOccured,
+            DateResolved: DateResolved,
+            Medication: Medication,
+            DateStart: DateStart,
+            DateEnd: DateEnd,
+            DateSubmitted : DateSubmitted,
+            ChildID : ChildID }, function (data) {
+                checkTimeout(data, 0);
+            });
+    }
+
+        function savequestionsCI(cid, criid){
+            var title = $("#q1581_0").val().trim();
+            var startDate = $("#q1582_0").val().trim();
+            var endDate = $("#q1583_0").val().trim();
+            var entryDate = '@DateTime.Now.ToShortDateString()';
+            var childId = cid;
+            var criid = criid;
+
+            var url = "/UserQuestion/savequestionsCI";
+
+            $.post(url, { title: title,
+                startDate: startDate,
+                endDate: endDate,
+                entryDate: entryDate,
+                childId: childId,
+                classroomIID : criid }, function (data) {
+                    checkTimeout(data, 0);
+                });
+        }
+
+
+
+    function savequestionsLifeEvents(cid){
+        var ChildID = cid;
+        var q869g="School Event",q869="Teacher Change",                                                 d869_st=$('#q869_1_st').val(),  d869_en=$('#q869_1_en').val();
+        var q870g="School Event",q870="Classroom Change",                                               d870_st=$('#q870_1_st').val(),  d870_en=$('#q870_1_en').val();
+        var q871g="School Event",q871="New Student",                                                    d871_st=$('#q871_1_st').val(),  d871_en=$('#q871_1_en').val();
+        var q872g="School Event",q872="Major peer incident",                                            d872_st=$('#q872_1_st').val(),  d872_en=$('#q872_1_en').val();
+        var q873g="School Event",q873="Violence in classroom",                                          d873_st=$('#q873_1_st').val(),  d873_en=$('#q873_1_en').val();
+        var q874g="School Event",q874="Emotional peer interaction",                                     d874_st=$('#q874_1_st').val(),  d874_en=$('#q874_1_en').val();
+        var q875g="School Event",q875="Change in schedule",                                             d875_st=$('#q875_1_st').val(),  d875_en=$('#q875_1_en').val();
+        var q876g="School Event",q876="High stakes test",                                               d876_st=$('#q876_1_st').val(),  d876_en=$('#q876_1_en').val();
+        var q877g="School Event",q877="Formal assessment",                                              d877_st=$('#q877_1_st').val(),  d877_en=$('#q877_1_en').val();
+        var q878g="School Event",q878="Outside assessor",                                               d878_st=$('#q878_1_st').val(),  d878_en=$('#q878_1_en').val();
+        var q879g="School Event",q879="Personnel change",                                               d879_st=$('#q879_1_st').val(),  d879_en=$('#q879_1_en').val();
+        var q880g="School Event",q880="Teacher absence",                                                d880_st=$('#q880_1_st').val(),  d880_en=$('#q880_1_en').val();
+        var q881g="School Event",q881="School absence",                                                 d881_st=$('#q881_1_st').val(),  d881_en=$('#q881_1_en').val();
+        var q882g="School Event",q882=$('#q882_0').val(),                                               d882_st=$('#q882_1').val();
+        var q884g="Family Events",q884="New family member",                                             d884_st=$('#q884_1_st').val(),  d884_en=$('#q884_1_en').val();
+        var q885g="Family Events",q885="Parent temporarily leave",                                      d885_st=$('#q885_1_st').val(),  d885_en=$('#q885_1_en').val();
+        var q886g="Family Events",q886="Injury or illness in family",                                   d886_st=$('#q886_1_st').val(),  d886_en=$('#q886_1_en').val();
+        var q887g="Family Events",q887="Change in residence",                                           d887_st=$('#q887_1_st').val(),  d887_en=$('#q887_1_en').val();
+        var q888g="Family Events",q888="Sibling issues",                                                d888_st=$('#q888_1_st').val(),  d888_en=$('#q888_1_en').val();
+        var q889g="Family Events",q889="Parents travel",                                                d889_st=$('#q889_1_st').val(),  d889_en=$('#q889_1_en').val();
+        var q890g="Family Events",q890="New person staying at the home (company)",                      d890_st=$('#q890_1_st').val(),  d890_en=$('#q890_1_en').val();
+        var q891g="Family Events",q891="Death in the family",                                           d891_st=$('#q891_1_st').val(),  d891_en=$('#q891_1_en').val();
+        var q892g="Family Events",q892="Parental separation/divorce",                                   d892_st=$('#q892_1_st').val(),  d892_en=$('#q892_1_en').val();
+        var q893g="Family Events",q893="Significant family member moves",                               d893_st=$('#q893_1_st').val(),  d893_en=$('#q893_1_en').val();
+        var q894g="Family Events",q894="Sibling moves",                                                 d894_st=$('#q894_1_st').val(),  d894_en=$('#q894_1_en').val();
+        var q895g="Family Events",q895="Significant struggles with parents",                            d895_st=$('#q895_1_st').val(),  d895_en=$('#q895_1_en').val();
+        var q896g="Family Events",q896="Significant struggles with siblingsabsence",                    d896_st=$('#q896_1_st').val(),  d896_en=$('#q896_1_en').val();
+        var q897g="Family Events",q897="Mother pregnant",                                               d897_st=$('#q897_1_st').val(),  d897_en=$('#q897_1_en').val();
+        var q898g="Family Events",q898="Parent marrying",                                               d898_st=$('#q898_1_st').val(),  d898_en=$('#q898_1_en').val();
+        var q899g="Family Events",q899="Sibling marrying",                                              d899_st=$('#q899_1_st').val(),  d899_en=$('#q899_1_en').val();
+        var q900g="Family Events",q900="Parent Job/Work Change",                                        d900_st=$('#q900_1_st').val(),  d900_en=$('#q900_1_en').val();
+        var q901g="Family Events",q901="Change in family financial circumstances",                      d901_st=$('#q901_1_st').val(),  d901_en=$('#q901_1_en').val();
+        var q902g="Family Events",q902=$('#q902_0').val(),                                              d902_st=$('#q902_1').val();
+        var q904g="Health Events",q904="Physical Injury",                                               d904_st=$('#q904_1_st').val(),  d904_en=$('#q904_1_en').val();
+        var q905g="Health Events",q905="Medication Change",                                             d905_st=$('#q905_1_st').val(),  d905_en=$('#q905_1_en').val();
+        var q906g="Health Events",q906="Supplement Change",                                             d906_st=$('#q906_1_st').val(),  d906_en=$('#q906_1_en').val();
+        var q907g="Health Events",q907="Complementary and Alternative Medicine Change",                 d907_st=$('#q907_1_st').val(),  d907_en=$('#q907_1_en').val();
+        var q908g="Health Events",q908="Physician Change",                                              d908_st=$('#q908_1_st').val(),  d908_en=$('#q908_1_en').val();
+        var q909g="Health Events",q909="Therapist Change",                                              d909_st=$('#q909_1_st').val(),  d909_en=$('#q909_1_en').val();
+        var q910g="Health Events",q910="Illness requiring doctor visit",                                d910_st=$('#q910_1_st').val(),  d910_en=$('#q910_1_en').val();
+        var q911g="Health Events",q911="Illness not requiring doctor visit",                            d911_st=$('#q911_1_st').val(),  d911_en=$('#q911_1_en').val();
+        var q912g="Health Events",q912="Change in diet",                                                d912_st=$('#q912_1_st').val(),  d912_en=$('#q912_1_en').val();
+        var q913g="Health Events",q913="Hospitalization",                                               d913_st=$('#q913_1_st').val(),  d913_en=$('#q913_1_en').val();
+        var q914g="Health Events",q914="Drug or Alcohol Use",                                           d914_st=$('#q914_1_st').val(),  d914_en=$('#q914_1_en').val();
+        var q915g="Health Events",q915="Weight Gain or Loss",                                           d915_st=$('#q915_1_st').val(),  d915_en=$('#q915_1_en').val();
+        var q916g="Health Events",q916="Change in physical appearance (glasses, braces)",               d916_st=$('#q916_1_st').val(),  d916_en=$('#q916_1_en').val();
+        var q917g="Health Events",q917=$('#q917_0').val(),                                              d917_st=$('#q917_1').val();
+        var q919g="External Events",q919="Significant Weather",                                         d919_st=$('#q919_1_st').val(),  d919_en=$('#q919_1_en').val();
+        var q920g="External Events",q920="World Events",                                                d920_st=$('#q920_1_st').val(),  d920_en=$('#q920_1_en').val();
+        var q921g="External Events",q921="Local Events",                                                d921_st=$('#q921_1_st').val(),  d921_en=$('#q921_1_en').val();
+        var q922g="External Events",q922="Natural Disaster",                                            d922_st=$('#q922_1_st').val(),  d922_en=$('#q922_1_en').val();
+        var q923g="External Events",q923=$('#q923_0').val(),                                            d923_st=$('#q923_1').val();
+        var q924g="Additional Notes",q924=$('#q924_0').val(),                                        d924_en="";
+
+        var str = "";
+        var _LifeE = "[#1#|#2#|#3#|#4#]";
+        if(d869_st!='' || d869_en != ''){str += _LifeE.replace('#1#',q869g).replace('#2#',q869).replace('#3#',d869_st).replace('#4#', d869_en);}
+        if(d870_st!='' || d870_en != ''){str += _LifeE.replace('#1#',q870g).replace('#2#',q870).replace('#3#',d870_st).replace('#4#', d870_en);}
+        if(d871_st!='' || d871_en != ''){str += _LifeE.replace('#1#',q871g).replace('#2#',q871).replace('#3#',d871_st).replace('#4#', d871_en);}
+        if(d872_st!='' || d872_en != ''){str += _LifeE.replace('#1#',q872g).replace('#2#',q872).replace('#3#',d872_st).replace('#4#', d872_en);}
+        if(d873_st!='' || d873_en != ''){str += _LifeE.replace('#1#',q873g).replace('#2#',q873).replace('#3#',d873_st).replace('#4#', d873_en);}
+        if(d874_st!='' || d874_en != ''){str += _LifeE.replace('#1#',q874g).replace('#2#',q874).replace('#3#',d874_st).replace('#4#', d874_en);}
+        if(d875_st!='' || d875_en != ''){str += _LifeE.replace('#1#',q875g).replace('#2#',q875).replace('#3#',d875_st).replace('#4#', d875_en);}
+        if(d876_st!='' || d876_en != ''){str += _LifeE.replace('#1#',q876g).replace('#2#',q876).replace('#3#',d876_st).replace('#4#', d876_en);}
+        if(d877_st!='' || d877_en != ''){str += _LifeE.replace('#1#',q877g).replace('#2#',q877).replace('#3#',d877_st).replace('#4#', d877_en);}
+        if(d878_st!='' || d878_en != ''){str += _LifeE.replace('#1#',q878g).replace('#2#',q878).replace('#3#',d878_st).replace('#4#', d878_en);}
+        if(d879_st!='' || d879_en != ''){str += _LifeE.replace('#1#',q879g).replace('#2#',q879).replace('#3#',d879_st).replace('#4#', d879_en);}
+        if(d880_st!='' || d880_en != ''){str += _LifeE.replace('#1#',q880g).replace('#2#',q880).replace('#3#',d880_st).replace('#4#', d880_en);}
+        if(d881_st!='' || d881_en != ''){str += _LifeE.replace('#1#',q881g).replace('#2#',q881).replace('#3#',d881_st).replace('#4#', d881_en);}
+        if(d882_st!=''){str += _LifeE.replace('#1#',q882g).replace('#2#',q882).replace('#3#',d882_st).replace('#4#', '');}
+        if(d884_st!='' || d884_en != ''){str += _LifeE.replace('#1#',q884g).replace('#2#',q884).replace('#3#',d884_st).replace('#4#', d884_en);}
+        if(d885_st!='' || d885_en != ''){str += _LifeE.replace('#1#',q885g).replace('#2#',q885).replace('#3#',d885_st).replace('#4#', d885_en);}
+        if(d886_st!='' || d886_en != ''){str += _LifeE.replace('#1#',q886g).replace('#2#',q886).replace('#3#',d886_st).replace('#4#', d886_en);}
+        if(d887_st!='' || d887_en != ''){str += _LifeE.replace('#1#',q887g).replace('#2#',q887).replace('#3#',d887_st).replace('#4#', d887_en);}
+        if(d888_st!='' || d888_en != ''){str += _LifeE.replace('#1#',q888g).replace('#2#',q888).replace('#3#',d888_st).replace('#4#', d888_en);}
+        if(d889_st!='' || d889_en != ''){str += _LifeE.replace('#1#',q889g).replace('#2#',q889).replace('#3#',d889_st).replace('#4#', d889_en);}
+        if(d890_st!='' || d890_en != ''){str += _LifeE.replace('#1#',q890g).replace('#2#',q890).replace('#3#',d890_st).replace('#4#', d890_en);}
+        if(d891_st!='' || d891_en != ''){str += _LifeE.replace('#1#',q891g).replace('#2#',q891).replace('#3#',d891_st).replace('#4#', d891_en);}
+        if(d892_st!='' || d892_en != ''){str += _LifeE.replace('#1#',q892g).replace('#2#',q892).replace('#3#',d892_st).replace('#4#', d892_en);}
+        if(d893_st!='' || d893_en != ''){str += _LifeE.replace('#1#',q893g).replace('#2#',q893).replace('#3#',d893_st).replace('#4#', d893_en);}
+        if(d894_st!='' || d894_en != ''){str += _LifeE.replace('#1#',q894g).replace('#2#',q894).replace('#3#',d894_st).replace('#4#', d894_en);}
+        if(d895_st!='' || d895_en != ''){str += _LifeE.replace('#1#',q895g).replace('#2#',q895).replace('#3#',d895_st).replace('#4#', d895_en);}
+        if(d896_st!='' || d896_en != ''){str += _LifeE.replace('#1#',q896g).replace('#2#',q896).replace('#3#',d896_st).replace('#4#', d896_en);}
+        if(d897_st!='' || d897_en != ''){str += _LifeE.replace('#1#',q897g).replace('#2#',q897).replace('#3#',d897_st).replace('#4#', d897_en);}
+        if(d898_st!='' || d898_en != ''){str += _LifeE.replace('#1#',q898g).replace('#2#',q898).replace('#3#',d898_st).replace('#4#', d898_en);}
+        if(d899_st!='' || d899_en != ''){str += _LifeE.replace('#1#',q899g).replace('#2#',q899).replace('#3#',d899_st).replace('#4#', d899_en);}
+        if(d900_st!='' || d900_en != ''){str += _LifeE.replace('#1#',q900g).replace('#2#',q900).replace('#3#',d900_st).replace('#4#', d900_en);}
+        if(d901_st!='' || d901_en != ''){str += _LifeE.replace('#1#',q901g).replace('#2#',q901).replace('#3#',d901_st).replace('#4#', d901_en);}
+        if(d902_st!=''){str += _LifeE.replace('#1#',q902g).replace('#2#',q902).replace('#3#',d902_st).replace('#4#', '');}
+        if(d904_st!='' || d904_en != ''){str += _LifeE.replace('#1#',q904g).replace('#2#',q904).replace('#3#',d904_st).replace('#4#', d904_en);}
+        if(d905_st!='' || d905_en != ''){str += _LifeE.replace('#1#',q905g).replace('#2#',q905).replace('#3#',d905_st).replace('#4#', d905_en);}
+        if(d906_st!='' || d906_en != ''){str += _LifeE.replace('#1#',q906g).replace('#2#',q906).replace('#3#',d906_st).replace('#4#', d906_en);}
+        if(d907_st!='' || d907_en != ''){str += _LifeE.replace('#1#',q907g).replace('#2#',q907).replace('#3#',d907_st).replace('#4#', d907_en);}
+        if(d908_st!='' || d908_en != ''){str += _LifeE.replace('#1#',q908g).replace('#2#',q908).replace('#3#',d908_st).replace('#4#', d908_en);}
+        if(d909_st!='' || d909_en != ''){str += _LifeE.replace('#1#',q909g).replace('#2#',q909).replace('#3#',d909_st).replace('#4#', d909_en);}
+        if(d910_st!='' || d910_en != ''){str += _LifeE.replace('#1#',q910g).replace('#2#',q910).replace('#3#',d910_st).replace('#4#', d910_en);}
+        if(d911_st!='' || d911_en != ''){str += _LifeE.replace('#1#',q911g).replace('#2#',q911).replace('#3#',d911_st).replace('#4#', d911_en);}
+        if(d912_st!='' || d912_en != ''){str += _LifeE.replace('#1#',q912g).replace('#2#',q912).replace('#3#',d912_st).replace('#4#', d912_en);}
+        if(d913_st!='' || d913_en != ''){str += _LifeE.replace('#1#',q913g).replace('#2#',q913).replace('#3#',d913_st).replace('#4#', d913_en);}
+        if(d914_st!='' || d914_en != ''){str += _LifeE.replace('#1#',q914g).replace('#2#',q914).replace('#3#',d914_st).replace('#4#', d914_en);}
+        if(d915_st!='' || d915_en != ''){str += _LifeE.replace('#1#',q915g).replace('#2#',q915).replace('#3#',d915_st).replace('#4#', d915_en);}
+        if(d916_st!='' || d916_en != ''){str += _LifeE.replace('#1#',q916g).replace('#2#',q916).replace('#3#',d916_st).replace('#4#', d916_en);}
+        if(d917_st!=''){str += _LifeE.replace('#1#',q917g).replace('#2#',q917).replace('#3#',d917_st).replace('#4#', '');}
+        if(d919_st!='' || d919_en != ''){str += _LifeE.replace('#1#',q919g).replace('#2#',q919).replace('#3#',d919_st).replace('#4#', d919_en);}
+        if(d920_st!='' || d920_en != ''){str += _LifeE.replace('#1#',q920g).replace('#2#',q920).replace('#3#',d920_st).replace('#4#', d920_en);}
+        if(d921_st!='' || d921_en != ''){str += _LifeE.replace('#1#',q921g).replace('#2#',q921).replace('#3#',d921_st).replace('#4#', d921_en);}
+        if(d922_st!='' || d922_en != ''){str += _LifeE.replace('#1#',q922g).replace('#2#',q922).replace('#3#',d922_st).replace('#4#', d922_en);}
+        if(d923_st!=''){str += _LifeE.replace('#1#',q923g).replace('#2#',q923).replace('#3#',d923_st).replace('#4#', '');}
+        if(q924!=''){str += _LifeE.replace('#1#',q924g).replace('#2#',q924).replace('#3#','').replace('#4#','');}
+
+
+        var url = "/UserQuestion/savequestionsLifeEvent";
+
+        $.post(url, { LifeEvent: str,
+            ChildID : ChildID }, function (data) {
+                checkTimeout(data, 0);
+            });
+
+    }
+
+    //function SaveValues(qid) {
+
+    //    var a1 = $('[data-md=m1' + qid + ']').val();
+    //    var a2 = $('[data-md=m2' + qid + ']').val();
+    //    var a3 = $('[data-md=m3' + qid + ']').val();
+    //    var a4 = $('[data-md=m4' + qid + ']').val();
+    //    var a5 = $('[data-md=m5' + qid + ']').val();
+    //    var allans = a1 + "|" + a2 + "|" + a3 + "|" + a4 + "|" + a5;
+    //    var childId= GetQueryStringValues()['ChildId'];
+    //    var SurID = GetQueryStringValues()['surveyID'];
+    //    savequestions(qid, allans, null, childId, SurID, "SaveUpdate");
+    //}
+
+
+
+
+    </script>
+}
+
+@functions{
+
+    public string GetArrayValue(string[] sr, int i)
+    {
+        string returnrsl = "";
+        try
+        {
+            if (sr[i].Length > 0)
+            {
+                returnrsl = sr[i].ToString();
+            }
+
+
+        }
+        catch (System.IndexOutOfRangeException)
+        {
+            return null;
+        }
+        return returnrsl;
+
+
+    }
+
+    public string GetSelect()
+    {
+        return "<select class='form-control' qid='#q#' data-tmed='tmed' data-md='m6#q#'>" +
+         "<option value='0' ></option>" +
+          "<option value='mg'  >mg: milligram(s)</option>" +
+         "<option value='ml' >mL: milliliter(s)</option>" +
+         "<option value='ug' >ug: microgram(s)</option>" +
+         "<option value='ul' >uL: microliter(s)</option>" +
+         "<option value='mmol' >mmol: millimole(s)</option>" +
+         "<option value='iu' >IU: International Unit(s)</option>" +
+         "<option value='other' >Other</option></select>";
+    }
+
+
+    public string GetFrequency()
+    {
+        return "<select class='form-control' qid='#q#' data-tmed='tmed' data-md='m7#q#'   >" +
+     "<option value='0' ></option>" +
+     "<option value='1' >01</option>" +
+     "<option value='2' >02</option>" +
+     "<option value='3' >03</option>" +
+     "<option value='4' >04</option>" +
+     "<option value='5' >05</option>" +
+     "<option value='6' >06</option>" +
+     "<option value='7' >07</option>" +
+     "<option value='8' >08</option>" +
+     "<option value='9' >09</option> " +
+     "<option value='10' >10</option>" +
+     "<option value='11' >11</option> " +
+     "<option value='12' >12</option> " +
+     "</select>";
+
+    }
+
+    public string GetHours()
+    {
+        return "<select class='form-control' qid='#q#' data-tmed='tmed' data-md='m8#q#'>" +
+   "<option value=''   ></option>" +
+   "<option value='Hour' >Hour</option>" +
+   "<option value='Day' >Day</option>" +
+   "<option value='Week' >Week</option>" +
+   "<option value='Month' >Month</option>" +
+   "</select>";
+    }
+
+
+    protected string Option(int qid, string a, string type, string cssclass, string scr, string ans)
+    {
+
+        var tradio = "<div class='#c#'><input type='radio'  qid='#q#' name='q#q#' id='q#q#_#i#' value='#si#' data-score='#sc#' #chk# ><label for='q#q#_#i#'>#si#</label></div>";
+        var tslider = "<div class='#c#'><label for='q#q#_#i#' data-score='#sc#'>#si#</label></div>";
+        var tcheckbox = "<div class='#c#'><input type='checkbox' qid='#q#' name='q#q#' id='q#q#_#i#' value='#si#' data-score='#sc#' #chk#><label for='q#q#_#i#'>#si#</label></div>";
+        var ttext = "<div class='#c#'><input class='form-control' type='text' qid='#q#' name='q#q#' id='q#q#_#i#' value='#si#'></div>";
+        var tmultitext = "<div class='#c#'><textarea class='form-control' qid='#q#' name='q#q#' id='q#q#_#i#'>#si#</textarea></div>";
+
+        var tdate = "<div class='#c#'><input class='form-control _datepicker' type='text' qid='#q#' name='q#q#' id='q#q#_#i#' value='#si#'></div>";
+        var tmed = @"<div class='#c#'>
+                  <div class='row'>
+                    <div class='_spacing col-sm-1 _medlbl'>Details</div>
+                    <div class='_spacing col-sm-11'><input class='form-control' data-tmed='tmed' data-md='m1#q#' data-score='#sc#' placeholder='Details and Indication' type='text' qid='#q#' name='q#q#' id='q#q#_0' value='#si1#'></div>
+                    <div class='_spacing col-sm-1 _medlbl'>Dosage</div>
+                    <div class='_spacing col-sm-5'>
+                        <div class='col-sm-6' style='padding:0px;'><input class='form-control' data-tmed='tmed' data-md='m2#q#' data-score='#sc#' placeholder='Dosage' type='text' qid='#q#' name='q#q#' id='q#q#_1' value='#si2#'></div>
+                        <div class='col-sm-6' style='padding:0px;'>#GetSelect#</div></div>
+                    <div class='_spacing col-sm-1 _medlbl'>Frequency</div>
+                    <div class='_spacing col-sm-2'>#GetFrequency#</div>
+                    <div class='_spacing col-sm-1 _medlbl'>Times per</div>
+                    <div class='_spacing col-sm-2'>#GetHours#</div>
+                    <div class='_spacing col-sm-1 _medlbl'>Start Date</div>
+                    <div class='_spacing col-sm-2'><input class='form-control _datepickermed' data-tmed='tmed' data-md='m4#q#' data-score='#sc#' placeholder='Start Date' type='text' qid='#q#' name='q#q#' id='q#q#_2' value='#si4#'></div>
+                    <div class='_spacing col-sm-1 _medlbl'>End Date</div>
+                    <div class='_spacing col-sm-2'><input class='form-control _datepickermed' data-tmed='tmed' data-md='m5#q#' data-score='#sc#' placeholder='End Date' type='text' qid='#q#' name='q#q#' id='q#q#_3' value='#si5#'></div>
+                  </div>
+                </div>";
+        tmed = tmed.Replace("#GetSelect#", GetSelect()).Replace("#GetFrequency#", GetFrequency()).Replace("#GetHours#", GetHours());
+        var tsupmed = @"<div class='#c#'>
+                  <div class='row'>
+                    <div class='_spacing col-sm-1 _medlbl'>Brand</div>
+                    <div class='_spacing col-sm-11'><input class='form-control' data-tmed='tmed' data-md='m1#q#' data-score='#sc#' placeholder='Brand' type='text' qid='#q#' name='q#q#' id='q#q#_0' value='#si1#'></div>
+                    <div style='display:none;'>
+                    <div class='_spacing col-sm-1 _medlbl'>Dosage</div>
+                    <div class='_spacing col-sm-5'>
+                        <div class='col-sm-6' style='padding:0px;'><input class='form-control' data-tmed='tmed' data-md='m2#q#' data-score='#sc#' placeholder='Dosage' type='text' qid='#q#' name='q#q#' id='q#q#_1' value='#si2#'></div>
+                        <div class='col-sm-6' style='padding:0px;'>#GetSelect#</div></div></div>
+                    <div class='_spacing col-sm-1 _medlbl'>Frequency</div>
+                    <div class='_spacing col-sm-2'>#GetFrequency#</div>
+                    <div class='_spacing col-sm-1 _medlbl'>Times per</div>
+                    <div class='_spacing col-sm-2'>#GetHours#</div>
+                    <div class='_spacing col-sm-1 _medlbl'>Start Date</div>
+                    <div class='_spacing col-sm-2'><input class='form-control _datepickermed' data-tmed='tmed' data-md='m4#q#' data-score='#sc#' placeholder='Start Date' type='text' qid='#q#' name='q#q#' id='q#q#_2' value='#si4#'></div>
+                    <div class='_spacing col-sm-1 _medlbl'>End Date</div>
+                    <div class='_spacing col-sm-2'><input class='form-control _datepickermed' data-tmed='tmed' data-md='m5#q#' data-score='#sc#' placeholder='End Date' type='text' qid='#q#' name='q#q#' id='q#q#_3' value='#si5#'></div>
+                  </div>
+                </div>";
+        tsupmed = tsupmed.Replace("#GetSelect#", GetSelect()).Replace("#GetFrequency#", GetFrequency()).Replace("#GetHours#", GetHours());
+        var tsch = @"<div class='#c#'>
+                    <div class='col-sm-3 _schlbl'>Count of Sessions/Week</div>
+                    <div class='col-sm-3 _schlbl'>Time/Session</div>
+                    <div class='col-sm-3 _schlbl'>Start Date (mm-yy)</div>
+                    <div class='col-sm-3 _schlbl'>End Date (mm-yy)</div>
+                <div class='col-sm-3'><input class='form-control' data-sch='tsch' data-id='t1#q#' placeholder='Count of Sessions/Week' type='text' qid='#q#' name='q#q#' id='q#q#_#i#' value='#si0#'></div>
+                <div class='col-sm-3'><input class='form-control' data-sch='tsch' data-id='t2#q#' placeholder='Time/Session' type='text' qid='#q#' name='q#q#' id='q#q#_#i#' value='#si1#'></div>
+                <div class='col-sm-3'><input class='form-control' data-sch='tsch' data-id='t3#q#' placeholder='Start (mm-yy)' type='text' qid='#q#' name='q#q#' id='q#q#_#i#' value='#si2#'></div>
+                <div class='col-sm-3'><input class='form-control' data-sch='tsch' data-id='t4#q#' placeholder='End (mm-yy)' type='text' qid='#q#' name='q#q#' id='q#q#_#i#' value='#si3#'></div>
+                </div>";
+        var tschdiet = @"<div class='#c#'>
+                    <div class='col-sm-6 _schlbl'>Diet Details</div>
+                    <div class='col-sm-3 _schlbl'>Start Date (mm-yy)</div>
+                    <div class='col-sm-3 _schlbl'>End Date (mm-yy)</div>
+                <div class='col-sm-6'><input class='form-control' data-schdiet='tschdiet' data-id='t1#q#' placeholder='Details' type='text' qid='#q#' name='q#q#' id='q#q#_#i#' value='#si0#'></div>
+                <div class='col-sm-3'><input class='form-control' data-schdiet='tschdiet' data-id='t2#q#' placeholder='Start (mm-yy)' type='text' qid='#q#' name='q#q#' id='q#q#_#i#' value='#si1#'></div>
+                <div class='col-sm-3'><input class='form-control' data-schdiet='tschdiet' data-id='t3#q#' placeholder='End (mm-yy)' type='text' qid='#q#' name='q#q#' id='q#q#_#i#' value='#si2#'></div>
+                </div>";
+        var tcheckdate = "<div class='#c#  form-inline'><input type='checkbox' #chk# qid='#q#' name='q#q#' id='q#q#_#i#' value='#si#' class='col-sm-1' style='margin-top:10px;' onclick='enableDate(this,\"q#q#_1\")'>" +
+                    "<div class='col-sm-5'><input disabled='disabled' placeholder='Select Start Date' class='form-control _datepicker q#q#_1' type='text' qid='#q#' name='q#q#' id='q#q#_1_st' value='#si#'></div>" +
+                    "<div class='col-sm-5'><input disabled='disabled' placeholder='Select End Date' class='form-control _datepicker q#q#_1' type='text' qid='#q#' name='q#q#' id='q#q#_1_en' value='#si#'></div></div>";
+        var ttextdate = "<div class='#c#  form-inline'>" +
+                     "<input type='text' placeholder='Details' qid='#q#' name='q#q#' id='q#q#_#i#' value='#si0#' class='form-control _txtdatepicker' style='width:68%;' onkeyup='enabletextDate(this,\"q#q#_1\")'>" +
+                     "<input type='text' disabled='disabled'  placeholder='Select Date' qid='#q#' name='q#q#' id='q#q#_1' value='#si1#' class='form-control _datepicker'></div>";
+        string temp = @"";
+        string[] s = a.Split('|');
+
+        string[] sr = new string[] { };
+        if (scr != "")
+        {
+
+            sr = scr.Split('|');
+        }
+        for (int i = 0; i < s.Length; i++)
+        {
+            string att = "";
+            var multians = ans.Split('|');
+            if (type == "radio")
+            {
+                for (int j = 0; j < s.Length; j++)
+                {
+                    for (int k = 0; k < multians.Length; k++)
+                    {
+                        if (s[i].ToString() == multians[k])
+                        {
+                            att = "checked";
+                            break;
+                        }
+                        else
+                        {
+                            att = "";
+                        }
+                    }
+                    break;
+                }
+                temp += tradio.Replace("#c#", cssclass).Replace("#q#", qid.ToString()).Replace("#i#", i.ToString()).Replace("#si#", s[i]).Replace("#sc#", GetArrayValue(sr, i)).Replace("#chk#", att);
+            }
+            else if (type == "checkbox")
+            {
+                for (int j = 0; j < s.Length; j++)
+                {
+                    for (int k = 0; k < multians.Length; k++)
+                    {
+                        if (s[i].ToString() == multians[k])
+                        {
+                            att = "checked";
+                            break;
+                        }
+                        else
+                        {
+                            att = "";
+                        }
+                    }
+                    break;
+                }
+
+                temp += tcheckbox.Replace("#c#", cssclass).Replace("#q#", qid.ToString()).Replace("#i#", i.ToString()).Replace("#si#", s[i]).Replace("#sc#", GetArrayValue(sr, i)).Replace("#chk#", att);
+            }
+
+            else if (type == "text")
+            {
+                temp += ttext.Replace("#c#", cssclass).Replace("#q#", qid.ToString()).Replace("#i#", i.ToString()).Replace("#si#", ans);
+            }
+            else if (type == "multitext")
+            {
+
+                temp += tmultitext.Replace("#c#", cssclass).Replace("#q#", qid.ToString()).Replace("#i#", i.ToString()).Replace("#si#", ans);
+
+            }
+            else if (type == "select")
+            {
+
+                //to be continue from here
+                string selectedvalue = "";
+                if (s[i] == ans)
+                {
+                    var selectedoption = ans;
+                    selectedvalue = "selected";
+                    // break;
+                }
+                else
+                {
+                    selectedvalue = "";
+                }
+
+
+                if (i == 0)
+                {
+                    temp += "<div class='" + cssclass + "'><select class='form-control' qid='" + qid + "' name='q" + qid + "' id='q" + qid + "_" + i + "' ><option value=''></option>";
+                }
+                temp += "<option value='" + s[i] + "' " + selectedvalue + ">" + s[i] + "</option>";
+                if (i == s.Length - 1)
+                {
+                    temp += "</select></div>";
+                }
+
+            }
+            else if (type == "date")
+            {
+                temp += tdate.Replace("#c#", cssclass).Replace("#q#", qid.ToString()).Replace("#i#", i.ToString()).Replace("#si#", ans);
+            }
+            else if (type == "med")
+            {
+
+                var tempansvalue = "";
+                if (multians.Length >= 8)
+                {
+
+
+                    tempansvalue = tmed.Replace("#c#", cssclass).Replace("#q#", qid.ToString()).Replace("#i#", i.ToString()).Replace("#si1#", multians[0]).Replace("#si2#", multians[1]).Replace("#si4#", multians[2]).Replace("#si5#", multians[3]).Replace("#si6#", multians[7]).Replace("'" + multians[4] + "'", "'" + multians[4] + "' selected='selected'").Replace("'" + multians[5] + "'", "'" + multians[5] + "' selected='selected'").Replace("'" + multians[6] + "'", "'" + multians[6] + "' selected='selected'");
+                    if (multians[4] == "other") { tempansvalue = tempansvalue.Replace("none", "block"); }
+                }
+                else
+                {
+                    tempansvalue = tmed.Replace("#c#", cssclass).Replace("#q#", qid.ToString()).Replace("#i#", i.ToString()).Replace("#si1#", "").Replace("#si2#", "").Replace("#si4#", "").Replace("#si5#", "").Replace("#si6#", "");
+                }
+                temp += tempansvalue;
+            }
+            else if (type == "supmed")
+            {
+
+                var tempansvalue = "";
+                if (multians.Length >= 8)
+                {
+                    tempansvalue = tsupmed.Replace("#c#", cssclass).Replace("#q#", qid.ToString()).Replace("#i#", i.ToString()).Replace("#si1#", multians[0]).Replace("#si2#", multians[1]).Replace("#si4#", multians[2]).Replace("#si5#", multians[3]).Replace("#si6#", multians[7]).Replace("'" + multians[4] + "'", "'" + multians[4] + "' selected='selected'").Replace("'" + multians[5] + "'", "'" + multians[5] + "' selected='selected'").Replace("'" + multians[6] + "'", "'" + multians[6] + "' selected='selected'");
+                    if (multians[4] == "other") { tempansvalue = tempansvalue.Replace("none", "block"); }
+                }
+                else
+                {
+                    tempansvalue = tsupmed.Replace("#c#", cssclass).Replace("#q#", qid.ToString()).Replace("#i#", i.ToString()).Replace("#si1#", "").Replace("#si2#", "").Replace("#si4#", "").Replace("#si5#", "").Replace("#si6#", "");
+                }
+                temp += tempansvalue;
+            }
+            else if (type == "sch")
+            {
+                var temptsch = "";
+
+                if (multians.Length >= 4)
+                {
+                    temptsch = tsch.Replace("#c#", cssclass).Replace("#q#", qid.ToString()).Replace("#i#", i.ToString()).Replace("#si0#", multians[0]).Replace("#si1#", multians[1]).Replace("#si2#", multians[2]).Replace("#si3#", multians[3]);
+                }
+                else
+                {
+                    temptsch = tsch.Replace("#c#", cssclass).Replace("#q#", qid.ToString()).Replace("#i#", i.ToString()).Replace("#si0#", "").Replace("#si1#", "").Replace("#si2#", "").Replace("#si3#", "");
+                }
+
+
+                temp += temptsch;
+            }
+            else if (type == "schdiet")
+            {
+                var temptschdiet = "";
+
+                if (multians.Length >= 3)
+                {
+                    temptschdiet = tschdiet.Replace("#c#", cssclass).Replace("#q#", qid.ToString()).Replace("#i#", i.ToString()).Replace("#si0#", multians[0]).Replace("#si1#", multians[1]).Replace("#si2#", multians[2]);
+                }
+                else
+                {
+                    temptschdiet = tschdiet.Replace("#c#", cssclass).Replace("#q#", qid.ToString()).Replace("#i#", i.ToString()).Replace("#si0#", "").Replace("#si1#", "").Replace("#si2#", "").Replace("#si3#", "");
+                }
+
+
+                temp += temptschdiet;
+            }
+            else if (type == "checkdate")
+            {
+                temp += tcheckdate.Replace("#c#", cssclass).Replace("#q#", qid.ToString()).Replace("#i#", i.ToString()).Replace("#si#", ans).Replace("#chk#", ans != "" ? "checked" : "").Replace("disabled='disabled'", ans != "" ? "" : "disabled='disabled'");
+            }
+            else if (type == "textdate")
+            {
+                temp += ttextdate.Replace("#c#", cssclass).Replace("#q#", qid.ToString()).Replace("#i#", i.ToString())
+                    .Replace("#si0#", (ans.Contains("|") ? ans.Split('|')[0] : "")).Replace("#si1#", (ans.Contains("|") ? ans.Split('|')[1] : ""))
+                    .Replace("disabled='disabled'", ans != "" ? "" : "disabled='disabled'");
+            }
+            else if (type == "slider")
+            {
+                temp += tslider.Replace("#c#", cssclass + " slider").Replace("#q#", qid.ToString()).Replace("#i#", i.ToString()).Replace("#si#", s[i]).Replace("#sc#", GetArrayValue(sr, i));
+                if (i == s.Length - 1) { temp += ("<div id='slider#q#' qid='#q#' length='#i#' value='#si#' class='col-sm-" + (i == 5 ? "9" : "10") + " __slider'></div>").Replace("#si#", Array.IndexOf(s, ans).ToString()).Replace("#q#", qid.ToString()).Replace("#i#", i.ToString()); }
+            }
+            else
+            {
+                temp += ttext.Replace("#c#", cssclass).Replace("#q#", qid.ToString()).Replace("#i#", i.ToString()).Replace("#si#", s[i]);
+            }
+        }
+        temp += "";
+        return temp;
+    }
+
+    public string getGenderSpecificText(string question, int gender)
+    {
+        if (gender == 1)
+        {
+            question = question.Replace("He/She/They has", "He has");
+            question = question.Replace("Has he/she/they", "Has he");
+            question = question.Replace("he/she/they had", "he had");
+            question = question.Replace("Had he/she/they", "Had he");
+            question = question.Replace("he/she/they", "he");
+            question = question.Replace(" his/her/their", " his");
+            question = question.Replace("[his/her/their]", "his");
+            question = question.Replace(" was/were ", " was ");
+            question = question.Replace("him/her/them", "him");
+            question = question.Replace("himself/herself/themselves", "himself");
+            question = question.Replace("Does/Do ", "Does ");
+            question = question.Replace(" is/are ", " is ");
+            question = question.Replace("Has/Have ", "Has ");
+            question = question.Replace(" does/do ", " does ");
+        }
+        else if (gender == 2)
+        {
+            question = question.Replace("He/She/They has", "She has");
+            question = question.Replace("Has he/she/they", "Has she");
+            question = question.Replace("he/she/they had", "she had");
+            question = question.Replace("Had he/she/they", "Had she");
+            question = question.Replace("he/she/they", "she");
+            question = question.Replace(" his/her/their", " her");
+            question = question.Replace("[his/her/their]", "her");
+            question = question.Replace(" was/were ", " was ");
+            question = question.Replace("him/her/them", "her");
+            question = question.Replace("himself/herself/themselves", "herself");
+            question = question.Replace("Does/Do ", "Does ");
+            question = question.Replace(" is/are ", " is ");
+            question = question.Replace("Has/Have ", "Has ");
+            question = question.Replace(" does/do ", " does ");
+        }
+        else if (gender == 3)
+        {
+            question = question.Replace("Has he/she/they", "Have they");
+            question = question.Replace("He/She/They has", "They have");
+            question = question.Replace("he/she/they had", "they had");
+            question = question.Replace("Had he/she/they", "Had they");
+            question = question.Replace("he/she/they", "they");
+            question = question.Replace(" his/her/their", " their");
+            question = question.Replace("[his/her/their]", "their");
+            question = question.Replace(" was/were ", " were ");
+            question = question.Replace("him/her/them", "them");
+            question = question.Replace("himself/herself/themselves", "themselves");
+            question = question.Replace("Does/Do ", "Do ");
+            question = question.Replace(" is/are ", " are ");
+            question = question.Replace("Has/Have ", "Have ");
+            question = question.Replace(" does/do ", " do ");
+        }
+        return question;
+    }
+}
+
+<script type="text/javascript">
+    $(function(){
+        $(function () {
+            $(document).ajaxStart(function () { $(".disablebackground").show(); });
+            $(document).ajaxStop(function () { $(".disablebackground").hide(); });
+        });
+
+        $('[data-toggle="tooltip"]').tooltip({
+            track: true,
+            content: function () {
+                return $(this).attr('title').replace(/_NEWLINE_/g, "<br/>");
+            },
+        });
+    });
+
+    function goBack(elem){
+        var prcnt = $("#divCompletion").find("span:last-child").text();
+        if(prcnt == "100%"){
+            $("#SurveySubmit").click();
+        }
+        else{
+            location.href = "@Html.Raw(Request.UrlReferrer)#1";
+        }
+    }
+</script>
+
+@if (SurveyID == 44 && dsCRIs != null && dsCRIs.Tables.Count > 0 && dsCRIs.Tables[0].Rows.Count > 0)
+{
+    <script type="text/javascript">
+        $(function(){
+            $("#q1581_0").val("@dsCRIs.Tables[0].Rows[0]["Title"]");
+            $("#q1582_0").val("@(dsCRIs.Tables[0].Rows[0]["StartDate"] != DBNull.Value ? Convert.ToDateTime(dsCRIs.Tables[0].Rows[0]["StartDate"]).ToString("MM/dd/yyyy") : "")");
+            $("#q1583_0").val("@(dsCRIs.Tables[0].Rows[0]["EndDate"] != DBNull.Value ? Convert.ToDateTime(dsCRIs.Tables[0].Rows[0]["EndDate"]).ToString("MM/dd/yyyy") : "")");
+        });
+    </script>
+}

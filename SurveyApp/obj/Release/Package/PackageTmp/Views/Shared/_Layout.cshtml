@@ -1,0 +1,216 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewBag.Title</title>
+    <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-site-verification" content="SMAwJkKzNtZv3wEFlsIyVn93BxpV5Da2640hBh-CpW0" />
+
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans">
+    <link href="~/bootstrap/css/core.css" rel="stylesheet" />
+    <link href="~/bootstrap/css/icons.css" rel="stylesheet" />
+    <link href="~/bootstrap/css/components.css" rel="stylesheet" />
+    <link href="~/bootstrap/css/ionicons.min.css" rel="stylesheet" />
+
+    <link href="~/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/bootstrap/css/bootstrap-theme.css" rel="stylesheet" />
+    <link href="~/Content/jquery-ui.min.css" rel="stylesheet" />
+    <link href="~/Content/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+    <script src="~/Scripts/jquery-2.2.0.min.js"></script>
+    <script src="~/bootstrap/js/bootstrap.js"></script>
+    <script src="~/Scripts/jquery-ui.min.js"></script>
+    <script src="~/Scripts/custom.js"></script>
+    <script src="~/Scripts/jquery.dataTables.min.js"></script>
+    <script src="~/Scripts/dataTables.bootstrap.min.js"></script>
+    <script src="~/Scripts/smoothscroll.js"></script>
+    <script src="~/Scripts/bootbox.min.js"></script>
+
+    <script src="~/Scripts/dataTables.buttons.min.js"></script>
+    <script src="~/Scripts/jszip.min.js"></script>
+    <script src="~/Scripts/buttons.html5.min.js"></script>
+
+    <link href="~/Content/awsm/css/font-awesome.min.css" rel="stylesheet" />
+
+    <script src="~/Scripts/HighCharts/highcharts.js"></script>
+    <script src="~/Scripts/HighCharts/exporting.js"></script>
+
+
+    <style>
+        /*body{
+            font-family: 'Open Sans','Noto Sans', Arial, sans-serif !important;
+        }*/
+        .highcharts-button {
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 5px;
+        }
+
+        .btn-link {
+            color: #23527c;
+            text-decoration: underline;
+            background-color: transparent;
+        }
+
+        #body {
+            padding: 0px;
+        }
+
+        .leftmenu {
+            box-shadow: none;
+            font-size: 13px;
+        }
+
+            .leftmenu .list-group-item:first-child, .leftmenu .list-group-item:last-child {
+                border-radius: 0px;
+                padding: 10px 10px;
+            }
+
+            .leftmenu .list-group-item {
+                padding: 10px 10px;
+                background: #fafafa;
+                border-bottom: solid 1px #f1f1f1;
+                border: none;
+                color: #666666;
+            }
+
+                .leftmenu .list-group-item i {
+                    font-size: 18px;
+                    position: absolute;
+                    top: 8px;
+                    left: 15px;
+                }
+
+                .leftmenu .list-group-item.active {
+                    text-shadow: none;
+                    background: #90DFFC;
+                    color: #000000;
+                }
+
+                .leftmenu .list-group-item:hover {
+                    background: #C5EEFD;
+                }
+    </style>
+    <script type="text/javascript">
+        $(function () {
+            $(document).ajaxStart(function () { $(".loading").show(); /*$(".disablebackground").show();*/ });
+            $(document).ajaxStop(function () { $(".loading").hide(); /*$(".disablebackground").hide();*/ });
+        });
+
+        function isSessionValid(data) {
+            if (data.indexOf("sessionexpiredshowpopup") != -1) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+        function checkTimeout(data, type) {
+            if (data.indexOf("sessionexpiredshowpopup") != -1) {
+                showTimeoutError("@Url.Action("Login", "Account")");
+            }
+        }
+        function showTimeoutError(url) {
+            bootbox.dialog({
+                message: "Your session has expired, please login again to continue work.",
+                title: "Session Expired!",
+                closeButton: false,
+                onEscape: function() {
+                    location.href = url;
+                },
+                buttons: {
+                    success: {
+                        label: "Ok",
+                        className: "btn-primary",
+                        callback: function() {
+                            location.href = url;
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+    @*@Html.Raw(Request.IsAuthenticated == false ? "<script type=\"text/javascript\">window.location.href = window.location.origin + '/Account/Login';</script>" : "")*@
+
+    <!--
+    To collect end-user usage analytics about your application,
+    insert the following script into each page you want to track.
+    Place this code immediately before the closing </head> tag,
+    and before any other scripts. Your first data will appear
+    automatically in just a few seconds.
+    -->
+    <script type="text/javascript">
+        var appInsights = window.appInsights || function (a) {
+            function b(a) { c[a] = function () { var b = arguments; c.queue.push(function () { c[a].apply(c, b) }) } } var c = { config: a }, d = document, e = window; setTimeout(function () { var b = d.createElement("script"); b.src = a.url || "https://az416426.vo.msecnd.net/scripts/a/ai.0.js", d.getElementsByTagName("script")[0].parentNode.appendChild(b) }); try { c.cookie = d.cookie } catch (a) { } c.queue = []; for (var f = ["Event", "Exception", "Metric", "PageView", "Trace", "Dependency"]; f.length;)b("track" + f.pop()); if (b("setAuthenticatedUserContext"), b("clearAuthenticatedUserContext"), b("startTrackEvent"), b("stopTrackEvent"), b("startTrackPage"), b("stopTrackPage"), b("flush"), !a.disableExceptionTracking) { f = "onerror", b("_" + f); var g = e[f]; e[f] = function (a, b, d, e, h) { var i = g && g(a, b, d, e, h); return !0 !== i && c["_" + f](a, b, d, e, h), i } } return c
+        }({
+            instrumentationKey: "@System.Web.Configuration.WebConfigurationManager.AppSettings["ApplicationInsightsKey"]"  
+        });
+
+        window.appInsights = appInsights, appInsights.queue && 0 === appInsights.queue.length && appInsights.trackPageView();
+    </script>
+</head>
+<body>
+    <header>
+        <div class="content-wrapper" style='overflow:auto;padding:10px;border-bottom:solid 1px #f1f1f1;background:url(@Url.Content("~/")Images/ebitrainbow.jpg) no-repeat right bottom;background-size:auto 200%;padding-right:90px;'>
+            <div class="float-left">
+                <p class="site-title">
+                    <a href="@(System.Web.Configuration.WebConfigurationManager.AppSettings["_RootPath"].ToString())"><img src='~/Images/at3logo.png' /></a>
+                </p>
+            </div>
+            <div class="float-right">
+                <section id="login">
+                    @Html.Partial("_LoginPartial")
+                </section>
+                <nav>
+                    @if (!Request.Url.ToString().Contains("/Login"))
+                    {
+                        <ul id="menu">
+                            <li class="@(Request.Url.ToString().ToLower().Contains("home/index") == true ? "selected" : "")">@Html.ActionLink("Home", "Index", "Home")</li>
+                            <li class="@(Request.Url.ToString().ToLower().Contains("home/about") == true ? "selected" : "")">@Html.ActionLink("About", "About", "Home")</li>
+                            <li class="@(Request.Url.ToString().ToLower().Contains("home/contact") == true ? "selected" : "")">@Html.ActionLink("Contact", "Contact", "Home")</li>
+                        </ul>
+                    }
+                </nav>
+            </div>
+
+        </div>
+    </header>
+    <div id="body">
+        @if (SurveyApp.Controllers.HomeController.isAdminRole() == true)
+        {
+            <div class="col-sm-2 leftsection" style="margin-top:0px;padding:0px;min-height:600px;">
+                @{Html.RenderPartial("~/Views/Shared/_AdminMenu.cshtml");}
+            </div>
+        }
+
+        <div class="@(SurveyApp.Controllers.HomeController.isAdminRole() == true ? "col-sm-10 rightsection" : "")" style="margin: 0px; padding: 0px; min-height: 600px;background:#ffffff;">
+            @RenderSection("featured", required: false)
+            <section class="content-wrapper main-content clear-fix" style="padding:10px;">
+                @RenderBody()
+            <br /><br />
+        </section>
+    </div>
+
+</div>
+<footer class="col-sm-12">
+    <div class="content-wrapper" style="padding:10px;">
+        <p>&copy; @DateTime.Now.Year - eBit (Evidence Based Intervention and Treatment)</p>
+
+    </div>
+</footer>
+
+
+@RenderSection("scripts", required: false)
+
+<div class="loading" style="display: none;"><div>Please Wait...</div></div>
+    <div class="disablebackground"></div>
+    <script type="text/javascript">
+        window.onload = function () { $(".highcharts-button").hide(); }
+    </script>
+</body>
+</html>

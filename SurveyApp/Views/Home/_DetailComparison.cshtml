@@ -1,0 +1,701 @@
+﻿@using SurveyApp.Models;
+@using System.Data;
+
+@{ 
+    int studyId = String.IsNullOrEmpty(Request.QueryString["studyId"]) != true ? Convert.ToInt32(Request.QueryString["studyId"]) : 0;
+    string studyName = String.IsNullOrEmpty(Request.QueryString["studyName"]) != true ? Request.QueryString["studyName"].ToString() : "";
+    int childIdts = String.IsNullOrEmpty(Request.QueryString["childIdts"]) != true ? Convert.ToInt32(Request.QueryString["childIdts"]) : 0;
+    string childName = String.IsNullOrEmpty(Request.QueryString["child"]) != true ? Request.QueryString["child"].ToString() : "";
+
+    int children = 0;
+    DataSet dsComparison = SurveyApp.DataHelper.DashboardGetDetailComparison(studyId, DateTime.Now, childIdts);
+    if(dsComparison != null)
+    {
+        dtChildren = dsComparison.Tables[0];
+        dtTeachers = dsComparison.Tables[1];
+        dtStudents = dsComparison.Tables[2];
+        dtSurveys = dsComparison.Tables[3];
+        dtTotalSurveys = dsComparison.Tables[4];
+    }
+    if (dtChildren != null && dtChildren.Rows != null && dtChildren.Rows.Count > 0)
+    {
+        children = dtChildren.Rows.Count;
+    }
+
+}
+
+@functions{
+
+    DataTable dtChildren, dtTeachers, dtStudents, dtSurveys, dtTotalSurveys;
+
+    public string getSurveyValue(int childId, int surveyId, int teacherId, int periodtype, SurveyAppRoles userType)
+    {
+        string value = "", scheduleDate = "", userId = "";
+        string notstarted = "<span><i class='ion-record notstarted' data-toggle='tooltip' title='This questionnaire has not started yet' scheuledate='_SCHEDULEDATE_' userid='_USERID_'></i></span>";
+        string notapplicable = "<span><i class='ion-android-radio-button-off notenrolled' data-toggle='tooltip' title='Not applicable to respond' scheuledate='_SCHEDULEDATE_' userid='_USERID_'></i></span>";
+        string notscheduled = "<span><i class='ion-record notapplicable' data-toggle='tooltip' title='Child is not scheduled for this questionnaire for this respondent' scheuledate='_SCHEDULEDATE_' userid='_USERID_'></i></span>";
+
+        DataRow[] drSurveys = dtSurveys.Select("ChildId = " + childId + " AND SurveyId = " + surveyId + " AND ('" + DateTime.Now.ToString("MM/dd/yyyy") + "'" + (periodtype == 1 ? " <= " : " > ") + " ScheduleDate OR ScheduleDate IS NULL) "+ (periodtype == 1 ? " AND EndDatePassed = 0 " : " AND EndDatePassed = 1 ") + " AND (ScheuleStartDate <= '" + DateTime.Now.ToString("MM/dd/yyyy") + "')", (periodtype == 1 ? " ScheduleDate ASC" : " ScheduleDate DESC "));
+        foreach (DataRow drS in drSurveys)
+        {
+            scheduleDate = drS["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(drS["ScheduleDate"]).ToString("MM/dd/yyyy") : "";
+            userId = drS["UserID"] != DBNull.Value ? drS["UserID"].ToString() : "";
+
+            int aoutMin = drS["AOUTMin"] != DBNull.Value ? Convert.ToInt32(drS["AOUTMin"]) : 0;
+            int aoutMax = drS["AOUTMax"] != DBNull.Value ? Convert.ToInt32(drS["AOUTMax"]) : 0;
+
+            if ((drS["UserID"] != DBNull.Value ? (int)drS["UserID"] : -1) == teacherId && (aoutMin == (int)userType || aoutMax == (int)userType))
+            {
+                string cssClass = (drS["Percentage"] == DBNull.Value ? "notstarted" : (Convert.ToInt32(drS["Percentage"]) == 100 ? "complete" : (Convert.ToInt32(drS["Percentage"]) < 100 ? "incomplete" : "notapplicable")));
+                string title = (cssClass == "complete" ? "This questionnaire is complete" : (cssClass == "incomplete" ? "This questionnaire is partially complete" : (cssClass == "notstarted" ? "This questionnaire has not started yet" : "Child is not scheduled for this questionnaire for this respondent")));
+                value = "<span><i data-toggle='tooltip' title='" + title + "' class='ion-record " + cssClass + "' scheuledate='_SCHEDULEDATE_' userid='_USERID_'></i></span>";
+                value = value.Replace("_SCHEDULEDATE_", scheduleDate);
+                value = value.Replace("_USERID_", userId);
+                return value;
+            }
+            else
+            {
+                if (drS["ScheduleDate"] == DBNull.Value && drS["UserID"] == DBNull.Value)
+                {
+                    if (surveyId == 6 || surveyId == 7 || surveyId == 8 || surveyId == 9 || surveyId == 45)
+                    {
+                        DataRow[] drChildren = dtChildren.Select("ChildId = " + childId);
+                        if (drChildren.Length > 0)
+                        {
+                            int age = DateTime.Today.Year - Convert.ToDateTime(drChildren[0]["dob"]).Year;
+                            if (surveyId == 6) { if (age <= 4 && surveyId == 6) { value = notstarted; } else { value = notapplicable; } }
+                            if (surveyId == 7) { if (age <= 7 && age >= 5 && surveyId == 7) { value = notstarted; } else { value = notapplicable; } }
+                            if (surveyId == 8) { if (age <= 12 && age >= 8 && surveyId == 8) { value = notstarted; } else { value = notapplicable; } }
+                            if (surveyId == 9) { if (age <= 18 && age >= 13 && surveyId == 9) { value = notstarted; } else { value = notapplicable; } }
+                            if (surveyId == 45) { if (age >= 19 && surveyId == 45) { value = notstarted; } else { value = notapplicable; } }
+                        }
+                    }
+                    else if (surveyId == 51 || surveyId == 52)
+                    {
+                        DataRow[] drChildren = dtChildren.Select("ChildId = " + childId);
+                        if (drChildren.Length > 0)
+                        {
+                            int age = DateTime.Today.Year - Convert.ToDateTime(drChildren[0]["dob"]).Year;
+                            if (surveyId == 51) { if (age <= 10 && surveyId == 51) { value = notstarted; } else { value = notapplicable; } }
+                            if (surveyId == 52) { if (age >= 11 && surveyId == 52) { value = notstarted; } else { value = notapplicable; } }
+                        }
+                    }
+                    else if (surveyId == 62 || surveyId == 63)
+                    {
+                        DataRow[] drChildren = dtChildren.Select("ChildId = " + childId);
+                        if (drChildren.Length > 0)
+                        {
+                            int age = DateTime.Today.Year - Convert.ToDateTime(drChildren[0]["dob"]).Year;
+                            if (surveyId == 62) { if (age <= 10 && surveyId == 62) { value = notstarted; } else { value = notapplicable; } }
+                            if (surveyId == 63) { if (age >= 11 && surveyId == 63) { value = notstarted; } else { value = notapplicable; } }
+                        }
+                    }
+                    else
+                    {
+                        if(aoutMin == (int)userType || aoutMax == (int)userType)
+                        {
+                            value = notstarted;
+                        }
+                        else
+                        {
+                            value = notapplicable;
+                        }
+
+                    }
+                }
+                else
+                {
+                    value = notscheduled;
+                }
+            }
+        }
+        if (value == "")
+        {
+            value = notapplicable;
+        }
+        value = value.Replace("_SCHEDULEDATE_", scheduleDate);
+        value = value.Replace("_USERID_", userId);
+        return value;
+    }
+
+
+    public bool getChildAge(int childId, int surveyId) {
+        bool isPeds = false;
+        int age = 0;
+        DataRow[] drChildren = dtChildren.Select("ChildId = " + childId);
+        if (drChildren.Length > 0)
+        {
+            age = DateTime.Today.Year - Convert.ToDateTime(drChildren[0]["dob"]).Year;
+            DateTime dob = Convert.ToDateTime(drChildren[0]["dob"]);
+            DateTime today = DateTime.Today;
+            if (dob > today.AddYears(-age)) { age--; }
+
+            if (surveyId == 6 || surveyId == 7 || surveyId == 8 || surveyId == 9 || surveyId == 45)
+            {
+                if (surveyId == 6) { if (age <= 4 && surveyId == 6) { isPeds = true; } else { isPeds = false; } }
+                if (surveyId == 7) { if (age <= 7 && age >= 5 && surveyId == 7) { isPeds = true; } else { isPeds = false; } }
+                if (surveyId == 8) { if (age <= 12 && age >= 8 && surveyId == 8) { isPeds = true; } else { isPeds = false; } }
+                if (surveyId == 9) { if (age <= 18 && age >= 13 && surveyId == 9) { isPeds = true; } else { isPeds = false; } }
+                if (surveyId == 45) { if (age >= 19 && surveyId == 45) { isPeds = true; } else { isPeds = false; } }
+            }
+            if (surveyId == 51 || surveyId == 52)
+            {
+                if (surveyId == 51) { if (age <= 10 && surveyId == 51) { isPeds = true; } else { isPeds = false; } }
+                if (surveyId == 52) { if (age >= 11 && surveyId == 52) { isPeds = true; } else { isPeds = false; } }
+            }
+            if (surveyId == 62 || surveyId == 63)
+            {
+                if (surveyId == 62) { if (age <= 12 && age >= 8 && surveyId == 62) { isPeds = true; } else { isPeds = false; } }
+                if (surveyId == 63) { if (age <= 18 && age >= 13 && surveyId == 63) { isPeds = true; } else { isPeds = false; } }
+            }
+
+        }
+
+        return isPeds;
+    }
+        }
+
+<style type="text/css">
+    .comparison h4, .comparison .current{display: inline-block;}    
+    .tblComparison{background-color: #FFF;}
+    .tblComparison .hdhelper{font-weight: normal;cursor: pointer;color:#000000;}
+    .name{border-right: solid 1px #CCC;border-bottom: solid 1px #CCC;width: 140px;padding: 2px;text-transform:capitalize;}
+    .name span{cursor:pointer;color: #EA0000;}
+    .dots td{padding: 2px;}    
+    .dots .dot{width: 43px;text-align: center;border-right: solid 1px #CCC;border-bottom: solid 1px #CCC;cursor:pointer;}
+    .complete{color:#33B86C;}
+    .incomplete{color:#FFEB3B;}
+    .notstarted{color:#D7524B;}
+    .notapplicable{color:#9E9E9E;}
+    .notenrolled{color:#A3A2DE;}
+    .comparison .current, .comparison .previous {border-top: none;width: 100%;}
+    .comparison ul {height: 41px;margin: 0px;list-style: none;padding:0px;border-bottom: solid 1px #CCC;}
+    .comparison li {float: left;}
+    .comparison li a {margin-right: 2px;border: 1px solid transparent;padding: 10px 15px;display: block;position: relative;text-shadow: none;text-decoration:none;color:#333;min-width: 141px;}
+    .comparison li a:hover {border-color: #FEFEFE;cursor: pointer;}
+    .comparison li a.selected {color: #4d6b8a;background-color: #fff;border: 1px solid #B1B1B1;border-bottom-color: transparent;cursor: default;}
+    .comparison .tblComparison .trhdn{display:none !important;}
+    .comparison .title{height: 50px;clear: both;background-color: #FFF;text-align: center;padding: 10px;}
+    .comparison .linker{text-decoration:none;padding: 2px 4px;background-color: #333;color: #FFF;display: inline-block;}
+    .comparison .heading{position: absolute;display:inline-block;font-size:10px;-ms-transform: rotate(-60deg); /* IE 9 */-webkit-transform: rotate(-60deg); /* Chrome, Safari, Opera */transform: rotate(-60deg);}
+    .comparison .tilttitle{position:absolute;display: inline-block;transform: rotate(-40deg);top: -3px;left: 6px;right: 0;margin-left: auto;margin-right: auto;white-space: nowrap;}
+    .comparison .nodata{margin: 25px;text-align: center;}
+    .comparison .linker.disabled{background-color: #CCC;cursor: help;}
+    .ui-tooltip {max-width: 400px;background-color: #333;color:#FFF;}
+    .notasoc{}
+</style>
+
+<div class="comparison">
+    <h3 style="text-transform:capitalize;">@studyName @(childName != "" ? "(" + childName + ")" : "") - Questionnaire Completion Detail</h3>
+    <div class="current">
+        <div class="tabs" >
+            <ul class="tabperiod">
+                <li>
+                    <a class="selected" href="javascript:void(0);" onclick="$('.tabperiod a').removeClass('selected'); $(this).addClass('selected'); $('.tblComparison').find('.tblPrevious').hide(); $('#divAssignmentDetails').hide();$('.completionHistory').show(); $('.tblComparison').find('.tblCurrent').show(); $('.chkPrevious').hide(); $('.chkCurrent').show(); $('.remPrevious').hide(); $('.remCurrent').show();">Currently Due</a>
+                </li>
+                <li>
+                    <a href="javascript:void(0);" onclick="$('.tabperiod a').removeClass('selected'); $(this).addClass('selected'); $('.tblComparison').find('.tblCurrent').hide(); $('#divAssignmentDetails').hide(); $('.completionHistory').show(); $('.tblComparison').find('.tblPrevious').show(); $('.chkCurrent').hide(); $('.chkPrevious').show(); $('.remCurrent').hide(); $('.remPrevious').show();">Previously Due</a>
+                </li>
+                <li>
+                    <a href="javascript:void(0);" onclick="showAssignmentDetails(this);">Future Assignment</a>
+                </li>
+            </ul>
+            </div>
+
+        <div class="completionHistory">
+
+            <div style="padding:10px 0px;overflow:hidden;text-align:center;">
+                <table style="float:right;">
+                    <tr>
+                        <td style="padding:0px 10px;"><span><i class="ion-record complete"></i>&nbsp;Complete</span></td>
+                        <td style="padding:0px 10px;"><span><i class="ion-record incomplete"></i>&nbsp;Partialy Complete</span></td>
+                        <td style="padding:0px 10px;"><span><i class="ion-record notstarted"></i>&nbsp;Not Started</span></td>
+                        <td style="padding:0px 10px;"><span><i class="ion-record notapplicable"></i>&nbsp;Not Assigned</span></td>
+                        <td style="padding:0px 10px;"><span><i class="ion-android-radio-button-off notenrolled"></i>&nbsp;Not Applicable</span></td>
+
+                    </tr>
+                </table>
+            </div>
+            <div class="title" style="height:10px;"></div>
+            <div style="border-bottom: solid 1px #CCC;">
+                <table cellpadding="0" cellspacing="0" class="tblComparison" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th class="name hdhelper" data-toggle="tooltip" title="Child enrolled in the specfic questionnaire">Child</th>
+                            <th>
+                                <table class="dots" style="width:100%">
+                                    <tr>
+                                        <th class="dot hdhelper" style="position:relative">
+                                            <div style="position:absolute;top:-25px;width:140px;left:-40px;">
+                                                <div style="margin:0px 0px 0px 5px; padding:0; float:left;" class="remCurrent">
+                                                    <a href="javascript:void(0);" class="linker disabled" data-toggle='tooltip' title="Please select a respondent first to send reminder" onclick="sendReminder(this);">Send Reminder</a>
+                                                </div>
+                                                <div style="margin:0px 0px 0px 5px; padding:0; float:left;display:none;" class="remPrevious">
+                                                    <a href="javascript:void(0);" class="linker disabled" data-toggle='tooltip' title="Please select a respondent first to send reminder" onclick="sendReminder(this);">Send Reminder</a>
+                                                </div>
+                                            </div>
+                                            <input type="checkbox" class="chkCurrent" style="" onclick="checkAll(this);" />
+                                            <input type="checkbox" class="chkPrevious" style="display:none;" onclick="checkAll(this);" />
+                                        </th>
+                                        <th class="name hdhelper" data-toggle="tooltip" title="The resondents for the respective questionnaire i.e. Teacher/Parent">
+                                            Respondent
+                                        </th>
+
+                                        @{ bool peds = false, snd = false, ssis = false; }
+                                        @foreach (DataRow drT in dtTotalSurveys.Rows)
+                                        {
+                                            if (((int)drT["SurveyId"] == 6 || (int)drT["SurveyId"] == 7 || (int)drT["SurveyId"] == 8 || (int)drT["SurveyId"] == 9 || (int)drT["SurveyId"] == 45) && peds == false)
+                                            {
+                                                peds = true;
+                                                <th class="dot hdhelper" data-toggle="tooltip" style="position:relative" title="@drT["FullTitle"]"><span class="tilttitle">@drT["Title"]</span></th>
+                                            }
+                                            else if (((int)drT["SurveyId"] == 51 || (int)drT["SurveyId"] == 52) && snd == false)
+                                            {
+                                                snd = true;
+                                                <th class="dot hdhelper" data-toggle="tooltip" style="position:relative" title="@drT["FullTitle"]"><span class="tilttitle">@drT["Title"]</span></th>
+                                            }
+                                            else if (((int)drT["SurveyId"] == 62 || (int)drT["SurveyId"] == 63) && ssis == false)
+                                            {
+                                                ssis = true;
+                                                <th class="dot hdhelper" data-toggle="tooltip" style="position:relative" title="@drT["FullTitle"]"><span class="tilttitle">@drT["Title"]</span></th>
+                                            }
+                                            else if ((int)drT["SurveyId"] != 6 && (int)drT["SurveyId"] != 7 && (int)drT["SurveyId"] != 8 && (int)drT["SurveyId"] != 9 && (int)drT["SurveyId"] != 45 && (int)drT["SurveyId"] != 51 && (int)drT["SurveyId"] != 52 && (int)drT["SurveyId"] != 62 && (int)drT["SurveyId"] != 63)
+                                            {
+                                                <th class="dot hdhelper" data-toggle="tooltip" style="position:relative" title="@drT["FullTitle"]"><span class="tilttitle">@drT["Title"]</span></th>
+                                            }
+                                        }
+
+                                    </tr>
+                                </table>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (children > 0)
+                    {
+                        int index = 0;
+                        foreach (DataRow drChild in dtChildren.Rows)
+                        {
+                            DataRow[] drTeachers = dtTeachers.Select("ChildId = " + drChild["ChildId"]);
+                            DataRow[] drStudents = dtStudents.Select("ChildId = " + drChild["ChildId"]);
+                                <tr class="@(index >= 10 ? "chosenones trhdn" : "")">
+                                    <td class="name">@drChild["Name"]</td>
+                                    <td>
+                                        <table class="dots tblCurrent" style="width: 100%;">
+                                            <tr>
+                                                <td class="dot" @(drChild["Email"] == DBNull.Value ? "notasoc" : "")>
+                                                    @if (drChild["Email"] != DBNull.Value)
+                                                    {
+                                                        <input type="checkbox" class="checkReminder" data-toggle="tooltip" title="@drChild["Email"]" onclick="setReminderOption(this);" userid="@drChild["ParentId"]" email="@drChild["Email"]" />
+                                                    }
+                                                </td>
+                                                <td class="name @(drChild["Email"] == DBNull.Value ? "notasoc" : "")">
+                                                    @if (drChild["Email"] != DBNull.Value)
+                                                    {
+                                                        <i class="ion-home"></i>
+                                                        @drChild["Parent"]
+                                                        if (@drChild["ReminderDate"] != DBNull.Value)
+                                                        {
+                                                            <span data-toggle="tooltip" title="Last Reminder Sent On: @drChild["ReminderDate"]"><i class="fa fa-clock-o"></i></span>
+                                                       }
+                                                   }
+                                                   else
+                                                   {
+                                                        <i class="ion-home" style="color: #EE0000;" title="Parent association has been removed for this child" data-toggle="tooltip"></i>
+                                                   }
+                                                </td>
+                                                @{bool pedsTD = false, sndTD = false, ssisTD = false; }
+                                                @foreach (DataRow drT in dtTotalSurveys.Rows)
+                                                {
+                                                    if ((((int)drT["SurveyId"] == 6 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 7 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 8 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 9 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 45 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true)) && pedsTD == false)
+                                                    {
+                                                        pedsTD = true;
+                                                        <td class="dot @(drChild["Email"] == DBNull.Value ? "notasoc" : "")"><span onclick="openSurvey(this, @drT["SurveyId"], @drChild["ChildId"], @((int)drChild["ParentId"]), '@drChild["Name"]');">@Html.Raw(getSurveyValue((int)drChild["ChildId"], (int)drT["SurveyId"], (int)drChild["ParentId"], 1, SurveyAppRoles.Parent))</span></td>
+                                                    }
+                                                    else if ((((int)drT["SurveyId"] == 51 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 52 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true)) && sndTD == false)
+                                                    {
+                                                        sndTD = true;
+                                                        <td class="dot @(drChild["Email"] == DBNull.Value ? "notasoc" : "")"><span onclick="openSurvey(this, @drT["SurveyId"], @drChild["ChildId"], @((int)drChild["ParentId"]), '@drChild["Name"]');">@Html.Raw(getSurveyValue((int)drChild["ChildId"], (int)drT["SurveyId"], (int)drChild["ParentId"], 1, SurveyAppRoles.Parent))</span></td>
+                                                    }
+                                                    else if ((((int)drT["SurveyId"] == 62 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 63 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true)) && ssisTD == false)
+                                                    {
+                                                        ssisTD = true;
+                                                        <td class="dot @(drChild["Email"] == DBNull.Value ? "notasoc" : "")"><span onclick="openSurvey(this, @drT["SurveyId"], @drChild["ChildId"], @((int)drChild["ParentId"]), '@drChild["Name"]');">@Html.Raw(getSurveyValue((int)drChild["ChildId"], (int)drT["SurveyId"], (int)drChild["ParentId"], 1, SurveyAppRoles.Parent))</span></td>
+                                                    }
+                                                    else if ((int)drT["SurveyId"] != 6 && (int)drT["SurveyId"] != 7 && (int)drT["SurveyId"] != 8 && (int)drT["SurveyId"] != 9 && (int)drT["SurveyId"] != 45 && (int)drT["SurveyId"] != 51 && (int)drT["SurveyId"] != 52 && (int)drT["SurveyId"] != 62 && (int)drT["SurveyId"] != 63)
+                                                    {
+                                                        <td class="dot @(drChild["Email"] == DBNull.Value ? "notasoc" : "")"><span onclick="openSurvey(this, @drT["SurveyId"], @drChild["ChildId"], @((int)drChild["ParentId"]), '@drChild["Name"]');">@Html.Raw(getSurveyValue((int)drChild["ChildId"], (int)drT["SurveyId"], (int)drChild["ParentId"], 1, SurveyAppRoles.Parent))</span></td>
+                                                    }
+                                                }
+                                            </tr>
+                                            @foreach (DataRow drTeacher in drTeachers)
+                                            {
+                                                <tr>
+                                                    <td class="dot">
+                                                        <input type="checkbox" class="checkReminder" data-toggle="tooltip" title="@drTeacher["Email"]" onclick="setReminderOption(this);" userid="@drTeacher["TeacherId"]" email="@drTeacher["Email"]" />
+                                                    </td>
+                                                    <td class="name">
+                                                        <i class="ion-university"></i> @drTeacher["Teacher"] @if (@drTeacher["ReminderDate"] != DBNull.Value) { <span data-toggle="tooltip" title="Last Reminder Sent On: @drTeacher["ReminderDate"]"><i class="fa fa-clock-o"></i></span> }
+                                                    </td>
+                                                    @{bool pedsPTD = false, sndTTD = false, ssisTTD = false; }
+                                                    @foreach (DataRow drT in dtTotalSurveys.Rows)
+                                                    {
+                                                        if ((((int)drT["SurveyId"] == 6 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 7 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 8 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 9 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 45 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true)) && pedsPTD == false)
+                                                        {
+                                                            pedsPTD = true;
+                                                            <td class="dot"><span onclick="openSurvey(this, @drT["SurveyId"], @drChild["ChildId"], @((int)drTeacher["TeacherId"]), '@drChild["Name"]');">@Html.Raw(getSurveyValue((int)drChild["ChildId"], (int)drT["SurveyId"], (int)drTeacher["TeacherId"], 1, SurveyAppRoles.Teacher))</span></td>
+                                                        }
+                                                        else if ((((int)drT["SurveyId"] == 51 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 52 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true)) && sndTTD == false)
+                                                        {
+                                                            sndTTD = true;
+                                                            <td class="dot"><span onclick="openSurvey(this, @drT["SurveyId"], @drChild["ChildId"], @((int)drTeacher["TeacherId"]), '@drChild["Name"]');">@Html.Raw(getSurveyValue((int)drChild["ChildId"], (int)drT["SurveyId"], (int)drTeacher["TeacherId"], 1, SurveyAppRoles.Teacher))</span></td>
+                                                        }
+                                                        else if ((((int)drT["SurveyId"] == 62 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 63 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true)) && ssisTTD == false)
+                                                        {
+                                                            ssisTTD = true;
+                                                            <td class="dot"><span onclick="openSurvey(this, @drT["SurveyId"], @drChild["ChildId"], @((int)drTeacher["TeacherId"]), '@drChild["Name"]');">@Html.Raw(getSurveyValue((int)drChild["ChildId"], (int)drT["SurveyId"], (int)drTeacher["TeacherId"], 1, SurveyAppRoles.Teacher))</span></td>
+                                                        }
+                                                        else if ((int)drT["SurveyId"] != 6 && (int)drT["SurveyId"] != 7 && (int)drT["SurveyId"] != 8 && (int)drT["SurveyId"] != 9 && (int)drT["SurveyId"] != 45 && (int)drT["SurveyId"] != 51 && (int)drT["SurveyId"] != 52 && (int)drT["SurveyId"] != 62 && (int)drT["SurveyId"] != 63)
+                                                        {
+                                                            <td class="dot"><span onclick="openSurvey(this, @drT["SurveyId"], @drChild["ChildId"], @((int)drTeacher["TeacherId"]), '@drChild["Name"]');">@Html.Raw(getSurveyValue((int)drChild["ChildId"], (int)drT["SurveyId"], (int)drTeacher["TeacherId"], 1, SurveyAppRoles.Teacher))</span></td>
+                                                        }
+                                                    }
+                                                </tr>
+                                            }
+                                            @foreach (DataRow drStudent in drStudents)
+                                    {
+                                                <tr>
+                                                    <td class="dot">
+                                                        <input type="checkbox" class="checkReminder" data-toggle="tooltip" title="@drStudent["Email"]" onclick="setReminderOption(this);" userid="@drStudent["StudentId"]" email="@drStudent["Email"]" />
+                                                    </td>
+                                                    <td class="name">
+                                                        <i class="ion-happy"></i> @drStudent["Student"] @if (@drStudent["ReminderDate"] != DBNull.Value)
+                                                { <span data-toggle="tooltip" title="Last Reminder Sent On: @drStudent["ReminderDate"]"><i class="fa fa-clock-o"></i></span> }
+                                                    </td>
+                                                    @{bool pedsPTD = false, sndTTD = false, ssisTTD = false; }
+                                                    @foreach (DataRow drT in dtTotalSurveys.Rows)
+                                            {
+                                                if ((((int)drT["SurveyId"] == 6 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 7 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 8 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 9 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 45 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true)) && pedsPTD == false)
+                                                {
+                                                    pedsPTD = true;
+                                                    <td class="dot"><span onclick="openSurvey(this, @drT["SurveyId"], @drChild["ChildId"], @((int)drStudent["StudentId"]), '@drChild["Name"]');">@Html.Raw(getSurveyValue((int)drChild["ChildId"], (int)drT["SurveyId"], (int)drStudent["StudentId"], 1, SurveyAppRoles.Student))</span></td>
+                                                }
+                                                else if ((((int)drT["SurveyId"] == 51 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 52 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true)) && sndTTD == false)
+                                                {
+                                                    sndTTD = true;
+                                                    <td class="dot"><span onclick="openSurvey(this, @drT["SurveyId"], @drChild["ChildId"], @((int)drStudent["StudentId"]), '@drChild["Name"]');">@Html.Raw(getSurveyValue((int)drChild["ChildId"], (int)drT["SurveyId"], (int)drStudent["StudentId"], 1, SurveyAppRoles.Student))</span></td>
+                                                }
+                                                else if ((((int)drT["SurveyId"] == 62 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 63 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true)) && ssisTTD == false)
+                                                {
+                                                    ssisTTD = true;
+                                                    <td class="dot"><span onclick="openSurvey(this, @drT["SurveyId"], @drChild["ChildId"], @((int)drStudent["StudentId"]), '@drChild["Name"]');">@Html.Raw(getSurveyValue((int)drChild["ChildId"], (int)drT["SurveyId"], (int)drStudent["StudentId"], 1, SurveyAppRoles.Student))</span></td>
+                                                }
+                                                else if ((int)drT["SurveyId"] != 6 && (int)drT["SurveyId"] != 7 && (int)drT["SurveyId"] != 8 && (int)drT["SurveyId"] != 9 && (int)drT["SurveyId"] != 45 && (int)drT["SurveyId"] != 51 && (int)drT["SurveyId"] != 52 && (int)drT["SurveyId"] != 62 && (int)drT["SurveyId"] != 63)
+                                                {
+                                                     <td class="dot"><span onclick="openSurvey(this, @drT["SurveyId"], @drChild["ChildId"], @((int)drStudent["StudentId"]), '@drChild["Name"]');">@Html.Raw(getSurveyValue((int)drChild["ChildId"], (int)drT["SurveyId"], (int)drStudent["StudentId"], 1, SurveyAppRoles.Student))</span></td>
+                                                }
+                                            }
+                                                </tr>
+                                    }
+                                        </table>
+                                        <table class="dots tblPrevious" style="display:none;width:100%;">
+                                            <tr>
+                                                <td class="dot">
+                                                    <input type="checkbox" class="checkReminder" data-toggle="tooltip" title="@drChild["Email"]" onclick="setReminderOption(this);" userid="@drChild["ParentId"]" email="@drChild["Email"]" />
+                                                </td>
+                                                <td class="name">
+                                                    <i class="ion-home"></i> @drChild["Parent"]@if (@drChild["ReminderDate"] != DBNull.Value) { <span data-toggle="tooltip" title="Last Reminder Sent On: @drChild["ReminderDate"]"><i class="fa fa-clock-o"></i></span> }
+                                                </td>
+
+                                                @{bool pedsCTD = false, sndCTD = false, ssisCTD = false; }
+                                                @foreach (DataRow drT in dtTotalSurveys.Rows)
+                                                {
+                                                    if ((((int)drT["SurveyId"] == 6 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 7 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 8 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 9 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 45 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true)) && pedsCTD == false)
+                                                    {
+                                                        pedsCTD = true;
+                                                        <td class="dot"><span onclick="openSurvey(this, @drT["SurveyId"], @drChild["ChildId"], @((int)drChild["ParentId"]), '@drChild["Name"]');">@Html.Raw(getSurveyValue((int)drChild["ChildId"], (int)drT["SurveyId"], (int)drChild["ParentId"], 2, SurveyAppRoles.Parent))</span></td>
+                                                    }
+                                                    else if ((((int)drT["SurveyId"] == 51 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 52 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true)) && sndCTD == false)
+                                                    {
+                                                        sndCTD = true;
+                                                        <td class="dot"><span onclick="openSurvey(this, @drT["SurveyId"], @drChild["ChildId"], @((int)drChild["ParentId"]), '@drChild["Name"]');">@Html.Raw(getSurveyValue((int)drChild["ChildId"], (int)drT["SurveyId"], (int)drChild["ParentId"], 2, SurveyAppRoles.Parent))</span></td>
+                                                    }
+                                                    else if ((((int)drT["SurveyId"] == 62 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 63 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true)) && ssisCTD == false)
+                                                    {
+                                                        ssisCTD = true;
+                                                        <td class="dot"><span onclick="openSurvey(this, @drT["SurveyId"], @drChild["ChildId"], @((int)drChild["ParentId"]), '@drChild["Name"]');">@Html.Raw(getSurveyValue((int)drChild["ChildId"], (int)drT["SurveyId"], (int)drChild["ParentId"], 2, SurveyAppRoles.Parent))</span></td>
+                                                    }
+                                                    else if ((int)drT["SurveyId"] != 6 && (int)drT["SurveyId"] != 7 && (int)drT["SurveyId"] != 8 && (int)drT["SurveyId"] != 9 && (int)drT["SurveyId"] != 45 && (int)drT["SurveyId"] != 51 && (int)drT["SurveyId"] != 52 && (int)drT["SurveyId"] != 62 && (int)drT["SurveyId"] != 63)
+                                                    {
+                                                        <td class="dot"><span onclick="openSurvey(this, @drT["SurveyId"], @drChild["ChildId"], @((int)drChild["ParentId"]), '@drChild["Name"]');">@Html.Raw(getSurveyValue((int)drChild["ChildId"], (int)drT["SurveyId"], (int)drChild["ParentId"], 2, SurveyAppRoles.Parent))</span></td>
+                                                    }
+                                                }
+                                            </tr>
+                                            @foreach (DataRow drTeacher in drTeachers)
+                                            {
+                                                <tr>
+                                                    <td class="dot">
+                                                        <input type="checkbox" class="checkReminder" data-toggle="tooltip" title="@drTeacher["Email"]" onclick="setReminderOption(this);" userid="@drTeacher["TeacherId"]" email="@drTeacher["Email"]" />
+                                                    </td>
+                                                    <td class="name">
+                                                        <i class="ion-university"></i> @drTeacher["Teacher"]@if (@drTeacher["ReminderDate"] != DBNull.Value) { <span data-toggle="tooltip" title="Last Reminder Sent On: @drTeacher["ReminderDate"]"><i class="fa fa-clock-o"></i></span> }
+                                                    </td>
+                                                    @{bool pedsCPTD = false, sndCTTD = false , ssisCTTD = false;}
+                                                    @foreach (DataRow drT in dtTotalSurveys.Rows)
+                                                    {
+                                                        if ((((int)drT["SurveyId"] == 6 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 7 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 8 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 9 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 45 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true)) && pedsCPTD == false)
+                                                        {
+                                                            pedsCPTD = true;
+                                                            <td class="dot"><span onclick="openSurvey(this, @drT["SurveyId"], @drChild["ChildId"], @((int)drTeacher["TeacherId"]), '@drChild["Name"]');">@Html.Raw(getSurveyValue((int)drChild["ChildId"], (int)drT["SurveyId"], (int)drTeacher["TeacherId"], 2, SurveyAppRoles.Teacher))</span></td>
+                                                        }
+                                                        else if ((((int)drT["SurveyId"] == 51 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 52 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true)) && sndCTTD == false)
+                                                        {
+                                                            sndCTTD = true;
+                                                            <td class="dot"><span onclick="openSurvey(this, @drT["SurveyId"], @drChild["ChildId"], @((int)drTeacher["TeacherId"]), '@drChild["Name"]');">@Html.Raw(getSurveyValue((int)drChild["ChildId"], (int)drT["SurveyId"], (int)drTeacher["TeacherId"], 2, SurveyAppRoles.Teacher))</span></td>
+                                                        }
+                                                        else if ((((int)drT["SurveyId"] == 62 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 63 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true)) && ssisCTTD == false)
+                                                        {
+                                                            ssisCTTD = true;
+                                                            <td class="dot"><span onclick="openSurvey(this, @drT["SurveyId"], @drChild["ChildId"], @((int)drTeacher["TeacherId"]), '@drChild["Name"]');">@Html.Raw(getSurveyValue((int)drChild["ChildId"], (int)drT["SurveyId"], (int)drTeacher["TeacherId"], 2, SurveyAppRoles.Teacher))</span></td>
+                                                        }
+                                                        else if ((int)drT["SurveyId"] != 6 && (int)drT["SurveyId"] != 7 && (int)drT["SurveyId"] != 8 && (int)drT["SurveyId"] != 9 && (int)drT["SurveyId"] != 45 && (int)drT["SurveyId"] != 51 && (int)drT["SurveyId"] != 52 && (int)drT["SurveyId"] != 62 && (int)drT["SurveyId"] != 63)
+                                                        {
+                                                            <td class="dot"><span onclick="openSurvey(this, @drT["SurveyId"], @drChild["ChildId"], @((int)drTeacher["TeacherId"]), '@drChild["Name"]');">@Html.Raw(getSurveyValue((int)drChild["ChildId"], (int)drT["SurveyId"], (int)drTeacher["TeacherId"], 2, SurveyAppRoles.Teacher))</span></td>
+                                                        }
+                                                    }
+                                                </tr>
+                                            }
+                                            @foreach (DataRow drStudent in drStudents)
+                                    {
+                                                <tr>
+                                                    <td class="dot">
+                                                        <input type="checkbox" class="checkReminder" data-toggle="tooltip" title="@drStudent["Email"]" onclick="setReminderOption(this);" userid="@drStudent["StudentId"]" email="@drStudent["Email"]" />
+                                                    </td>
+                                                    <td class="name">
+                                                        <i class="ion-happy"></i> @drStudent["Student"]@if (@drStudent["ReminderDate"] != DBNull.Value)
+                                                { <span data-toggle="tooltip" title="Last Reminder Sent On: @drStudent["ReminderDate"]"><i class="fa fa-clock-o"></i></span> }
+                                                    </td>
+                                                    @{bool pedsCPTD = false, sndCTTD = false, ssisCTTD = false; }
+                                                    @foreach (DataRow drT in dtTotalSurveys.Rows)
+                                            {
+                                                if ((((int)drT["SurveyId"] == 6 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 7 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 8 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 9 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 45 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true)) && pedsCPTD == false)
+                                                {
+                                                    pedsCPTD = true;
+                                                            <td class="dot"><span onclick="openSurvey(this, @drT["SurveyId"], @drChild["ChildId"], @((int)drStudent["StudentId"]), '@drChild["Name"]');">@Html.Raw(getSurveyValue((int)drChild["ChildId"], (int)drT["SurveyId"], (int)drStudent["StudentId"], 2, SurveyAppRoles.Student))</span></td>
+                                                }
+                                                else if ((((int)drT["SurveyId"] == 51 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 52 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true)) && sndCTTD == false)
+                                                        {
+                                                            sndCTTD = true;
+                                                            <td class="dot"><span onclick="openSurvey(this, @drT["SurveyId"], @drChild["ChildId"], @((int)drStudent["StudentId"]), '@drChild["Name"]');">@Html.Raw(getSurveyValue((int)drChild["ChildId"], (int)drT["SurveyId"], (int)drStudent["StudentId"], 2, SurveyAppRoles.Student))</span></td>
+                                                        }
+                                                else if ((((int)drT["SurveyId"] == 62 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true) || ((int)drT["SurveyId"] == 63 && getChildAge((int)drChild["ChildId"], (int)drT["SurveyId"]) == true)) && ssisCTTD == false)
+                                                        {
+                                                            ssisCTTD = true;
+                                                            <td class="dot"><span onclick="openSurvey(this, @drT["SurveyId"], @drChild["ChildId"], @((int)drStudent["StudentId"]), '@drChild["Name"]');">@Html.Raw(getSurveyValue((int)drChild["ChildId"], (int)drT["SurveyId"], (int)drStudent["StudentId"], 2, SurveyAppRoles.Student))</span></td>
+                                                        }
+                                                else if ((int)drT["SurveyId"] != 6 && (int)drT["SurveyId"] != 7 && (int)drT["SurveyId"] != 8 && (int)drT["SurveyId"] != 9 && (int)drT["SurveyId"] != 45 && (int)drT["SurveyId"] != 51 && (int)drT["SurveyId"] != 52 && (int)drT["SurveyId"] != 62 && (int)drT["SurveyId"] != 63)
+                                                {
+                                                            <td class="dot"><span onclick="openSurvey(this, @drT["SurveyId"], @drChild["ChildId"], @((int)drStudent["StudentId"]), '@drChild["Name"]');">@Html.Raw(getSurveyValue((int)drChild["ChildId"], (int)drT["SurveyId"], (int)drStudent["StudentId"], 2, SurveyAppRoles.Student))</span></td>
+                                                }
+                                            }
+                                                </tr>
+                                                }
+                                        </table>
+                                    </td>
+                                </tr>
+                                index++;
+                            }
+                        }
+                        else
+                        {
+                                                            <tr><td colspan="2"><div class="nodata">There is no child enrolled in this study currently</div></td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (children > 10)
+            {
+                <div style="margin:0; padding:0; float:left;">
+                    <a href="javascript:void(0);" class="linker" onclick="showHideChildren(this);">Show All Children</a>
+                </div>
+            }
+        </div>
+        <div id="divAssignmentDetails" style="min-height:300px;display:none;">
+
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip({
+            content: function () {
+                return $(this).attr('title').replace(/<br\/>/g, "<br/>");
+            },
+        });
+    });
+
+    function showHideChildren(elem) {
+        if ($(elem).hasClass("hdn") == false) {
+            $('.tblComparison tr.chosenones').removeClass('trhdn');
+            $(elem).addClass("hdn");
+            $(elem).text("Show Less Children");
+        }
+        else {
+            $('.tblComparison tr.chosenones').addClass('trhdn');
+            $(elem).removeClass("hdn");
+            $(elem).text("Show All Children");
+        }
+    }
+
+    function checkAll(elem) {
+        var isChecked = $(elem)[0].checked;
+        if (isChecked == true) {
+            var tbl = $(".tblCurrent").is(":visible") == true ? $(".tblCurrent") : $(".tblPrevious");
+            tbl.find(".checkReminder").each(function (index, obj) {
+                $(obj)[0].checked = true;
+            });
+        }
+        else {
+            var tbl = $(".tblCurrent").is(":visible") == true ? $(".tblCurrent") : $(".tblPrevious");
+            tbl.find(".checkReminder").each(function (index, obj) {
+                $(obj)[0].checked = false;
+            });
+        }
+        if ($(".tblCurrent").is(":visible") == true) {
+
+            if (isChecked == true) {
+                $(".remCurrent a").removeClass("disabled");
+                $(".remCurrent a").attr("title", "A reminder email will be sent to the selected respondent(s)");
+            }
+            else {
+                $(".remCurrent a").addClass("disabled");
+                $(".remCurrent a").attr("title", "Please select a respondent first to send reminder");
+            }
+        }
+
+        if ($(".tblPrevious").is(":visible") == true) {
+
+            if (isChecked == true) {
+                $(".remPrevious a").removeClass("disabled");
+                $(".remPrevious a").attr("title", "A reminder email will be send to the selected respondent(s)");
+            }
+            else {
+                $(".remPrevious a").addClass("disabled");
+                $(".remPrevious a").attr("title", "Please select a respondent first to send reminder");
+            }
+        }
+    }
+
+    function setReminderOption(elem) {
+        if ($(".tblCurrent").is(":visible") == true) {
+            var isChecked = false;
+            $(".tblCurrent").find(".checkReminder").each(function (inex, obj) {
+                if ($(obj)[0].checked == true) {
+                    isChecked = true;
+                }
+            });
+            if (isChecked == true) {
+                $(".remCurrent a").removeClass("disabled");
+                $(".remCurrent a").attr("title", "A reminder email will be sent to the selected respondent(s)");
+            }
+            else {
+                $(".remCurrent a").addClass("disabled");
+                $(".remCurrent a").attr("title", "Please select a respondent first to send reminder");
+            }
+        }
+
+        if ($(".tblPrevious").is(":visible") == true) {
+            var isChecked = false;
+            $(".tblPrevious").find(".checkReminder").each(function (inex, obj) {
+                if ($(obj)[0].checked == true) {
+                    isChecked = true;
+                }
+            });
+            if (isChecked == true) {
+                $(".remPrevious a").removeClass("disabled");
+                $(".remPrevious a").attr("title", "A reminder email will be sent to the selected respondent(s)");
+            }
+            else {
+                $(".remPrevious a").addClass("disabled");
+                $(".remPrevious a").attr("title", "Please select a respondent first to send reminder");
+            }
+        }
+    }
+
+    function Respondent() {
+        this.UserId = 0;
+        this.Email = "";
+        this.ReminderDate = "";
+    }
+
+    function sendReminder(elem) {
+        if ($(elem).hasClass("disabled")) {
+            return false;
+        }
+        var respos = new Array();
+        $(".tblComparison").find(".checkReminder").each(function (index, obj) {
+            if ($(obj)[0].checked == true && $(obj).attr("email") != "") {
+                var respo = new Respondent();
+                respo.UserId = $(obj).attr("userid");
+                respo.Email = $(obj).attr("email");
+                respo.ReminderDate = "@DateTime.Now";
+                respos.push(respo);
+            }
+        });
+
+        $.ajax({
+            url: "@Url.Action("SendReminder", "Home")",
+            data: "{'respos': '" + JSON.stringify(respos) + "'}",
+            type: 'POST',
+            contentType: "application/json; charset=utf-8",
+            async: true,
+            success: function (data) {
+                if (data.success == true) {
+                    bootbox.alert("An email about the questionnaire completion has been sent to the selected respondent(s).");
+                }
+                else {                    
+                    bootbox.alert("We are unable to send email at this time, please try again later.");
+                    checkTimeout(data, 1);
+                }
+            },
+            error: function (errss) {
+                //result = false;
+            },
+            cache: false,
+            processData: false
+        });
+    }
+    //#FFD740
+
+    function openSurvey(elem, surveyId, childId, userId, childName) {
+        var perioddate = $(elem).find("i").attr("scheuledate");
+        //var userId = $(elem).find("i").attr("userid");
+        window.open('@Url.Action("Question", "UserQuestion")?surveyID=' + surveyId + "&ChildId=" + childId + "&userId=" + userId + "&perioddate=" + perioddate + "&ChildName=" + childName);
+    }
+
+    function showAssignmentDetails(elem) {
+        $('.tabperiod a').removeClass('selected');
+        $(elem).addClass('selected');
+
+        $(".completionHistory").hide();
+        $("#divAssignmentDetails").show();
+
+        if ($("#divAssignmentDetails").hasClass("loaded") == false) {
+            $.ajax({
+                url: "@Url.Action("_AssignmentDetails", "Home")?studyId=@studyId&studyName=@studyName&childIdts=@childIdts&child=@childName&role=@Roles.GetRolesForUser(User.Identity.Name)[0].ToString()",
+                dataType: "html",
+                success: function (data) {
+                    if (isSessionValid(data) == true) {
+                        $("#divAssignmentDetails").addClass("loaded");
+                        $("#divAssignmentDetails").html(data);
+                    }
+                    checkTimeout(data, 3);
+                }
+            });
+        }        
+    }
+    
+</script>

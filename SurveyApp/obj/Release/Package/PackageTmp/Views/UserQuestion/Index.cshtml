@@ -1,0 +1,334 @@
+﻿@using SurveyApp.Models;
+@using System.Data;
+@{
+    ViewBag.Title = "eBit - Questionnaire Manager";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    string studyName = "";
+    //var ds = SurveyApp.DataHelper.SurveyGetAll();
+
+    string[] roles = Roles.GetRolesForUser(User.Identity.Name);    
+    string role = roles[0];
+
+    string divSelected = String.IsNullOrEmpty(Request.QueryString["div"]) == true ? "" : Request.QueryString["div"].ToString();
+    int childIdts = String.IsNullOrEmpty(Request.QueryString["childIdts"]) == true ? 0 : Convert.ToInt32(Request.QueryString["childIdts"]);
+    int studyId = String.IsNullOrEmpty(Request.QueryString["studyId"]) == true ? 0 : Convert.ToInt32(Request.QueryString["studyId"]);
+
+    if (studyId > 0)
+    {
+        using (StudyContext sContext = new StudyContext())
+        {
+            Study objStd = sContext.Studies.Where(s => s.Id == studyId).FirstOrDefault();
+            studyId = objStd.Id;
+            studyName = objStd.Name;
+        }
+    }
+    else
+    {
+        studyName = "All Studies";
+    }
+
+    int childrenCount = 0;
+    System.Data.DataSet dschildren = SurveyApp.DataHelper.GetChildbyStudyID(studyId, WebSecurity.CurrentUserId);
+    if (dschildren != null && dschildren.Tables.Count > 0 && dschildren.Tables[0].Rows.Count > 0)
+    {
+        childrenCount = dschildren.Tables[0].Rows.Count;
+    }
+
+    string childName = "All Children";
+    if(childIdts == 0)
+    {
+        if(dschildren != null && dschildren.Tables.Count > 0 && dschildren.Tables[0].Rows.Count > 0 && (Roles.IsUserInRole(WebSecurity.CurrentUserName, "Parent") == true || Roles.IsUserInRole(WebSecurity.CurrentUserName, "Student") == true))
+        {
+            childIdts = (int)dschildren.Tables[0].Rows[0]["ChildId"];
+        }
+    }
+    else
+    {
+        using (var cContext = new ChildContext())
+        {
+            if(cContext.Children.FirstOrDefault() != null)
+            {
+                childName = cContext.Children.Where(c => c.Id == childIdts).FirstOrDefault().Name;
+            }
+        }
+    }
+}
+
+    @section featured {
+        <section class="featured">
+            <div class="content-wrapper">
+                <hgroup class="title">
+
+                    <h2>Welcome <b>@User.Identity.Name</b></h2>
+
+                </hgroup>
+            </div>
+        </section>
+    }
+
+    <style type="text/css">
+        .separator {
+            clear: both;
+            margin-bottom: 10px;
+        }
+        .featured .content-wrapper{
+            width: 100%;
+        }
+        .featured .content-wrapper h2{
+            background-image: -webkit-linear-gradient(top, #00aaff 0%, #b9def0 100%);
+            background-image: -o-linear-gradient(top, #00aaff 0%, #4b9dc5 100%);
+            background-image: -webkit-gradient(linear, left top, left bottom, from(#00aaff), to(#4b9dc5));
+            background-image: linear-gradient(to bottom, #00aaff 0%, #4b9dc5 100%);
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffd9edf7', endColorstr='#ffb9def0', GradientType=0);
+            background-repeat: repeat-x;
+            border-color: #000000;
+        }
+    </style>
+    <style type="text/css">
+        .topControls #ddlStudy, .topControls #ddlChildren{float: right; width: 22%; background-color: #fff;}
+        .tabs{margin-bottom: 12px;}
+        .tabs .current, .comparison .previous {border-top: none;}
+        .tabs ul {height: 41px;margin: 0px;list-style: none;padding:0px;border-bottom: solid 1px #CCC;}
+        .tabs li {float: left;}
+        .tabs li a {text-align:center;margin-right: 2px;border: 1px solid transparent;padding: 10px 15px;display: block;position: relative;text-shadow: none;text-decoration:none;color:#333;min-width: 141px;}
+        .tabs li a:hover {border-color: #FEFEFE;cursor: pointer;}
+        .tabs li a.selected {color: #4d6b8a;background-color: #fff;border: 1px solid #B1B1B1;border-bottom-color: transparent;cursor: default;}
+        .tabs .tblComparison .trhdn{display:none !important;}
+        .tabs .title{clear: both;background-color: #FFF;text-align: center;padding: 10px;border-right: solid 1px #CCC;border-left: solid 1px #CCC;}
+        .tabs .linker{text-decoration:none;padding: 2px 4px;background-color: #333;color: #FFF;margin-top: 4px;display: inline-block;}
+    </style>
+
+    <div class="waiting" style="@((Request.Url.ToString().ToLower().Contains("/home/") == true && Request.Url.ToString().ToLower().Contains("/home/about") == false && Request.Url.ToString().ToLower().Contains("/home/contact") == false) || (Request.Url.ToString().ToLower().Contains("/userquestion/") == true && Request.Url.ToString().ToLower().Contains("/userquestion/question") == false && Request.Url.ToString().ToLower().Contains("/userquestion/index?childid=") == false) ? "" : "display:none;")"><div>Please Wait...</div></div> 
+    <div class="tabs toptabs" style="display:none;">
+        <ul class="tabdashboard">
+            @if(role != "Student")
+            {
+            <li>
+                <a class="selected" href="#0" onclick="loadDashboard(this);">Dashboard</a>
+            </li>
+            }
+            <li>
+                <a href="#1" class="@(role == "Student" ? "selected" : "")" onclick="loadQuestionDetails(this);">Assessment</a>
+            </li>
+            @if (role != "Student")
+            {
+            <li>
+                <a href="#2" onclick="loadCharts(this);">Graphs Over Time</a>
+            </li>    
+            }
+            <li style="float:right;">
+                <div style="height: 38px;display:none;" class="col-md-6 topControls">
+                    <table>
+                        <tr>
+                            <td>
+                                <select id="ddlStudy" class="col-sm-9 form-control" onchange="getStudyInfo(this);" style="font-weight: bold; color: #00ADEE;border:solid 2px #00adee;width:250px;display:none;text-transform:capitalize;">
+                                    <option value="0" @(studyId == 0 ? "selected=selected" : "")>All Studies</option>
+                                    @foreach (DataRow drStd in dschildren.Tables[1].Rows)
+                                    {
+                                        <option value="@drStd["Id"]" @(studyId == (int)drStd["Id"] ? "selected=selected" : "")>@drStd["Name"]</option>
+                                    }
+                                </select>
+                            </td>
+                            <td>
+                                @*<span style="font-size: 24px;color: #00adee;" class="dashboard-controls">&nbsp;&nbsp; &rArr; &nbsp;&nbsp;</span>*@
+                            </td>
+                            <td>
+                                <select id="ddlChildren" class="col-sm-9 form-control dashboard-controls" onchange="getChildInfo(this);" style="font-weight: bold; color: #00ADEE;border:solid 2px #00adee;width:250px;text-transform:capitalize;">
+                                    @if (childrenCount >= 1 && Roles.IsUserInRole("Parent") == false && Roles.IsUserInRole(WebSecurity.CurrentUserName, "Student") == false)
+                                    {
+                                        <option value="0">All Children</option>
+                                    }                                    
+                                    @foreach (System.Data.DataRow drch in dschildren.Tables[0].Rows)
+                                    {
+                                        <option value="@drch["ID"]" @(childIdts == (int)drch["ID"] ? "selected=selected" : "")>@drch["Name"]</option>
+                                    }
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </li>        
+        </ul>
+
+        
+    </div>
+
+    
+
+    @if (role != "Student")
+    {
+    <div class="dashboardDetails __tabs" style="opacity:0;">
+        <div class="separator"></div>
+        <div class="col-sm-12">
+            <div id="divSurveyCompletion"></div>
+            @*@{Html.RenderPartial("~/Views/Home/_SurveyCompletion.cshtml", new ViewDataDictionary { { "studyId", studyId }, { "studyName", studyName } });}*@
+        </div>
+        <div class="separator"></div>
+        <div class="col-sm-12">
+            <div id="divAdverseEvent"></div>
+            @*@{Html.RenderPartial("~/Views/Home/_AdverseEvent.cshtml", new ViewDataDictionary { { "studyId", studyId }, { "studyName", studyName }, { "childIdts", childIdts } });}*@
+        </div>
+    </div>
+    <div class="graphsDetails __tabs" style="opacity:0;">
+        <div class="separator"></div>
+        <div class="col-sm-12">
+            <p style="margin-bottom: 50px;margin-top: 10px;">These graphs show student changes on eBit surveys over time</p>
+            <div id="divCharts"></div>
+            @*@{Html.RenderPartial("~/Views/Home/_Charts.cshtml", new ViewDataDictionary { { "studyId", studyId }, { "studyName", studyName }, { "childIdts", childIdts } });}*@
+        </div>
+    </div>
+    }
+    <div class="quesDetails __tabs" style="opacity:0;">
+        <div class="col-sm-12">
+            <div id="divQuestionDetails"></div>
+            @*@{Html.RenderPartial("_ChildDetails", new ViewDataDictionary { { "studyId", studyId }, { "studyName", studyName }, { "childIdts", childIdts } });}*@
+        </div>        
+    </div>
+
+<script type="text/javascript">
+    var isStudent = @(role == "Student" ? "true" : "false");
+    $(window).load(function () {
+        $(".waiting").hide();
+        $(".toptabs").show();
+        $(".topControls").show();
+
+        var hash = @(Roles.IsUserInRole(WebSecurity.CurrentUserName, "Parent") == true ? "1" : "0");
+        if (window.location.hash) {
+            hash = window.location.hash.substring(1);
+        }
+
+        if(isStudent == true){
+            $(".tabdashboard").find("li:eq(" + (hash > 2 ? 2 : 0) + ")").find("a").click();
+        }
+        else{
+            $(".tabdashboard").find("li:eq(" + (hash > 2 ? 2 : hash) + ")").find("a").click();
+        }        
+        
+        if (hash > 2) {
+            $(".graphTabs .graphSections").find("li:eq(" + (hash - 3) + ")").find("a").click();
+        }
+        $(".__tabs").css("opacity", "1");
+    });
+
+    function getVisibleDiv() {
+        if ($(".dashboardDetails").is(":visible") == true) { return 0; }
+        if ($(".quesDetails").is(":visible") == true) { return 1; }
+        if ($(".graphsDetails").is(":visible") == true) { return getInnerVisibleDiv(); }
+    }
+
+    function getInnerVisibleDiv() {
+        if ($(".gDetails .parentdiv").is(":visible") == true) { return 3; }
+        if ($(".gDetails .teacherdiv").is(":visible") == true) { return 4; }
+        if ($(".gDetails .parentteacherdiv").is(":visible") == true) { return 5; }
+        if ($(".gDetails .weeklydiv").is(":visible") == true) { return 6; }
+        if ($(".gDetails .lifeeventsdiv").is(":visible") == true) { return 7; }
+    }
+
+    function getChildInfo(elem) {
+        var div = getVisibleDiv();
+        var childIdts = $(elem).val();
+        location.href = "@Url.Action("Index", "UserQuestion")" + "?studyId=" + @studyId +"&childIdts=" + childIdts + "#" + div;
+    }
+
+    function getStudyInfo(elem) {
+        var div = getVisibleDiv();
+        var studyId = $(elem).val();
+        location.href = "@Url.Action("Index", "UserQuestion")" + "?studyId=" + (studyId == 0 ? "" : studyId) + "#" + div;
+    }
+
+    function loadDashboard(elem) {
+        $('.tabdashboard a').removeClass('selected');
+        $(elem).addClass('selected');
+        $('.__tabs').hide();
+        $('.dashboard-controls').hide();
+        $('.dashboard-controls').show();
+        $('.dashboardDetails').show();
+        $('.allchildren').removeClass('highlightError');
+
+        if ($(".dashboardDetails").hasClass("loaded") == false)
+        {
+            $.ajax({
+                url: "@Url.Action("_SurveyCompletion", "Home")?studyId=@studyId&studyName=@studyName&childIdts=@childIdts&child=@childName",
+                dataType: "html",
+                success: function (data) {
+                    if (isSessionValid(data) == true) {
+                        $("#divSurveyCompletion").html(data);
+                    }
+                    checkTimeout(data, 3);
+                }
+            });
+
+            $.ajax({
+                url: "@Url.Action("_AdverseEvent", "Home")?studyId=@studyId&studyName=@studyName&childIdts=@childIdts&child=@childName",
+                dataType: "html",
+                success: function (data) {
+                    if (isSessionValid(data) == true) {
+                        $("#divAdverseEvent").html(data);
+                    }
+                    checkTimeout(data, 3);
+                }
+            });
+
+            $(".dashboardDetails").addClass("loaded");
+        }
+    }
+
+    function loadCharts(elem) {
+        $('.tabdashboard a').removeClass('selected');
+        $(elem).addClass('selected');
+        $('.__tabs').hide();
+        $('.childrendropdown').hide();
+        $('.childrendropdown').show();
+        $('.graphsDetails').show();
+        $('.dashboard-controls').show();
+        $('.allchildren').removeClass('highlightError');
+
+        if ($(".graphsDetails").hasClass("loaded") == false)
+        {
+            $.ajax({
+                url: "@Url.Action("_Charts", "Home")?studyId=@studyId&studyName=@studyName&childIdts=@childIdts&child=@childName",
+                dataType: "html",
+                success: function (data) {
+                    if (isSessionValid(data) == true) {
+                        $(".graphsDetails").addClass("loaded");
+                        $("#divCharts").html(data);
+                        if (window.location.hash) {
+                            hash = window.location.hash.substring(1);
+                        }
+                        if (hash > 2) {
+                            $(".graphTabs .graphSections").find("li:eq(" + (hash - 3) + ")").find("a").click();
+                        }
+                    }
+                    checkTimeout(data, 3);
+                }
+            });
+        }
+    }
+
+    function loadQuestionDetails(elem){
+        $('.tabdashboard a').removeClass('selected');
+        $(elem).addClass('selected');
+        $('.__tabs').hide();
+        $('.childrendropdown').hide();
+        $('.quesDetails').show();
+        $('.dashboard-controls').show();
+        $('.allchildren').addClass('highlightError');
+
+        if ($(".quesDetails").hasClass("loaded") == false)
+        {
+            $.ajax({
+                url: "@Url.Action("_ChildDetails", "UserQuestion")?studyId=@studyId&studyName=@studyName&childIdts=@childIdts&child=@childName",
+                dataType: "html",
+                success: function (data) {                    
+                    if(isSessionValid(data) == true){
+                        $(".quesDetails").addClass("loaded");
+                        $("#divQuestionDetails").html(data);
+                    }
+                    checkTimeout(data, 3);
+                }
+            });
+        }
+    }
+</script>
+    

@@ -1,0 +1,344 @@
+﻿@using System.Data;
+@using SurveyApp.Models;
+
+@{
+    ViewBag.Title = "eBit - Data Manager";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+    int studyId = String.IsNullOrEmpty(Request.QueryString["studyId"]) == true ? 0 : Convert.ToInt32(Request.QueryString["studyId"]);
+    int userId = String.IsNullOrEmpty(Request.QueryString["userId"]) == true ? 0 : Convert.ToInt32(Request.QueryString["userId"]);
+    int childId = String.IsNullOrEmpty(Request.QueryString["childId"]) == true ? 0 : Convert.ToInt32(Request.QueryString["childId"]);
+    int surveyId = String.IsNullOrEmpty(Request.QueryString["surveyId"]) == true ? 0 : Convert.ToInt32(Request.QueryString["surveyId"]);
+    DateTime dtScheduleDate = string.IsNullOrEmpty(Request.QueryString["dt"]) == true ? DateTime.MinValue : Convert.ToDateTime(Request.QueryString["dt"]);
+
+    DataTable dtUsers = null, dtChildren = null, dtSurveys = null, dtDates = null;
+
+    //using (var sContext = new StudyContext())
+    //{
+    //    if(sContext.Studies.FirstOrDefault() != null)
+    //    {
+    //        Study objStd = studyId == 0 ? sContext.Studies.OrderBy(s => s.Id).FirstOrDefault() : sContext.Studies.Where(s => s.Id == studyId).FirstOrDefault();
+    //        studyId = objStd.Id;
+    //    }
+    //}
+    if(studyId == 0)
+    {
+        studyId = Study.StudyGetAllByUserId(WebSecurity.CurrentUserId).FirstOrDefault().Id;
+    }
+
+    string childName = "", userName = "", surveyName = "", childStatus = string.Empty, scheduleDate = string.Empty;
+    if (studyId != 0)
+    {
+        DataSet dsDefaultDataValues = SurveyApp.DataHelper.getDefaultDataValues(studyId);
+        dtUsers = dsDefaultDataValues.Tables[0];
+        dtChildren = dsDefaultDataValues.Tables[1];
+        dtSurveys = dsDefaultDataValues.Tables[2];
+        dtDates = dsDefaultDataValues.Tables[3];
+
+        //if (userId <= 0 && dtUsers.Rows.Count > 0)
+        //{
+        //    userId = Convert.ToInt32(dtUsers.Rows[0]["UserId"]);
+        //}
+
+        //if (childId <= 0 && dtChildren.Rows.Count > 0)
+        //{
+        //    childId = Convert.ToInt32(dtChildren.Rows[0]["ChildId"]);
+        //}
+
+        //if (surveyId <= 0 && dtSurveys.Rows.Count > 0)
+        //{
+        //    surveyId = Convert.ToInt32(dtSurveys.Rows[0]["SurveyId"]);
+        //}
+
+        DataRow[] drsChildren = dtChildren.Select("ChildId = " + childId);
+        if (drsChildren.Length > 0)
+        {
+            childName = drsChildren[0]["Name"].ToString();
+            childStatus = SurveyApp.Controllers.ChildController.getStatusDescription((int)drsChildren[0]["StatusId"]);
+        }
+
+        DataRow[] drsUsers = dtUsers.Select("UserId = " + userId);
+        if (drsUsers.Length > 0)
+        {
+            userName = drsUsers[0]["UserName"].ToString();
+        }
+
+        DataRow[] drsSurveys = dtSurveys.Select("SurveyId = " + surveyId);
+        if (drsSurveys.Length > 0)
+        {
+            surveyName = drsSurveys[0]["Title"].ToString();
+        }
+
+        DataRow[] drsDates = dtDates.Select("ScheduleDate = '" + dtScheduleDate + "'");
+        if (drsDates.Length > 0)
+        {
+            scheduleDate = Convert.ToDateTime(drsDates[0]["ScheduleDate"]).ToShortDateString();
+        }
+    }
+
+    DataSet dsData = SurveyApp.DataHelper.getAllData(studyId, userId, childId, surveyId, dtScheduleDate);
+}
+
+<link href="~/Content/chosen/chosen.css" rel="stylesheet" />
+
+<style type="text/css">
+    a.excel{
+        padding: 6px 10px 7px 10px;
+        color: #fff;
+        font-weight: normal;
+        font-size: 14px;
+        cursor: pointer;
+        -webkit-border-radius: 4px;
+        -moz-border-radius: 4px;
+        -o-border-radius: 4px;
+        border-radius: 4px;
+        display: inline-block;
+        background-color: #333;
+        background-size: auto 18px;
+        border: 1px solid #ccc;
+        margin: 0px;
+        text-decoration: none;
+        font-family: Arial;
+        float: right;
+        margin-right: 6px;
+    }
+    a.exportdetails.disabled span{
+        cursor: default;
+        background-color: #bcbcbc;
+        color: #efefef;
+    }
+    .controls select{
+        text-transform:capitalize;
+        margin-right: 5px;width: 190px;
+    }
+    .controls .titles span{
+        margin-right: 5px;width: 190px;padding: 0px;
+    }
+    .info .buttons-excel[aria-controls=tblSurveyList]{
+        /*position:relative;
+        bottom: 20px;*/
+    }
+    .ui-tooltip {max-width: 400px;background-color: #333;color:#FFF;}
+    .infoDetails .text-success, .info .text-success {
+        color: #33b86c;
+    }
+
+    .infoDetails .text-danger, .info .text-danger {
+        color: #ef5350;
+    }
+</style>
+
+<script src="~/Content/chosen/chosen.jquery.min.js"></script>
+
+<script type="text/javascript">
+    $(function () {
+        $("#tblData").DataTable({ "order": [[0, "asc"]], dom: 'Bfrtip', buttons: [{ extend: 'excel', text: "Export to Excel", title: '@(childName == "" ? "Child_Data" : childName + "_Data")', exportOptions: { modifier: { search: 'none' } } }] });
+        $("#tblSurveyList").DataTable({ searching: true, paging: true, lengthChange: false, info: false, "oLanguage": { "sInfo": "Displaying _START_ to _END_ of _TOTAL_ Questionnaires" }, dom: 'Bfrtip', buttons: [{ extend: 'excel', text: "Export to Excel", title: 'Completion_Details', exportOptions: { modifier: { search: 'none', order: 'original' } } }] });
+    });
+</script>
+
+<div>
+    <div class="col-sm-8">
+        <h2 class="col-sm-12" style="margin: 0px;padding: 0px;">Data Manager</h2>
+    </div>
+    
+    <div style="clear:both;"></div>
+</div>
+
+
+<div class="controls" style="margin-bottom: 24px;margin-top: 24px;">
+    <div class="titles">
+        <span class="col-sm-9">Study</span>
+        <span class="col-sm-9">Respondent</span>
+        <span class="col-sm-9">Child</span>
+        <span class="col-sm-9">Questionnaire</span>
+        <span class="col-sm-9">Schedule End Date</span>
+    </div>
+    <div style="clear:both;"></div>
+    <select id="ddlStudy" class="col-sm-9 form-control" onchange="getData(this, 1);">
+        @foreach (Study std in Study.StudyGetAllByUserId(WebSecurity.CurrentUserId))
+        {
+            <option value="@std.Id" @(std.Id == studyId ? "selected='selected'" : "")>@std.Name</option>
+        }
+    </select>
+
+    <select id="ddlUsers" class="col-sm-9 form-control" onchange="getData(this, 2);">
+        <option value="">All Respondents</option>
+        @if (dtUsers != null && dtUsers.Rows.Count > 0)
+        {
+            foreach (DataRow dr in dtUsers.Rows)
+            {
+                <option value="@dr["UserId"]" @((int)dr["UserId"] == userId ? "selected='selected'" : "")>@Html.Raw(dr["UserName"])</option>
+            }
+        }
+    </select>
+
+    <select id="ddlChildren" class="col-sm-9 form-control" onchange="getData(this, 3);">
+        <option value="">All Children</option>
+        @if (dtChildren != null && dtChildren.Rows.Count > 0)
+        {
+            foreach (DataRow dr in dtChildren.Rows)
+            {
+                <option value="@dr["ChildId"]" @((int)dr["ChildId"] == childId ? "selected='selected'" : "")>@dr["Name"]</option>
+            }
+        }        
+    </select>
+
+    <select id="ddlSurveys" class="col-sm-9 form-control" onchange="getData(this, 4);">
+        <option value="">All Questionnaires</option>
+        @if (dtSurveys != null && dtSurveys.Rows.Count > 0)
+        {
+            foreach (DataRow dr in dtSurveys.Rows)
+            {
+                <option value="@dr["SurveyId"]" @((int)dr["SurveyId"] == surveyId ? "selected='selected'" : "")>@dr["Title"]&nbsp;@((int)dr["SurveyId"] == 6 ? " for 2yrs - 4yrs" : ((int)dr["SurveyId"] == 7 ? " for 5yrs - 7yrs" : ((int)dr["SurveyId"] == 8 ? " for 8yrs - 12yrs" : ((int)dr["SurveyId"] == 9 ? " for 13yrs - 18yrs" : ((int)dr["SurveyId"] == 45 ? " for 19yrs and older" : "")))))</option>
+            }
+        }
+    </select>
+
+    <select id="ddlDates" class="col-sm-9 form-control" onchange="getData(this, 5);">
+        <option value="">All Dates</option>
+        @if (dtDates != null && dtDates.Rows.Count > 0)
+        {
+            foreach (DataRow dr in dtDates.Rows)
+            {
+                <option value="@dr["ScheduleDate"]" @(Convert.ToDateTime(dr["ScheduleDate"]).ToShortDateString() == dtScheduleDate.ToShortDateString() ? "selected='selected'" : "")>@Convert.ToDateTime(dr["ScheduleDate"]).ToShortDateString()</option>
+            }
+        }
+    </select>
+
+
+    <div style="clear:both;"></div>
+</div>
+
+<div style="clear:both;"></div>
+<div class="info" style="border:solid 1px #CCC;padding: 6px;background-color: #FFF;">
+    <div>
+        <div>
+            <b>@(surveyName == "" ? "All questionnaires" : surveyName)</b> provided by <b>@(userName == "" ? "All respondents" : userName)</b> for <b>@(childName == "" ? "All Children" : childName + " " + (childStatus != string.Empty ? "(" + childStatus + ")" : ""))</b>
+            @*<span><a href="javascript:void(0);" data-toggle="tooltip" title="@(surveyId > 0 && childId > 0 && userId > 0 ? "" : "Please select a respondent, child and questionnaire first")" class="excel @(surveyId > 0 && childId > 0 && userId > 0 ? "" : "disabled")" onclick="@(surveyId > 0 && childId > 0 && userId > 0 ? "$('.infoDetails .buttons-excel').click();" : "")"><i class="fa fa-file-excel-o">&nbsp;</i>Export questionnaire details to Excel</a></span>*@
+            <div class="dt-buttons">@*<a class="dt-button buttons-excel buttons-html5 exportdetails @(surveyId > 0 && childId > 0 && userId > 0 ? "" : "disabled")" href="javascript:void(0);" data-toggle="tooltip" title="@(surveyId > 0 && childId > 0 && userId > 0 ? "" : "Please select a respondent, child and questionnaire first")" onclick="@(surveyId > 0 && childId > 0 && userId > 0 ? "$('.infoDetails .buttons-excel').click();" : "")"><span>Export questionnaire details to Excel</span></a>*@</div>
+        </div>
+    </div>
+    <table cellpadding="0" cellspacing="0" class="table table-striped table-hover" id="tblSurveyList">
+        <thead>
+            <tr>
+                @if (childId <= 0)
+                {
+                    <th>Child</th>
+                    <th>Status</th>
+                }
+                @if (userId <= 0)
+                {
+                    <th>Respondent</th>
+                }
+                <th>Questionnaire</th>                                
+                <th style="width: 120px;">Schedule End Date</th>
+                <th style="width: 130px;">Completion(%)</th>
+                <th style="width: 160px;">Submitted On</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (dsData != null && dsData.Tables.Count > 0 && dsData.Tables[0] != null && dsData.Tables[0].Rows.Count > 0)
+            {
+                foreach (DataRow dr in dsData.Tables[0].Rows)
+                {
+                    <tr>
+                        @if (childId <= 0)
+                        {
+                            <td>@dr["Name"]</td>
+                            <td data-toggle="tooltip" title="@(dr["StatusChangeDate"] != DBNull.Value ? "Status Changed on " + Convert.ToDateTime(dr["StatusChangeDate"]).ToShortDateString() : "")" class="@((int)dr["StatusId"] == 1 ? "text-success" : "text-danger")">@SurveyApp.Controllers.ChildController.getStatusDescription((int)dr["StatusId"])&nbsp;@(dr["StatusChangeDate"] != DBNull.Value ? "(" + Convert.ToDateTime(dr["StatusChangeDate"]).ToShortDateString() + ")" : "")</td>
+                        }
+                        @if (userId <= 0)
+                        {
+                            <td>@dr["Respondent"]</td>
+                        }
+                        <td>@dr["Title"]</td>                        
+                        <td><a href='@Url.Action("Question", "UserQuestion")?surveyID=@dr["SurveyId"]&userId=@dr["UserId"]&ChildId=@dr["ChildID"]&ChildName=@childName&perioddate=@(dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "")' target="_blank" style="text-decoration: underline;color: #337ab7;">@(dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "")</a></td>
+                        <td>@dr["Percentage"]</td>
+                        <td>@dr["SubmitDate"]</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<br />
+<br />
+@if (userId > 0 && childId > 0 && surveyId > 0 && dsData.Tables[0].Rows.Count > 0)
+{
+    <div class="infoDetails" style="border:solid 1px #CCC;padding: 6px;background-color: #FFF;">
+        <div>
+            <b>@surveyName</b> - details as provided by <b>@userName</b> for <b>@childName @(childStatus != string.Empty ? "(" + childStatus + ")" : "")</b>
+        </div>
+        <table class="table table-striped table-hover" id="tblData">
+            <thead>
+                <tr>
+                    <th>S#</th>
+                    @if (surveyId == 48 || surveyId == 46)
+                    {
+                        <th>Area</th>
+                    }                    
+                    <th>Question</th>
+                    <th>Answer</th>
+                    <th>Score</th>
+                    <th>Entry Date</th>
+                    <th>Schedule End Date</th>
+                    <th>Child Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (dsData != null && dsData.Tables.Count > 1 && dsData.Tables[1] != null && dsData.Tables[1].Rows.Count > 0)
+                {
+                    int sn = 1;
+                    foreach (DataRow dr in dsData.Tables[1].Rows)
+                    {
+                        <tr>
+                            <td>@sn</td>
+                            @if(dr["SurveyId"].ToString() == "48" || dr["SurveyId"].ToString() == "46") { 
+                            <td>@dr["Area"]</td>
+                            }
+                            <td>@Html.Raw(dr["Question"])</td>
+                            <td>@Html.Raw(dr["Answers"])</td>
+                            <td>@dr["Score"]</td>
+                            <td>@(dr["EntryDate"] != DBNull.Value ? Convert.ToDateTime(dr["EntryDate"]).ToString("MM/dd/yyyy") : "")</td>
+                            <td>@(dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "")</td>
+                            <td class="@((int)dr["StatusId"] == 1 ? "text-success" : "text-danger")">@SurveyApp.Controllers.ChildController.getStatusDescription((int)dr["StatusId"])</td>
+                        </tr>
+                        sn++;
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+
+<script type="text/javascript">
+    $(function () {
+        $("#ddlStudy").chosen();
+        $("#ddlUsers").chosen();
+        $("#ddlChildren").chosen();
+        $("#ddlSurveys").chosen();
+        $("#ddlDates").chosen();
+
+        $('[data-toggle="tooltip"]').tooltip({
+            content: function () {
+                return $(this).attr('title').replace(/<br\/>/g, "<br/>");
+            },
+        });
+    });
+
+    function getData(elem, type) {
+        var studyId, userId, childId, surveyId, scheduleDate;
+        studyId = $("#ddlStudy option:selected").val();
+        userId = type != 1 ? ($("#ddlUsers option:selected").val() == undefined || $("#ddlUsers option:selected").val() == "undefined" ? 0 : $("#ddlUsers option:selected").val()) : 0;
+        childId = type != 1 ? ($("#ddlChildren option:selected").val() == undefined || $("#ddlChildren option:selected").val() == "undefined" ? 0 : $("#ddlChildren option:selected").val()) : 0;
+        surveyId = type != 1 ? ($("#ddlSurveys option:selected").val() == undefined || $("#ddlSurveys option:selected").val() == "undefined" ? 0 : $("#ddlSurveys option:selected").val()) : 0;
+        scheduleDate = $("#ddlDates option:selected").val() == undefined || $("#ddlDates option:selected").val() == "undefined" ? 0 : $("#ddlDates option:selected").val();
+
+        location.href = "@Url.Action("Index", "Data")" + "?studyId=" + studyId + "&userId=" + userId + "&childId=" + childId + "&surveyId=" + surveyId + "&dt=" + scheduleDate;
+    }
+    
+</script>

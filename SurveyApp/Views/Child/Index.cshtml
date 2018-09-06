@@ -1,0 +1,159 @@
+﻿@using System.Data;
+@{
+    ViewBag.Title = "eBit - Child Manager";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    DataSet dsChildren = SurveyApp.DataHelper.ChildGetAll(WebSecurity.CurrentUserId);
+}
+
+
+<style type="text/css">
+    .ui-tooltip {
+        min-width: 200px;
+        max-width: 400px;
+        background-color: #333;
+        color: #FFF;
+    }
+    #tblChildren .name{
+        text-transform: capitalize;
+    }
+    #tblChildren .text-success {
+        color: #33b86c;
+    }
+    #tblChildren .text-danger {
+        color: #ef5350;
+    }
+</style>
+
+<script type="text/javascript">
+    $(function () {
+        $("#tblChildren").DataTable({ dom: 'Bfrtip', buttons: [{ extend: 'excel', text: "Export to Excel", title: 'Children_List', exportOptions: {  modifier: { search: 'none', order: 'original' }} }], "oLanguage": { "sInfo": "Displaying _START_ to _END_ of _TOTAL_ Children" } });
+        });
+</script>
+<div>
+    <h2 class="col-sm-11" style="margin: 0px;padding: 0px;">Child Manager</h2>
+    <a href="@Url.Action("ChildAddEdit", "Child")" class="btn btn-default" style="float:right;"><i class="fa fa-child"></i>&nbsp;Add Child</a>
+</div>
+<div style="clear:both;"></div>
+<br />
+<style>
+    .table-hover tbody tr{cursor:pointer;}
+</style>
+<table class="table table-striped table-hover" id="tblChildren">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>DOB</th>
+            <th>School</th>
+            <th>Parent</th>
+            <th>Teacher(s)</th>
+            <th>Study(s)</th>
+            <th>Status</th>
+            @*<th style="width: 50px;">Consent</th>*@
+            <th style="width: 50px;">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (dsChildren != null && dsChildren.Tables.Count > 0 && dsChildren.Tables[0] != null && dsChildren.Tables[0].Rows.Count > 0)
+{
+    foreach (DataRow dr in dsChildren.Tables[0].Rows)
+    {
+        <tr onclick="location.href = '@Url.Action("ChildAddEdit", "Child", new { id = dr["Id"] })';">
+            <td title="@(dr["IsSelfRespondent"] != DBNull.Value && Convert.ToBoolean(dr["IsSelfRespondent"]) == true ? "This child is self respondent" : "")" data-toggle="@(dr["IsSelfRespondent"] != DBNull.Value && Convert.ToBoolean(dr["IsSelfRespondent"]) == true ? "tooltip" : "")" class="name">@(dr["Name"])<label class="text-danger">@(dr["IsSelfRespondent"] != DBNull.Value && Convert.ToBoolean(dr["IsSelfRespondent"]) == true ? "*" : "")</label></td>
+            <td>@(dr["dob"] != DBNull.Value ? Convert.ToDateTime(dr["dob"]).ToString("MM/dd/yyyy") : "")</td>
+            <td class="name">@dr["School"]</td>
+            <td class="name">@dr["Parent"]</td>
+            <td class="name">@dr["Teacher"]</td>
+            <td class="name">@dr["Study"]</td>
+            <td><a href="javascript:void(0);" onclick="event.stopPropagation();showStatusHistory(this, @dr["Id"], '@dr["Name"]');" class="@((int)dr["StatusId"] == 1 ? "text-success" : "text-danger")">@SurveyApp.Controllers.ChildController.getStatusDescription((int)dr["StatusId"])</a></td>
+            @*<td style="text-align: center;vertical-align:middle;">
+                    @if(dr["Consent"] != DBNull.Value && Convert.ToBoolean(dr["Consent"]) == true){
+                        <i class="ion-eye @(dr["Consent"] != DBNull.Value && Convert.ToBoolean(dr["Consent"]) == true ? (dr["Agreed"] != DBNull.Value ? (Convert.ToBoolean(dr["Agreed"]) == false ? "redeye" : "greeneye") : "redeye") : "")"  data-toggle='tooltip' title="@(dr["Consent"] != DBNull.Value && Convert.ToBoolean(dr["Consent"]) == true ? (dr["Agreed"] != DBNull.Value ? (Convert.ToBoolean(dr["Agreed"]) == false ? "Child has not given consent yet." : "Child has given the consent" + (dr["AgreeDate"] != DBNull.Value ? " on " + Convert.ToDateTime(dr["AgreeDate"]).ToString("MM/dd/yyyy") : ".")) : "") : "Consent is not required for this child.")"></i>
+                    }
+                </td>*@
+            <td style="text-align: center;vertical-align:middle;"><a href="javascript:void(0);" class="redCross" onclick="event.stopPropagation();deleteListItem(this, @dr["Id"], 'child', '@dr["Name"]', function(){ location.reload(true); });"><i class="ion-close"></i></a></td>
+        </tr>
+    }
+}
+    </tbody>
+</table>
+
+<script type="text/javascript">
+    $('[data-toggle="tooltip"]').tooltip({
+        track: true,
+        content: function () {
+            return $(this).attr('title').replace(/_NEWLINE_/g, "<br/>");
+        },
+    });
+
+    function goToDetailPage(childId, childName, statusId, schoolName) {
+        //d
+        if (statusId == 1) {
+            location.href = '@Url.Action("ChildAddEdit", "Child")?id=' + childId;
+        }
+        else {
+            var statusText = "";
+            if (statusId == 2) {
+                statusText = " has lost Followup.";
+            }
+            else if (statusId == 3) {
+                statusText = " has withdrew Consent.";
+            }
+            else if (statusId == 4) {
+                statusText = " is no longer at " + schoolName;
+            }
+
+            bootbox.dialog({
+                message: childName + statusText + "<br/>Do you want to view the details?",
+                title: "<span style='text-transform:capitalize;'>" + childName + "</span>",
+                closeButton: false,
+                onEscape: function() {
+
+                },
+                buttons: {
+                    success: {
+                        label: "Yes",
+                        className: "btn-primary",
+                        callback: function() {
+                            location.href = '@Url.Action("ChildAddEdit", "Child")?id=' + childId;
+                        }
+                    },
+                    danger: {
+                        label: "No",
+                        className: "btn-default",
+                        callback: function() {
+
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    function showStatusHistory(elem, childId, childName) {
+        $.ajax({
+            url: "@Url.Action("GetStatusHistory", "Child")?childId=" + childId,
+            dataType: "html",
+            success: function (data) {
+                if (isSessionValid(data) == true) {                    
+                    bootbox.dialog({
+                        message: data,
+                        size: "large",
+                        closeButton: true,
+                        title: "<span style='text-transform:capitalize;'>" + childName + "</span> - Status History",
+                        onEscape: function() {
+
+                        },
+                        buttons: {
+                            cancel: {
+                                label: 'Close',
+                                className: 'btn-default'
+                            }
+                        }
+                    });                    
+                }
+                checkTimeout(data, 0);
+            }
+        });
+    }
+</script>
