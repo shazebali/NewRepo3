@@ -528,6 +528,7 @@
     <Content Include="Views\Child\Index.cshtml" />
     <Content Include="Views\Child\_StatusHistory.cshtml" />
     <Content Include="Views\Report\SurveyScore.cshtml" />
+    <Content Include="Views\UserQuestion\SurveyHistory.cshtml" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

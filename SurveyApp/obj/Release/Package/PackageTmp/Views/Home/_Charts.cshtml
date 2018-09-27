@@ -92,6 +92,8 @@
 
     string dtSSISPc = "", ProblemBehaviorsPg = "", SocialSkillsPg = "";
 
+    string dtRCADSp = "", rCADSAnxietyPScore = "", rCADSDepressionPScore = "";
+
     #region populatingGraphs
     if (dsCharts != null && dsCharts.Tables != null && dsCharts.Tables.Count > 0)
     {
@@ -1236,6 +1238,24 @@
                 dtSSISPc += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
             }
             ProblemBehaviorsPg += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region Revised Children’s Anxiety and Depression Scale (RCADS-25)
+        DataRow[] drRCADSAnxietyP = dsCharts.Tables[13].Select("QuestionGroup = 'Anxiety' AND SURVEYid = 68");
+        foreach (DataRow dr in drRCADSAnxietyP)
+        {
+            dtRCADSp += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            rCADSAnxietyPScore += dr["Score"] + ",";
+        }
+        DataRow[] drDepressionP = dsCharts.Tables[13].Select("QuestionGroup = 'Depression' AND SURVEYid = 68");
+        foreach (DataRow dr in drDepressionP)
+        {
+            if (dr["ScheduleDate"] != DBNull.Value && dtRCADSp.Contains(Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy")) == false)
+            {
+                dtRCADSp += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            }
+            rCADSDepressionPScore += dr["Score"] + ",";
         }
         #endregion
     }
@@ -4670,7 +4690,75 @@
     </script>
 
 
+    <script type="text/javascript">
+    $(function () {
+    //-----------------------------------------Revised Children’s Anxiety and Depression Scale (RCADS-25)----------------------------------------
+        $('#divRCADSParent').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Revised Children’s Anxiety and Depression Scale (RCADS-25)'
+        },
+        subtitle: {
+            text: 'this chart represents the severity of general anxiety and depressive symptoms'
+        },
+        xAxis: {
+            categories: [@Html.Raw(dtRCADSp.Trim(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Anxiety',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(rCADSAnxietyPScore.Trim(','))],
+            color: '#67F97C'
 
+        }
+        , {
+            name: 'Depression',
+            marker: {
+                symbol: 'triangle-down'
+            },
+            data: [@Html.Raw(rCADSDepressionPScore.Trim(','))],
+            color: '#434348'
+        }
+        ]
+
+
+            , yAxis: {
+
+        }
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
 
 
 
@@ -4912,6 +5000,15 @@
                         </div>
                         isAssignedToParent = true;
                     }
+
+                    @if (isSurveyAssigned(68, "Parent"))
+                    {                        
+                        <div class="col-sm-12 parent" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                            <div id="divRCADSParent" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="42" class="surveygraph"></div>
+                        </div>
+                        isAssignedToParent = true;
+                    }
+                    
                 </div>
 
                 @if (role != "" && role != "Parent")

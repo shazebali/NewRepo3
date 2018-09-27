@@ -353,7 +353,12 @@
                         if (dob > today.AddYears(-age)) { age--; }
 
                         <div class="surveyList">
-                            <div class="col-md-12" style="font-size:14px;border-bottom:solid 2px #000000;"><i class="ion-clipboard"></i>&nbsp;Questionnaires&nbsp;(@childName)<a href="javascript:void(0);" style="text-decoration:none !important;background-color:#FFF !important;cursor:default;color: #00ADEE;font-weight: bold;">Currently Due</a><a href="javascript:void(0);" style="text-decoration:none !important;background-color:#FFF !important;cursor:default;color: #00ADEE;font-weight: bold;">Previously Due</a></div>
+                            <div class="col-md-12" style="font-size:14px;border-bottom:solid 2px #000000;">
+                                <a style="float:left;"><i class="ion-clipboard"></i>&nbsp;Questionnaires&nbsp;(@childName)</a>
+                                <a style="float:left;" href="">View Previously Submitted Surveys</a>
+                                <a href="javascript:void(0);" style="text-decoration:none !important;background-color:#FFF !important;cursor:default;color: #00ADEE;font-weight: bold;">Currently Due</a>
+                                <a href="javascript:void(0);" style="text-decoration:none !important;background-color:#FFF !important;cursor:default;color: #00ADEE;font-weight: bold;">Previously Due</a>
+                            </div>
                             @if (roles[0] != "Teacher")
                             {
                                 if (schoolId == 1)
@@ -391,6 +396,13 @@
                                 {
                                     <div class="col-md-12 text-left">Academic Progress Rating Scales@(Html.Raw(acadmicprogrss))</div>
                                 }
+
+                                var academicProgressAthena = getPercentCompletion(67, (int)drch["ID"], url.Replace("__", "67"));
+                                if (showHideSurvey(academicProgressAthena) == true)
+                                {
+                                    <div class="col-md-12 text-left">Academic Progress Scale for Athena Academy@(Html.Raw(academicProgressAthena))</div>
+                                }
+
                                 var testReportCard = getPercentCompletion(42, (int)drch["ID"], url.Replace("__", "42"));
                                 if (showHideSurvey(testReportCard) == true)
                                 {
@@ -639,6 +651,14 @@
                                 if (showHideSurvey(ssisp) == true)
                                 {
                                     <div class="col-md-12 text-left">Social Skills Improvement System (Parent)@(Html.Raw(ssisp))</div>
+                                }
+                            }
+                            
+                            @if (roles[0] == "Parent") {
+                                var rcads = getPercentCompletion(68, (int)drch["ID"], url.Replace("__", "68"));
+                                if (showHideSurvey(rcads) == true)
+                                {
+                                    <div class="col-md-12 text-left">Revised Children’s Anxiety and Depression Scale (RCADS-25)@(Html.Raw(rcads))</div>
                                 }
                             }
     </div>

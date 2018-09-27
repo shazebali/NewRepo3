@@ -1313,6 +1313,22 @@ namespace SurveyApp
             cmd.CommandText = "Study_GetStatusHistory";
             return DataHelper.ExecuteCommandAsDataSet(cmd);
         }
+
+        public static DataSet SurveyGetHistory(int userId, int childId)
+        {
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.Parameters.Add("@UserId", SqlDbType.Int);
+            cmd.Parameters["@UserId"].Value = userId;
+
+            cmd.Parameters.Add("@ChildId", SqlDbType.Int);
+            cmd.Parameters["@ChildId"].Value = childId;
         
+            cmd.CommandText = "Survey_GetHistory";
+            return DataHelper.ExecuteCommandAsDataSet(cmd);
+        }
+        
+
     }
 }

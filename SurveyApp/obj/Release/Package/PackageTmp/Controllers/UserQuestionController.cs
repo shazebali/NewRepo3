@@ -1,5 +1,7 @@
-﻿using System;
+﻿using SurveyApp.Models;
+using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web;
@@ -143,6 +145,21 @@ namespace SurveyApp.Controllers
             {
                 return new EmptyResult();
             }
+        }
+
+        public ActionResult SurveyHistory(int childId)
+        {            
+            ViewBag.ChildId = childId;
+            string childName = string.Empty;
+            using (var cContext = new ChildContext())
+            {
+                childName = cContext.Children.SingleOrDefault(c => c.Id == childId).Name;
+            }
+
+            ViewBag.ChildName = childName;
+            DataSet dsSurveys = SurveyApp.DataHelper.SurveyGetHistory(WebSecurity.CurrentUserId, childId);
+
+            return View(dsSurveys);
         }
     }
 }
