@@ -191,7 +191,9 @@
         {
             foreach (DataRow dr in dtSurveys.Rows)
             {
-                <option value="@dr["SurveyId"]" @((int)dr["SurveyId"] == surveyId ? "selected='selected'" : "")>@dr["Title"]&nbsp;@((int)dr["SurveyId"] == 6 ? " for 2yrs - 4yrs" : ((int)dr["SurveyId"] == 7 ? " for 5yrs - 7yrs" : ((int)dr["SurveyId"] == 8 ? " for 8yrs - 12yrs" : ((int)dr["SurveyId"] == 9 ? " for 13yrs - 18yrs" : ((int)dr["SurveyId"] == 45 ? " for 19yrs and older" : "")))))</option>
+                <option value="@dr["SurveyId"]" @((int)dr["SurveyId"] == surveyId ? "selected='selected'" : "")>
+                    @dr["Title"]&nbsp;@((int)dr["SurveyId"] == 6 ? " for 2yrs - 4yrs" : ((int)dr["SurveyId"] == 7 ? " for 5yrs - 7yrs" : ((int)dr["SurveyId"] == 8 ? " for 8yrs - 12yrs" : ((int)dr["SurveyId"] == 9 ? " for 13yrs - 18yrs" : ((int)dr["SurveyId"] == 45 ? " for 19yrs and older" : ((int)dr["SurveyId"] == 51 ? " for 4yrs - 10yrs" : ((int)dr["SurveyId"] == 52 ? " for 11yrs - 17yrs" : "")))))))                    
+                </option>
             }
         }
     </select>
@@ -280,6 +282,8 @@
                     {
                         <th>Area</th>
                     }                    
+                    <th>Child</th>                    
+                    <th>Respondent</th>
                     <th>Question</th>
                     <th>Answer</th>
                     <th>Score</th>
@@ -299,6 +303,8 @@
                             @if(dr["SurveyId"].ToString() == "48" || dr["SurveyId"].ToString() == "46") { 
                             <td>@dr["Area"]</td>
                             }
+                            <td>@childName</td>
+                            <td>@userName</td>
                             <td>@Html.Raw(dr["Question"])</td>
                             <td>@Html.Raw(dr["Answers"])</td>
                             <td>@dr["Score"]</td>
