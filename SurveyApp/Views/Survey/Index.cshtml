@@ -1,15 +1,30 @@
-﻿@model System.Data.DataSet
+﻿@using SurveyApp.Models;
+@model System.Data.DataSet
+
 @{
     ViewBag.Title = "eBit - Questionnaire Manager";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    System.Data.DataSet ds = SurveyApp.DataHelper.SurveyGetAll();
-    
+
+    int schoolId = string.IsNullOrEmpty(Request.QueryString["schoolId"]) == false ? Convert.ToInt32(Request.QueryString["schoolId"]) : 0;
+    int childId = string.IsNullOrEmpty(Request.QueryString["childId"]) == false ? Convert.ToInt32(Request.QueryString["childId"]) : 0;
+
+
+    System.Data.DataSet ds = SurveyApp.DataHelper.SurveyGetAll(schoolId, childId);
+
+
+
 }
+<link href="~/Content/chosen/chosen.css" rel="stylesheet" />
+<link href="~/Content/jQRangeSlider/iThing-min.css" rel="stylesheet" />
+
+<script src="~/Content/chosen/chosen.jquery.min.js"></script>
+<script src="~/Content/jQRangeSlider/jQAllRangeSliders-min.js"></script>
 
 <style type="text/css">
-    a.list-group-item:first-child, a.list-group-item:last-child{
+    a.list-group-item:first-child, a.list-group-item:last-child {
         padding: 10px 15px;
     }
+
     .featured .content-wrapper h2 {
         background-image: -webkit-linear-gradient(top, #0af 0%, #b9def0 100%);
         background-image: -o-linear-gradient(top, #00aaff 0%, #4b9dc5 100%);
@@ -19,61 +34,156 @@
         background-repeat: repeat-x;
         border-color: #000;
     }
+
+    .featured .content-wrapper select {
+        float: right;
+        width: 20%;
+    }
+    .featured .content-wrapper .chosen-container {
+        float: right;        
+    }
+    #ddlSchools_chosen{
+        margin:0px 4px 0px 0px;
+    }
+    .slider {
+        margin: 0px 26px;
+        background-color: #efefef;
+    }
+        .slider .ui-rangeSlider {
+            margin: 42px 0px 4px 0px;
+            padding: 0px;
+        }
 </style>
 
 @section featured {
     <section class="featured">
         <div class="content-wrapper">
             <hgroup class="title">
-                <h2>Questionnaire Manager</h2> 
+                <h2>Questionnaire Manager</h2>
             </hgroup>
-            <p style="font-size:16px;"> 
+            <p style="font-size:16px;">
                 Find the list of surveys below and click for details.
+                <select id="ddlChildren" class="col-sm-9 form-control" onchange="getQuestionnaires(this, 2);">
+                    <option value="">All Children</option>
+                    @foreach (Child objChild in SurveyApp.DataHelper.ChildGetBySchoolId(schoolId))
+                    {
+                        <option value="@objChild.Id" @(objChild.Id == childId ? "selected='selected'" : "")>@objChild.Name</option>
+                    }
+                </select>                
+                <select id="ddlSchools" class="col-sm-9 form-control" onchange="getQuestionnaires(this, 1);">
+                    <option value="">All School(s)</option>
+                    @foreach (School objSchool in School.SchoolGetAll().OrderBy(s => s.Name))
+                    {
+                        <option value="@objSchool.SchoolId" @(objSchool.SchoolId == schoolId ? "selected='selected'" : "")>@objSchool.Name</option>
+                    }
+                </select>
+                &nbsp;&nbsp;
+                <div style="clear:both;"></div>
             </p>
+        </div>
+
+        <div class="slider">
+            <p>Please select date range during which following questionnaire(s) were submitted by the respondent(s) to download their data.</p>
+            <div id="divSlider"></div>
         </div>
     </section>
 }
-<div class="list-group">
-    @foreach (System.Data.DataRow dr in ds.Tables[0].Rows)
-    {
-        if (dr["ID"] != DBNull.Value && (int)dr["ID"] != 21)
+    <div class="list-group">
+        @if (ds.Tables[0].Rows.Count > 0)
         {
-            string tileprefix = string.Empty;
-            if ((int)dr["ID"] == 6) { tileprefix = " for 2yrs - 4yrs"; }
-            if ((int)dr["ID"] == 7) { tileprefix = " for 5yrs - 7yrs"; }
-            if ((int)dr["ID"] == 8) { tileprefix = " for 8yrs - 12yrs"; }
-            if ((int)dr["ID"] == 9) { tileprefix = " for 13yrs - 18yrs"; }
-            if ((int)dr["ID"] == 45) { tileprefix = " for 19yrs and older"; }
-            if ((int)dr["ID"] == 51) { tileprefix = " for 4yrs - 10yrs"; }
-            if ((int)dr["ID"] == 52) { tileprefix = " for 11yrs - 17yrs"; }
-            if ((int)dr["ID"] == 62) { tileprefix = " for 8yrs - 12yrs"; }
-            if ((int)dr["ID"] == 63) { tileprefix = " for 13yrs - 18yrs"; }
-
-            <a href="@Url.Action("Survey", "Survey", new { surveyID = dr["ID"].ToString() })" class="list-group-item">
-                <strong>Preview:</strong> @dr["Title"].ToString() @tileprefix                
-                @using (Html.BeginForm("DownloadSubmittedData", "Report", FormMethod.Post, new { id = "frmDownloadData", @class = "form-horizontal", style = "display: inline-block;float: right; " }))
+            foreach (System.Data.DataRow dr in ds.Tables[0].Rows)
+            {
+                if (dr["ID"] != DBNull.Value && (int)dr["ID"] != 21)
                 {
-                    <div>
-                        <input type="hidden" id="hdnSurveyId" name="hdnSurveyId" />
-                        <input type="hidden" id="hdnFileName" name="hdnFileName" />                        
-                        <span href="javascript:void(0);" class="btnSubmit" style="text-decoration:underline;" surveyid="@dr["ID"]" filename="@(dr["Title"].ToString() + "_"+ tileprefix + "_Submitted_Data_Till_" + DateTime.Now.ToString("dd-MMM-yyyy"))">
-                            <i class="fa fa-download">&nbsp;</i>Export Sumitted Data in Excel
-                        </span>
-                    </div>
-                    <script type="text/javascript">
-                        $(function () {
-                            $(".btnSubmit").click(function (e) {
-                                e.preventDefault();
-                                $("#hdnSurveyId").val($(this).attr("surveyid"));
-                                $("#hdnFileName").val($(this).attr("filename"));
-                                $('#frmDownloadData').submit();
-                                return false;
+                    string tileprefix = string.Empty;
+                    if ((int)dr["ID"] == 6) { tileprefix = " for 2yrs - 4yrs"; }
+                    if ((int)dr["ID"] == 7) { tileprefix = " for 5yrs - 7yrs"; }
+                    if ((int)dr["ID"] == 8) { tileprefix = " for 8yrs - 12yrs"; }
+                    if ((int)dr["ID"] == 9) { tileprefix = " for 13yrs - 18yrs"; }
+                    if ((int)dr["ID"] == 45) { tileprefix = " for 19yrs and older"; }
+                    if ((int)dr["ID"] == 51) { tileprefix = " for 4yrs - 10yrs"; }
+                    if ((int)dr["ID"] == 52) { tileprefix = " for 11yrs - 17yrs"; }
+                    if ((int)dr["ID"] == 62) { tileprefix = " for 8yrs - 12yrs"; }
+                    if ((int)dr["ID"] == 63) { tileprefix = " for 13yrs - 18yrs"; }
+
+                    <a href="@Url.Action("Survey", "Survey", new { surveyID = dr["ID"].ToString() })" class="list-group-item">
+                        <strong>Preview:</strong> @dr["Title"].ToString() @tileprefix
+                        @using (Html.BeginForm("DownloadSubmittedData", "Report", FormMethod.Post, new { id = "frmDownloadData", @class = "form-horizontal", style = "display: inline-block;float: right; " }))
+                        {
+                        <div>
+                            <input type="hidden" id="hdnSurveyId" name="hdnSurveyId" />
+                            <input type="hidden" id="hdnFileName" name="hdnFileName" />
+                            <input type="hidden" id="hdnSchoolId" name="hdnSchoolId" />
+                            <input type="hidden" id="hdnChildId" name="hdnChildId" />
+                            <input type="hidden" id="hdnMinDate" name="hdnMinDate" />
+                            <input type="hidden" id="hdnMaxDate" name="hdnMaxDate" />
+                            <span href="javascript:void(0);" class="btnSubmit" style="text-decoration:underline;" surveyid="@dr["ID"]" schoolid="@schoolId" filename="@(dr["Title"].ToString() + "_"+ tileprefix + "_Submitted_Data_Till_" + DateTime.Now.ToString("dd-MMM-yyyy"))" childid="@childId">
+                                <i class="fa fa-download">&nbsp;</i>Export Sumitted Data in Excel
+                            </span>
+                        </div>
+                        <script type="text/javascript">
+                            $(function () {
+                                $(".btnSubmit").click(function (e) {
+                                    e.preventDefault();
+                                    var dateValues = $("#divSlider").dateRangeSlider("values");
+                                    var minDate = new Date(dateValues.min).toDateString();
+                                    
+                                    var maxDate = new Date(dateValues.max).toDateString();
+
+                                    $("#hdnSurveyId").val($(this).attr("surveyid"));
+                                    $("#hdnFileName").val($(this).attr("filename"));
+                                    $("#hdnSchoolId").val($(this).attr("schoolid"));
+                                    $("#hdnChildId").val($(this).attr("childid"));
+                                    $("#hdnMinDate").val(minDate);
+                                    $("#hdnMaxDate").val(maxDate);
+                                    
+                                    $('#frmDownloadData').submit();
+                                    return false;
+                                });
                             });
-                        });
-                        
-                    </script>
-                }                
-            </a>
+
+                        </script>
+                        }
+                    </a>
+                }
+            }            
         }
+        else{
+            <div style="text-align: center;margin: 60px 0px;">There is no questionnaire available for this school.</div>
+        }
+
+    </div>
+
+
+    <script type="text/javascript">
+    $(function () {
+        $("#ddlSchools").chosen();
+        $("#ddlChildren").chosen();
+        $("#divSlider").dateRangeSlider({
+                bounds: {
+                    min: new Date(2016, 0, 1),
+                    max: new Date(@DateTime.Now.Year, @(DateTime.Now.Month - 1), @DateTime.Now.Day)
+                },
+                defaultValues: {
+                    min: new Date(@DateTime.Now.Year, 0, 1),
+                    max: new Date(@DateTime.Now.Year, @(DateTime.Now.Month - 1), @DateTime.Now.Day)
+                }
+        });
+
+        
+    });
+
+
+    function getQuestionnaires(elem, type) {
+        var schoolId, childId;
+        schoolId = $("#ddlSchools").val();
+        childId = $("#ddlChildren").val();
+        
+        if (type == 1) {
+            childId = "0";
+        }
+        
+
+        location.href = "@Url.Action("Index", "Survey")" + "?schoolId=" + schoolId + "&childId=" + childId;
     }
-</div>
+    </script>
