@@ -1331,6 +1331,17 @@ namespace SurveyApp
             cmd.CommandText = "Report_GetAccountRequests";
             return DataHelper.ExecuteCommandAsDataSet(cmd);
         }
+
+        public static DataSet getActivityLog()
+        {
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.CommandText = "Report_GetActivityLog";
+            return DataHelper.ExecuteCommandAsDataSet(cmd);
+        }
+
+        
         public static DataSet getSurveyScore(int? studyId = null, int? userId = null, int? surveyId = null, int? childId = null, int? schoolId = null, bool? includeTestRepondent = null)
         {
             SqlCommand cmd = new SqlCommand();
@@ -1421,7 +1432,7 @@ namespace SurveyApp
             return DataHelper.ExecuteCommandAsDataSet(cmd);
         }
 
-        public static DataSet SurveyGetHistory(int userId, int childId, int surveyId)
+        public static DataSet SurveyGetHistory(int userId, int? childId = 0, int? surveyId = 0)
         {
             SqlCommand cmd = new SqlCommand();
             cmd.CommandType = CommandType.StoredProcedure;
@@ -1438,7 +1449,19 @@ namespace SurveyApp
             cmd.CommandText = "Survey_GetHistory";
             return DataHelper.ExecuteCommandAsDataSet(cmd);
         }
-        
+
+        #region SurveyQuestion
+        public static DataSet SurveyQuestionGetAllForSurvey(int surveyId) {
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandType = CommandType.StoredProcedure;
+            
+            cmd.Parameters.Add("@SurveyId", SqlDbType.Int);
+            cmd.Parameters["@SurveyId"].Value = surveyId;
+
+            cmd.CommandText = "SurveyQuestion_GetAllForSurvey";
+            return DataHelper.ExecuteCommandAsDataSet(cmd);
+        }
+        #endregion
 
     }
 }

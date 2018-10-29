@@ -1,0 +1,65 @@
+﻿@using SurveyApp.Models;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    ViewBag.Title = "eBit - Survey Manager";
+}
+
+
+
+<script type="text/javascript">
+    $(function () {
+        $("#tblSurveys").DataTable({ dom: 'Bfrtip', buttons: [{ extend: 'excel', text: "Export to Excel", title: 'Surveys_List', exportOptions: {  modifier: { search: 'none', order: 'original' }} }], "oLanguage": { "sInfo": "Displaying _START_ to _END_ of _TOTAL_ Surveys" } });
+    });
+</script>
+<div>
+    <h2 class="col-sm-11" style="margin: 0px;padding: 0px;">Survey Manager</h2>
+    <a href="@Url.Action("SurveyAddEdit", "Survey")" class="btn btn-default" style="float:right;"><i class="fa fa-graduation-cap"></i>&nbsp;Add Survey</a>    
+</div>
+<div style="clear:both;"></div>
+<br />
+<style>
+    .table-hover tbody tr {
+        cursor: default;
+    }
+
+    .surveylist .title {
+        text-transform: capitalize;
+        width:25%;
+    }
+    .surveylist .tagline{
+
+    }
+    .surveylist .abbreviation{
+        width:2%;
+    }
+    .surveylist tr td a{
+        cursor: pointer;
+    }
+        .surveylist tr td a i {
+            font-size: 18px;
+        }
+</style>
+<table class="table table-striped table-hover surveylist" id="tblSurveys">
+    <thead>
+        <tr>
+            <th class="title">Title</th>
+            <th class="tagline">Tagline</th>
+            <th class="abbreviation">Title Abbreviation</th>
+            <th class="style">Style</th>            
+            <th style="width: 50px;">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (Survey objSurvey in Survey.SurveyGetAll())
+        {
+            <tr onclick="location.href = '@Url.Action("SurveyQuestionList", "Survey", new { surveyId = objSurvey.Id })';">
+                <td class="name">@objSurvey.Title</td>
+                <td>@objSurvey.Tagline</td>
+                <td>@objSurvey.Title_Abbr</td>
+                <td>@objSurvey.Style</td>                
+                <td style="text-align: center;vertical-align:middle;"><a href="javascript:void(0);" onclick="event.stopPropagation();location.href = '@Url.Action("SurveyAddEdit", "Survey", new { id = objSurvey.Id })';"><i class="fa fa-edit"></i></a></td>
+            </tr>
+        }
+    </tbody>
+</table>

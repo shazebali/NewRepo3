@@ -157,7 +157,7 @@
     </div>
     <div style="clear:both;"></div>
     <select id="ddlStudy" class="col-sm-9 form-control" onchange="getData(this, 1);">
-        @foreach (Study std in Study.StudyGetAllByUserId(WebSecurity.CurrentUserId))
+        @foreach (Study std in Study.StudyGetAllByUserId(WebSecurity.CurrentUserId).OrderBy(s => s.Name))
         {
             <option value="@std.Id" @(std.Id == studyId ? "selected='selected'" : "")>@std.Name</option>
         }

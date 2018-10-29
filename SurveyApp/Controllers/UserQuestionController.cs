@@ -147,6 +147,20 @@ namespace SurveyApp.Controllers
             }
         }
 
+        public ActionResult _SurveyHistory()
+        {
+            if (Request.IsAuthenticated)
+            {
+                return PartialView("_SurveyHistory");
+            }
+            else
+            {
+                return new EmptyResult();
+            }
+        }
+
+        
+
         public ActionResult SurveyHistory(int childId,  int surveyId)
         {            
             ViewBag.ChildId = childId;

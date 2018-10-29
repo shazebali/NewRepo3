@@ -1,0 +1,69 @@
+﻿
+@using System.Data;
+@{
+    
+    Layout = null;
+
+    int childIdts = string.IsNullOrEmpty(Request.QueryString["childIdts"]) == false ? Convert.ToInt32(Request.QueryString["childIdts"]) : 0;
+    string childName = string.IsNullOrEmpty(Request.QueryString["child"]) == false ? Request.QueryString["child"].ToString() : string.Empty;
+    DataSet ds = SurveyApp.DataHelper.SurveyGetHistory(WebSecurity.CurrentUserId, childIdts);
+    
+
+}
+
+<script type="text/javascript">
+    $(function () {
+        $("#tblSurveys").DataTable({ dom: 'Bfrtip', buttons: [{ extend: 'excel', text: "Export to Excel", title: 'Questionnaires', exportOptions: { modifier: { search: 'none', order: 'original' } } }], "oLanguage": { "sInfo": "Displaying _START_ to _END_ of _TOTAL_ Questionnaire(s)" } });
+    });
+</script>
+
+<div style="clear:both;"></div>
+<br />
+<style>
+    .table-hover tbody tr {
+        cursor: pointer;
+    }
+
+    #tblStudies .name {
+        text-transform: capitalize;
+    }
+
+    #tblStudies .text-success {
+        color: #33b86c;
+    }
+
+    #tblStudies .text-danger {
+        color: #ef5350;
+    }
+</style>
+<table class="table table-striped table-hover" id="tblSurveys">
+    <thead>
+        <tr>
+            <th>Questionnaire</th>
+            <th>Child</th>
+            <th>Schedule Ended On</th>
+            <th>Submitted On</th>
+            <th>Score</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (System.Data.DataRow dr in ds.Tables[0].Rows)
+        {
+            <tr onclick="goToSurveyPage(@dr["SurveyId"], @dr["ChildId"] , '@dr["ChildName"]', '@Convert.ToDateTime(dr["ScheduleDate"]).ToString()', @dr["ScheduleId"]);">
+                <td class="name">@dr["Title"]</td>
+                <td class="name">@dr["ChildName"]</td>
+                <td>@(dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToShortDateString() : "")</td>
+                <td>@(dr["SubmitDate"] != DBNull.Value ? Convert.ToDateTime(dr["SubmitDate"]).ToShortDateString() : "")</td>
+                <td>@dr["Score"]</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script type="text/javascript">
+    function goToSurveyPage(surveyId, childId, childName, scheduleDate, schid) {
+        if (childName != "") {
+            window.open("@Url.Action("Question", "UserQuestion")?surveyID=" + surveyId + "&ChildId=" + childId + "&ChildName=" + childName + "&perioddate=" + scheduleDate + "&schid=" + schid + "&of=1");
+        }
+    }
+</script>

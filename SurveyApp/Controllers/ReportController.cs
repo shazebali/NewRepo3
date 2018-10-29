@@ -31,6 +31,12 @@ namespace SurveyApp.Controllers
             return View();
         }
 
+        public ActionResult ActivityLog()
+        {
+            return View();
+        }
+        
+
         public ActionResult SurveyScore()
         {
             if (!Roles.IsUserInRole(WebSecurity.CurrentUserName, "Administrator"))

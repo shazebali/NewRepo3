@@ -243,6 +243,7 @@
     <Compile Include="Models\Generic.cs" />
     <Compile Include="Models\LifeEvent.cs" />
     <Compile Include="Models\Survey.cs" />
+    <Compile Include="Models\SurveyQuestion.cs" />
     <Compile Include="SMTPHelper.cs" />
     <Content Include="404.html" />
     <Content Include="App_Data\aspnet-SurveyApp-20160130102437.mdf" />
@@ -535,6 +536,12 @@
     <Content Include="Views\Child\_StatusHistory.cshtml" />
     <Content Include="Views\Report\SurveyScore.cshtml" />
     <Content Include="Views\UserQuestion\SurveyHistory.cshtml" />
+    <Content Include="Views\Report\ActivityLog.cshtml" />
+    <Content Include="Views\Survey\SurveyAddEdit.cshtml" />
+    <Content Include="Views\Survey\SurveyList.cshtml" />
+    <Content Include="Views\Survey\SurveyQuestionAddEdit.cshtml" />
+    <Content Include="Views\Survey\SurveyQuestionList.cshtml" />
+    <Content Include="Views\UserQuestion\_SurveyHistory.cshtml" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

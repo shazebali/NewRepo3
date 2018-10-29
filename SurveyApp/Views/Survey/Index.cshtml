@@ -53,6 +53,17 @@
             margin: 42px 0px 4px 0px;
             padding: 0px;
         }
+    .editsurvey {
+        margin: 0px;
+        display: inline-block;
+        text-decoration: none;
+        color: #7b7eff;
+        font-size: 12px;
+        text-transform: uppercase;
+    }
+        .editsurvey:hover {
+            text-decoration: underline;
+        }
 </style>
 
 @section featured {
@@ -107,7 +118,8 @@
                     if ((int)dr["ID"] == 63) { tileprefix = " for 13yrs - 18yrs"; }
 
                     <a href="@Url.Action("Survey", "Survey", new { surveyID = dr["ID"].ToString() })" class="list-group-item">
-                        <strong>Preview:</strong> @dr["Title"].ToString() @tileprefix
+                        <strong>Preview:</strong> @dr["Title"].ToString() @tileprefix&nbsp;
+                        <strong class="editsurvey" onclick="event.preventDefault();event.stopPropagation();location.href='@Url.Action("SurveyAddEdit", "Survey")?id=@dr["ID"]'">Edit</strong>
                         @using (Html.BeginForm("DownloadSubmittedData", "Report", FormMethod.Post, new { id = "frmDownloadData", @class = "form-horizontal", style = "display: inline-block;float: right; " }))
                         {
                         <div>
