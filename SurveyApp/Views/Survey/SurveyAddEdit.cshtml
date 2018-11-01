@@ -11,8 +11,16 @@
 
 <h2>
     <a href="javascript:void(0);" id="back" class="btnBack" title="Back to Questionnaire Manager" data-toggle="tooltip"></a> &nbsp;
-    Questionnaire Information Editor&nbsp;
-    <a href="@Url.Action("SurveyQuestionList", "Survey", new { surveyId = surveyId })" class="viewQuestions" title="View Questions List for @title" data-toggle="tooltip">VIEW QUESTIONS</a>
+    
+    @if (surveyId > 0)
+    {
+        <span>Questionnaire Information Editor&nbsp;</span>
+        <a href="@Url.Action("SurveyQuestionList", "Survey", new { surveyId = surveyId })" class="viewQuestions" title="View Questions List for @title" data-toggle="tooltip">VIEW QUESTIONS</a>
+    }
+    else
+    {
+        <span>Add Questionnaire</span>
+    }
 </h2>
 <br />
 <style>
@@ -62,7 +70,7 @@
     <div class="form-group">
         <label class="control-label col-sm-4">Style:*</label>
         <div class="col-sm-8" style="text-align: right;">
-            @Html.DropDownListFor(m => m.Style, new SelectList(SurveyStyle.SurveyStyle_GetAll(), "Style", "Style"), "Select Survey Style", new { id = "ddlSurveyStyle", @class = "form-control" })
+            @Html.DropDownListFor(m => m.Style, new SelectList(SurveyStyle.SurveyStyle_GetAll(), "Style", "Style"), "Select Questionnaire Style", new { id = "ddlSurveyStyle", @class = "form-control" })
         </div>
     </div>
 

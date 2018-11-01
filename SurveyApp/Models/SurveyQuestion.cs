@@ -81,4 +81,53 @@ namespace SurveyApp.Models
         }
 
     }
+
+    public class Question_InputType
+    {
+        public string Id { get; set; }
+        public string Type { get; set; }
+
+        public static List<Question_InputType> getInputTypes() {
+            List<Question_InputType> lst = new List<Question_InputType>();
+
+            lst.Add(new Question_InputType() { Id = "supmed", Type = "Supplements" });
+            lst.Add(new Question_InputType() { Id = "checkbox", Type = "Multiple Options (Check Box)" });
+            lst.Add(new Question_InputType() { Id = "radio", Type = "Single Option (Radio Button)" });
+            lst.Add(new Question_InputType() { Id = "text", Type = "Single Line Text" });
+            lst.Add(new Question_InputType() { Id = "checkdate", Type = "Start/End Date based on Checkbox" });
+            lst.Add(new Question_InputType() { Id = "textdate", Type = "Start/End Date based on Text" });
+            lst.Add(new Question_InputType() { Id = "med", Type = "Medication" });
+            lst.Add(new Question_InputType() { Id = "schdiet", Type = "Diet" });
+            lst.Add(new Question_InputType() { Id = "select", Type = "Dropdown" });
+            lst.Add(new Question_InputType() { Id = "date", Type = "Date" });
+            lst.Add(new Question_InputType() { Id = "multitext", Type = "Multi Line Text" });
+            lst.Add(new Question_InputType() { Id = "slider", Type = "Slider" });
+            lst.Add(new Question_InputType() { Id = "sch", Type = "Schedule" });
+            
+            return lst;
+        }
+    }
+
+    public class PossibleAnswer
+    {
+        public string Answer { get; set; }
+        public string Score { get; set; }
+    }
+
+    public enum InputType
+    {
+        supmed = 1,
+        checkbox = 2,
+        radio = 3,
+        text = 4,
+        checkdate = 5,
+        textdate = 6,
+        med = 7,
+        schdiet = 8,
+        select = 9,
+        date = 10,
+        multitext = 11,
+        slider = 12,
+        sch = 13
+    }
 }

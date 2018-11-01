@@ -35,9 +35,9 @@
     dsChildrenSchedules = SurveyApp.DataHelper.getChildrenSchedulesByUserId(userId, DateTime.Now);
 
     int schoolId = 0;
-    if(dsReveseandLiveEvent != null && dsReveseandLiveEvent.Tables != null && dsReveseandLiveEvent.Tables.Count >= 6)
+    if (dsReveseandLiveEvent != null && dsReveseandLiveEvent.Tables != null && dsReveseandLiveEvent.Tables.Count >= 6)
     {
-        if(dsReveseandLiveEvent.Tables[5] != null && dsReveseandLiveEvent.Tables[5].Rows.Count > 0)
+        if (dsReveseandLiveEvent.Tables[5] != null && dsReveseandLiveEvent.Tables[5].Rows.Count > 0)
         {
             schoolId = Convert.ToInt32(dsReveseandLiveEvent.Tables[5].Rows[0]["SchoolId"]);
         }
@@ -94,9 +94,9 @@
             if (i < 1)
             {
                 DateTime endDate = drSchedule["ScheuleEndDate"] != DBNull.Value ? Convert.ToDateTime(drSchedule["ScheuleEndDate"]) : DateTime.MinValue;
-                int schId = 0;                
+                int schId = 0;
                 schId = drSchedule["ScheduleId" + (role == "Student" ? "Child" : role)] != DBNull.Value ? Convert.ToInt32(drSchedule["ScheduleId" + (role == "Student" ? "Child" : role)]) : 0;
-                
+
                 if (endDate != DateTime.MinValue)
                 {
                     percentage = "0%";
@@ -112,7 +112,7 @@
                         {
                             //should it go to one step previous or all the way to first one
                             DataRow[] drAlternativeQuestions = dsQuestionsFilled.Tables[0].Select("SurveyID = " + (surveyId - 1) + " AND ChildID = " + childId + " AND ScheduleDate = '" + endDate.ToString("MM/dd/yyyy") + "'", " ScheduleDate DESC");
-                            if(drAlternativeQuestions.Length > 0)
+                            if (drAlternativeQuestions.Length > 0)
                             {
                                 percentage = drAlternativeQuestions[0]["Percentage"] != DBNull.Value ? drAlternativeQuestions[0]["Percentage"].ToString() : percentage;
                                 endDate = drAlternativeQuestions[0]["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(drAlternativeQuestions[0]["ScheduleDate"]) : DateTime.MinValue;
@@ -120,7 +120,7 @@
                         }
                     }
 
-                    if(surveyId == 16 || surveyId == 43)
+                    if (surveyId == 16 || surveyId == 43)
                     {
                         inPer = percentage;
                         if (inPer == "100%")
@@ -143,7 +143,8 @@
         return info;
     }
 
-    public string getIntakeCompletion(int childId, string url, int surveyId) {
+    public string getIntakeCompletion(int childId, string url, int surveyId)
+    {
         string comp = "";
 
         if (dsQuestionsFilled != null && dsQuestionsFilled.Tables.Count > 1 && dsQuestionsFilled.Tables[1].Rows.Count > 0)
@@ -154,7 +155,7 @@
             {
                 string percentage = dr["Percentage"] != DBNull.Value ? dr["Percentage"].ToString() : "0%";
                 inPer = percentage;
-                if(inPer == "100%")
+                if (inPer == "100%")
                 {
                     inDt = (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString() : "");
                 }
@@ -171,7 +172,8 @@
     {
         bool isValidDate = false;
         DateTime dtEvent;
-        if (DateTime.TryParse(date, out dtEvent)) {
+        if (DateTime.TryParse(date, out dtEvent))
+        {
             isValidDate = true;
         }
 
@@ -180,12 +182,17 @@
 
     public bool showHideSurvey(string dates)
     {
-        if (dates == "" ||( dates.ToLower().Contains("_SHOW_") == false && dates.ToLower().Contains("</a>") == false))
+        if (dates == "" || (dates.ToLower().Contains("_SHOW_") == false && dates.ToLower().Contains("</a>") == false))
         {
             return false;
         }
 
         return true;
+    }
+
+    public string getViewHistoryLink(int childID, int surveyId)
+    {
+        return "<a class='viewhistory' target='_blank' href='" + @Url.Action("SurveyHistory", "UserQuestion") + "?childId=" + childID + "&surveyId=" + surveyId + "\'>View History</a>";
     }
 }
 @if (childID > 0)
@@ -207,10 +214,11 @@
                 text-align: left;
             }
 
-            .childDetailsDiv .boxitem .content {                
+            .childDetailsDiv .boxitem .content {
                 height: 200px;
             }
-        .childDetailsDiv .locked, 
+
+        .childDetailsDiv .locked,
         .childDetailsDiv .locked span {
             background-color: #CCC;
         }
@@ -308,7 +316,8 @@
             .intake a:hover {
                 background: rgba(255,255,255,.1);
             }
-        .btnViewMore{
+
+        .btnViewMore {
             padding: 0px 6px;
             display: inline-block;
             color: #FFF;
@@ -319,18 +328,20 @@
             margin-top: 7px;
             margin-top: 2px;
         }
-        .btnViewMore:hover{
-            padding: 0px 6px;
-            display: inline-block;
-            color: #FFF;
-            float: right;
-            border: solid 1px #FFF;
-            background-color: #666;
-            text-decoration: none;
-            margin-top: 7px;
-            margin-top: 2px;
-        }
-        a.redCrossInItem{
+
+            .btnViewMore:hover {
+                padding: 0px 6px;
+                display: inline-block;
+                color: #FFF;
+                float: right;
+                border: solid 1px #FFF;
+                background-color: #666;
+                text-decoration: none;
+                margin-top: 7px;
+                margin-top: 2px;
+            }
+
+        a.redCrossInItem {
             width: 20px;
             height: 20px;
             position: absolute;
@@ -338,10 +349,15 @@
             top: -6px;
             font-size: 18px;
         }
+
             a.redCrossInItem:hover, a.redCrossInItem:visited {
                 font-size: 19px !important;
             }
-        .ui-tooltip{/*min-width:300px;*/background-color: #333;color:#FFF;}
+
+        .ui-tooltip { /*min-width:300px;*/
+            background-color: #333;
+            color: #FFF;
+        }
     </style>
 
     <div style="margin: 0px 0px 20px 0px;" class="childDetailsDiv">
@@ -351,339 +367,358 @@
                     <div class="panel-group surveys">
 
                         @if (dschild.Tables[0].Rows.Count > 0)
-                {
-                    foreach (System.Data.DataRow drch in dschild.Tables[0].Rows)
-                    {
-
-                        var url = Url.Action("Question", "UserQuestion", new { surveyID = "__", ChildId = drch["ID"].ToString(), ChildName = drch["Name"].ToString() });
-                        DateTime today = DateTime.Today;
-                        DateTime dob = (DateTime)drch["DOB"];
-                        int age = today.Year - dob.Year;
-
-                        if (dob > today.AddYears(-age)) { age--; }
-
-                        <div class="surveyList">
-                            <div class="col-md-12" style="font-size:14px;border-bottom:solid 2px #000000;"><i class="ion-clipboard"></i>&nbsp;Questionnaires&nbsp;(@childName)<a href="javascript:void(0);" style="text-decoration:none !important;background-color:#FFF !important;cursor:default;color: #00ADEE;font-weight: bold;">Currently Due</a><a href="javascript:void(0);" style="text-decoration:none !important;background-color:#FFF !important;cursor:default;color: #00ADEE;font-weight: bold;">Previously Due</a></div>
-                            @if (roles[0] != "Teacher")
-                            {
-                                if (schoolId == 1)
-                                {
-                                    string percentGen = getPercentCompletion(16, (int)drch["ID"], url.Replace("__", "16"));
-                                    if (showHideSurvey(percentGen) == true)
-                                    {
-                                        <div class="col-md-12 text-left" style="background-color: #c7dbff;padding: 6px 6px;"><i class="ion-flag" style="font-size: 16px;vertical-align: middle;"></i>&nbsp;Parent Intake Form (OHS)@(Html.Raw(percentGen))</div>
-                                    }
-                                }
-                                if (schoolId == 2)
-                                {
-                                    string percentGenCAS = getPercentCompletion(43, (int)drch["ID"], url.Replace("__", "43"));
-                                    if (showHideSurvey(percentGenCAS) == true)
-                                    {
-                                        <div class="col-md-12 text-left" style="background-color: #c7dbff;padding: 6px 6px;"><i class="ion-flag" style="font-size: 16px;vertical-align: middle;"></i>&nbsp;Parent Intake Form (CAS)@(Html.Raw(percentGenCAS))</div>
-                                    }
-                                }
-                                var casParent = getPercentCompletion(55, (int)drch["ID"], url.Replace("__", "55"));
-                                if (showHideSurvey(casParent) == true)
-                                {
-                                    <div class="col-md-12 text-left">CAS Grit and Resilience - Parent@(Html.Raw(casParent))</div>
-                                }
-                            }
-                            @if (roles[0] == "Teacher")
+                        {
+                            foreach (System.Data.DataRow drch in dschild.Tables[0].Rows)
                             {
 
-                                var strLanComunication = getPercentCompletion(24, (int)drch["ID"], url.Replace("__", "24"));
-                                if (showHideSurvey(strLanComunication) == true)
-                                {
-                                    <div class="col-md-12 text-left">Weekly - Language and Communication, Behavior, Daily Learning @(Html.Raw(strLanComunication))</div>
-                                }
-                                var acadmicprogrss = getPercentCompletion(27, (int)drch["ID"], url.Replace("__", "27"));
-                                if (showHideSurvey(acadmicprogrss) == true)
-                                {
-                                    <div class="col-md-12 text-left">Academic Progress Rating Scales@(Html.Raw(acadmicprogrss))</div>
-                                }
+                                var url = Url.Action("Question", "UserQuestion", new { surveyID = "__", ChildId = drch["ID"].ToString(), ChildName = drch["Name"].ToString() });
+                                DateTime today = DateTime.Today;
+                                DateTime dob = (DateTime)drch["DOB"];
+                                int age = today.Year - dob.Year;
 
-                                var academicProgressAthena = getPercentCompletion(67, (int)drch["ID"], url.Replace("__", "67"));
-                                if (showHideSurvey(academicProgressAthena) == true)
-                                {
-                                    <div class="col-md-12 text-left">Academic Progress Scale for Athena Academy@(Html.Raw(academicProgressAthena))</div>
-                                }
+                                if (dob > today.AddYears(-age)) { age--; }
 
-                                var testReportCard = getPercentCompletion(42, (int)drch["ID"], url.Replace("__", "42"));
-                                if (showHideSurvey(testReportCard) == true)
-                                {
-                                    <div class="col-md-12 text-left">CAS Grit and Resilience Scale@(Html.Raw(testReportCard))</div>
-                                }
-                                var vinelandTeacher = getPercentCompletion(47, (int)drch["ID"], url.Replace("__", "47"));
-                                if (showHideSurvey(vinelandTeacher) == true)
-                                {
-                                    <div class="col-md-12 text-left">Vineland-3 (Teacher)@(Html.Raw(vinelandTeacher))</div>
-                                }
-                                var qTeacherReport = getPercentCompletion(50, (int)drch["ID"], url.Replace("__", "50"));
-                                if (showHideSurvey(qTeacherReport) == true)
-                                {
-                                    <div class="col-md-12 text-left">School Anxiety Scale – Teacher Report@(Html.Raw(qTeacherReport))</div>
-                                }
-                                var qCGITeacher = getPercentCompletion(58, (int)drch["ID"], url.Replace("__", "58"));
-                                if (showHideSurvey(qCGITeacher) == true)
-                                {
-                                    <div class="col-md-12 text-left">CGI-I: Teacher Rating@(Html.Raw(qCGITeacher))</div>
-                                }
-
-                                var ssist = getPercentCompletion(65, (int)drch["ID"], url.Replace("__", "65"));
-                                if (showHideSurvey(ssist) == true)
-                                {
-                                    <div class="col-md-12 text-left">Social Skills Improvement System (Teacher)@(Html.Raw(ssist))</div>
-                                }
-                            }
-                            @{
-                                var abbsensoryprofile = getPercentCompletion(1, (int)drch["ID"], url.Replace("__", "1"));
-                                if (showHideSurvey(abbsensoryprofile) == true)
-                                {
-                                    <div class="col-md-12 text-left">Abbreviated sensory profile @(Html.Raw(abbsensoryprofile))</div>
-
-                                }
-                                var CaregiverQuestionair = getPercentCompletion(2, (int)drch["ID"], url.Replace("__", "2"));
-                                if (showHideSurvey(CaregiverQuestionair) == true)
-                                {
-                                    <div class="col-md-12 text-left">Caregiver Strain Questionnaire@(Html.Raw(CaregiverQuestionair))</div>
-                                }
-                                var GISeverityIndex = getPercentCompletion(3, (int)drch["ID"], url.Replace("__", "3"));
-                                if (showHideSurvey(GISeverityIndex) == true)
-                                {
-                                    <div class="col-md-12 text-left">GI Severity Index @(Html.Raw(GISeverityIndex))</div>
-                                }
-                                var abbehaviourchk = getPercentCompletion(4, (int)drch["ID"], url.Replace("__", "4"));
-                                if (showHideSurvey(abbehaviourchk) == true)
-                                {
-                                    <div class="col-md-12 text-left">Aberrant Behavior Checklist@(Html.Raw(abbehaviourchk))</div>
-                                }
-
-                                var socialResponsivenies = getPercentCompletion(5, (int)drch["ID"], url.Replace("__", "5"));
-                                if (showHideSurvey(socialResponsivenies) == true)
-                                {
-                                    <div class="col-md-12 text-left">Social Responsiveness Scale@(Html.Raw(socialResponsivenies))</div>
-                                }
-
-                                if (age <= 4)
-                                {
-                                    var pedsqty = getPercentCompletion(6, (int)drch["ID"], url.Replace("__", "6"));
-                                    if (showHideSurvey(pedsqty) == true)
+                                <div class="surveyList">
+                                    <div class="col-md-12" style="font-size:14px;border-bottom:solid 2px #000000;"><i class="ion-clipboard"></i>&nbsp;Questionnaires&nbsp;(@childName)<a href="javascript:void(0);" style="text-decoration:none !important;background-color:#FFF !important;cursor:default;color: #00ADEE;font-weight: bold;">Currently Due</a><a href="javascript:void(0);" style="text-decoration:none !important;background-color:#FFF !important;cursor:default;color: #00ADEE;font-weight: bold;">Previously Due</a></div>
+                                    @if (roles[0] != "Teacher")
                                     {
-                                        <div class="col-md-12 text-left">Peds quality of life for 2yrs-4yrs@(Html.Raw(pedsqty))</div>
-                                    }
-                                }
-                                else if (age <= 7 && age >= 5)
-                                {
-                                    var pdsqtylife = getPercentCompletion(7, (int)drch["ID"], url.Replace("__", "7"));
-                                    if (showHideSurvey(pdsqtylife) == true)
-                                    {
-                                        <div class="col-md-12 text-left">Peds quality of life for 5yrs-7yrs@(Html.Raw(pdsqtylife))</div>
-                                    }
-                                }
-                                else if (age <= 12 && age >= 8)
-                                {
-                                    var pdsqty8yr = getPercentCompletion(8, (int)drch["ID"], url.Replace("__", "8"));
-                                    if (showHideSurvey(pdsqty8yr) == true)
-                                    {
-                                        <div class="col-md-12 text-left">Peds quality of life for 8yrs -12yrs@(Html.Raw(pdsqty8yr))</div>
-                                    }
-
-                                    var ssis812 = getPercentCompletion(62, (int)drch["ID"], url.Replace("__", "62"));
-                                    if (showHideSurvey(ssis812) == true)
-                                    {
-                                        <div class="col-md-12 text-left">Social Skills Improvement System for 8yrs -12yrs@(Html.Raw(ssis812))</div>
-                                    }
-                                }
-                                else if (age >= 13 && age <= 18)
-                                {
-                                    var pdsqty13year = getPercentCompletion(9, (int)drch["ID"], url.Replace("__", "9"));
-                                    if (showHideSurvey(pdsqty13year) == true)
-                                    {
-                                        <div class="col-md-12 text-left">Peds quality of life for 13yrs -18yrs@(Html.Raw(pdsqty13year))</div>
-                                    }
-
-
-                                    var ssis1318 = getPercentCompletion(63, (int)drch["ID"], url.Replace("__", "63"));
-                                    if (showHideSurvey(ssis1318) == true)
-                                    {
-                                        <div class="col-md-12 text-left">Social Skills Improvement System for 13yrs -18yrs@(Html.Raw(ssis1318))</div>
-                                    }
-                                }
-                                else if (age >= 19)
-                                {
-                                    var pdsqty19year = getPercentCompletion(45, (int)drch["ID"], url.Replace("__", "45"));
-                                    if (showHideSurvey(pdsqty19year) == true)
-                                    {
-                                        <div class="col-md-12 text-left">Peds quality of life for 19yrs and older@(Html.Raw(pdsqty19year))</div>
-                                    }
-                                }
-                                var shrtlngprofile = getPercentCompletion(10, (int)drch["ID"], url.Replace("__", "10"));
-                                if (showHideSurvey(shrtlngprofile) == true)
-                                {
-                                    <div class="col-md-12 text-left">Short language profile @(Html.Raw(shrtlngprofile))</div>
-                                }
-                                var socialcommqstions = getPercentCompletion(11, (int)drch["ID"], url.Replace("__", "11"));
-                                if (showHideSurvey(socialcommqstions) == true)
-                                {
-                                    <div class="col-md-12 text-left">Social communication Questionnaire – life time @(Html.Raw(socialcommqstions))</div>
-                                }
-                                var Insomniaseverity = getPercentCompletion(12, (int)drch["ID"], url.Replace("__", "12"));
-                                if (showHideSurvey(Insomniaseverity) == true)
-                                {
-                                    <div class="col-md-12 text-left">Insomnia Severity Index@(Html.Raw(Insomniaseverity))</div>
-                                }
-                                var connordavidson = getPercentCompletion(13, (int)drch["ID"], url.Replace("__", "13"));
-                                if (showHideSurvey(connordavidson) == true)
-                                {
-                                    <div class="col-md-12 text-left">Connor-Davidson Resilience Scale 10@(Html.Raw(connordavidson))</div>
-                                }
-
-                                var familyempowermentscale = getPercentCompletion(14, (int)drch["ID"], url.Replace("__", "14"));
-                                if (showHideSurvey(familyempowermentscale) == true)
-                                {
-                                    <div class="col-md-12 text-left">Family Empowerment Scale@(Html.Raw(familyempowermentscale))</div>
-                                }
-
-                                var feedbackquestionair = getPercentCompletion(15, (int)drch["ID"], url.Replace("__", "15"));
-                                if (showHideSurvey(feedbackquestionair) == true)
-                                {
-                                    <div class="col-md-4 text-left" style="display:none;">Feedback Questionnaire@(Html.Raw(feedbackquestionair))</div>
-
-                                }
-
-                                var monthlyTeacher = getPercentCompletion(37, (int)drch["ID"], url.Replace("__", "37"));
-                                if (showHideSurvey(monthlyTeacher) == true)
-                                {
-                                    <div class="col-md-12 text-left">Monthly Teacher@(Html.Raw(monthlyTeacher))</div>
-                                }
-
-                                var vanderbilt = getPercentCompletion(34, (int)drch["ID"], url.Replace("__", "34"));
-                                if (showHideSurvey(vanderbilt) == true)
-                                {
-                                    <div class="col-md-12 text-left">Vanderbilt Adhd Diagnostic Teacher Rating Scale@(Html.Raw(vanderbilt))</div>
-                                }
-                                var pvanderbilt = getPercentCompletion(56, (int)drch["ID"], url.Replace("__", "56"));
-                                if (showHideSurvey(pvanderbilt) == true)
-                                {
-                                    <div class="col-md-12 text-left">Vanderbilt ADHD Scale – Parent@(Html.Raw(pvanderbilt))</div>
-                                }
-
-                                var anxiety = getPercentCompletion(35, (int)drch["ID"], url.Replace("__", "35"));
-                                if (showHideSurvey(anxiety) == true)
-                                {
-                                    <div class="col-md-12 text-left">Anxiety Depression and Mood Scale@(Html.Raw(anxiety))</div>
-                                }
-
-                                var pas = getPercentCompletion(48, (int)drch["ID"], url.Replace("__", "48"));
-                                if (showHideSurvey(pas) == true)
-                                {
-                                    <div class="col-md-12 text-left">Parent Assessment Summary@(Html.Raw(pas))</div>
-                                }
-                                var qTeacher = getPercentCompletion(49, (int)drch["ID"], url.Replace("__", "49"));
-                                if (showHideSurvey(qTeacher) == true)
-                                {
-                                    <div class="col-md-12 text-left">CAS Academic Progress: Reading and Writing@(Html.Raw(qTeacher))</div>
-                                }
-                                var qTeacherMath = getPercentCompletion(53, (int)drch["ID"], url.Replace("__", "53"));
-                                if (showHideSurvey(qTeacherMath) == true)
-                                {
-                                    <div class="col-md-12 text-left">CAS Academic Progress: Math and Science@(Html.Raw(qTeacherMath))</div>
-                                }
-                                var qTeacherSkills = getPercentCompletion(54, (int)drch["ID"], url.Replace("__", "54"));
-                                if (showHideSurvey(qTeacherSkills) == true)
-                                {
-                                    <div class="col-md-12 text-left">CAS Academic Progress: Other Skills@(Html.Raw(qTeacherSkills))</div>
-                                }
-                                
-                                if (age <= 10){
-                                    var qStrengths = getPercentCompletion(51, (int)drch["ID"], url.Replace("__", "51"));
-                                    if (showHideSurvey(qStrengths) == true)
-                                    {
-                                        <div class="col-md-12 text-left">Strengths and Difficulties Questionnaire for 4yrs -10yrs@(Html.Raw(qStrengths))</div>
-                                    }
-                                }
-                                else if (age >= 11){
-                                    var qStrengths1117 = getPercentCompletion(52, (int)drch["ID"], url.Replace("__", "52"));
-                                    if (showHideSurvey(qStrengths1117) == true)
-                                    {
-                                        <div class="col-md-12 text-left">Strengths and Difficulties Questionnaire for 11yrs -17yrs@(Html.Raw(qStrengths1117))</div>
-                                    }
-                                }
-
-                                var qCGISelf = getPercentCompletion(59, (int)drch["ID"], url.Replace("__", "59"));
-                                if (showHideSurvey(qCGISelf) == true)
-                                {
-                                    <div class="col-md-12 text-left">CGI-I: Self-Rating@(Html.Raw(qCGISelf))</div>
-                                }
-
-                                var qLifeUpdate = getPercentCompletion(60, (int)drch["ID"], url.Replace("__", "60"));
-                                if (showHideSurvey(qLifeUpdate) == true)
-                                {
-                                    <div class="col-md-12 text-left">Life Update@(Html.Raw(qLifeUpdate))</div>
-                                }
-
-                                var InterventionsUpdate = getPercentCompletion(61, (int)drch["ID"], url.Replace("__", "61"));
-                                if (showHideSurvey(InterventionsUpdate) == true)
-                                {
-                                    <div class="col-md-12 text-left">Interventions Update@(Html.Raw(InterventionsUpdate))</div>
-                                }
-                            }
-
-                            @if (roles[0] != "Teacher")
-                            {
-                                @*string percentGen = getIntakeCompletion((int)drch["ID"], url.Replace("__", "16"));
-                                if (!String.IsNullOrEmpty(percentGen))
-                                {
-                                    <div class="col-md-12 text-left">Parent Intake Form (OHS)@(Html.Raw(percentGen))</div>
-                                }*@
-
-                                @*string percentM = getPercentCompletion(21, (int)drch["ID"], url.Replace("__", "21"));
-                                if (!String.IsNullOrEmpty(percentM))
-                                {
-                                    <div class="col-md-12 text-left">Parent Follow-Up Form (OHS)@(Html.Raw(percentM))</div>
-                                }*@
-                                var vinelandParent = getPercentCompletion(46, (int)drch["ID"], url.Replace("__", "46"));
-                                if (showHideSurvey(vinelandParent) == true)
-                                {
-                                    <div class="col-md-12 text-left">Vineland-3 (Parent)@(Html.Raw(vinelandParent))</div>
-                                }
-                                var qCGIParent = getPercentCompletion(57, (int)drch["ID"], url.Replace("__", "57"));
-                                if (showHideSurvey(qCGIParent) == true)
-                                {
-                                    <div class="col-md-12 text-left">CGI-I: Caregiver Rating@(Html.Raw(qCGIParent))</div>
-                                }
-                                var ssisp = getPercentCompletion(64, (int)drch["ID"], url.Replace("__", "64"));
-                                if (showHideSurvey(ssisp) == true)
-                                {
-                                    <div class="col-md-12 text-left">Social Skills Improvement System (Parent)<a class="viewhistory" href="@Url.Action("SurveyHistory", "UserQuestion")?childId=@childID&surveyId=64">View History</a>@(Html.Raw(ssisp))</div>
-                                }
-                            }
-                            
-                            @if (roles[0] == "Parent") {
-                                var rcads = getPercentCompletion(68, (int)drch["ID"], url.Replace("__", "68"));
-                                if (showHideSurvey(rcads) == true)
-                                {
-                                    <div class="col-md-12 text-left">Revised Children’s Anxiety and Depression Scale (RCADS-25)@(Html.Raw(rcads))</div>
-                                }
-                            }
-    </div>
-    <div class="col-sm-5">
-
-
-                        @*
-                            <div class="col-md-4 text-left">Adverse Reaction@(Html.Raw(getPercentCompletion(28, (int)drch["ID"], url.Replace("__", "28"))))</div>
-                            <div class="col-md-4 text-left">Life Events@(Html.Raw(getPercentCompletion(29, (int)drch["ID"], url.Replace("__", "29"))))</div>*@
-
-                                        </div>
-
-                                                }
-                                            }
-                                            else
+                                        if (schoolId == 1)
+                                        {
+                                            string percentGen = getPercentCompletion((int)Questionnaire.Parent_Intake_Form_OHS, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Parent_Intake_Form_OHS).ToString()));
+                                            if (showHideSurvey(percentGen) == true)
                                             {
-                                                <div class="alert alert-info">
-                                                    <strong>Info!</strong>No child is assosisated with this @roles[0]
-                                                </div>
+                                                <div class="col-md-12 text-left" style="background-color: #c7dbff;padding: 6px 6px;"><i class="ion-flag" style="font-size: 16px;vertical-align: middle;"></i>&nbsp;Parent Intake Form (OHS)@(Html.Raw(percentGen))</div>
                                             }
+                                        }
+                                        if (schoolId == 2)
+                                        {
+                                            string percentGenCAS = getPercentCompletion((int)Questionnaire.Intake_Form_CAS, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Intake_Form_CAS).ToString()));
+                                            if (showHideSurvey(percentGenCAS) == true)
+                                            {
+                                                <div class="col-md-12 text-left" style="background-color: #c7dbff;padding: 6px 6px;"><i class="ion-flag" style="font-size: 16px;vertical-align: middle;"></i>&nbsp;Parent Intake Form (CAS)@(Html.Raw(percentGenCAS))</div>
+                                            }
+                                        }
+                                        var casParent = getPercentCompletion((int)Questionnaire.CAS_Grit_and_Resilience_Parent, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.CAS_Grit_and_Resilience_Parent).ToString()));
+                                        if (showHideSurvey(casParent) == true)
+                                        {
+                                                <div class="col-md-12 text-left">CAS Grit and Resilience - Parent&nbsp;@(Html.Raw(casParent))</div>
+                                        }
+                                        var scasp = getPercentCompletion((int)Questionnaire.SCAS_Parent, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.SCAS_Parent).ToString()));
+                                        if (showHideSurvey(scasp) == true)
+                                        {
+                                            <div class="col-md-12 text-left">SCAS - Parent&nbsp;@(Html.Raw(scasp))</div>
+                                        }
+                                    }
+                                    @if (roles[0] == "Teacher")
+                                    {
+
+                                        var strLanComunication = getPercentCompletion((int)Questionnaire.Weekly_Teacher, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Weekly_Teacher).ToString()));
+                                        if (showHideSurvey(strLanComunication) == true)
+                                        {
+                                            <div class="col-md-12 text-left">Weekly - Language and Communication, Behavior, Daily Learning &nbsp;@(Html.Raw(strLanComunication))</div>
+                                        }
+                                        var acadmicprogrss = getPercentCompletion((int)Questionnaire.Academic_Progress_Rating_Scales, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Academic_Progress_Rating_Scales).ToString()));
+                                        if (showHideSurvey(acadmicprogrss) == true)
+                                        {
+                                            <div class="col-md-12 text-left">Academic Progress Rating Scales&nbsp;@(Html.Raw(acadmicprogrss))</div>
+                                        }
+
+                                        var academicProgressAthena = getPercentCompletion((int)Questionnaire.Academic_Progress_Scale_For_Athena_Academy, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Academic_Progress_Scale_For_Athena_Academy).ToString()));
+                                        if (showHideSurvey(academicProgressAthena) == true)
+                                        {
+                                            <div class="col-md-12 text-left">Academic Progress Scale for Athena Academy&nbsp;@(Html.Raw(academicProgressAthena))</div>
+                                        }
+
+                                        var testReportCard = getPercentCompletion((int)Questionnaire.CAS_Grit_and_Resilience_Scale, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.CAS_Grit_and_Resilience_Scale).ToString()));
+                                        if (showHideSurvey(testReportCard) == true)
+                                        {
+                                            <div class="col-md-12 text-left">CAS Grit and Resilience Scale&nbsp;@(Html.Raw(testReportCard))</div>
+                                        }
+                                        var vinelandTeacher = getPercentCompletion((int)Questionnaire.Vineland_3_Teacher, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Vineland_3_Teacher).ToString()));
+                                        if (showHideSurvey(vinelandTeacher) == true)
+                                        {
+                                            <div class="col-md-12 text-left">Vineland-3 (Teacher)&nbsp;@(Html.Raw(vinelandTeacher))</div>
+                                        }
+                                        var qTeacherReport = getPercentCompletion((int)Questionnaire.School_Anxiety_Scale_Teacher_Report, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.School_Anxiety_Scale_Teacher_Report).ToString()));
+                                        if (showHideSurvey(qTeacherReport) == true)
+                                        {
+                                            <div class="col-md-12 text-left">School Anxiety Scale – Teacher Report&nbsp;@(Html.Raw(qTeacherReport))</div>
+                                        }
+                                        var qCGITeacher = getPercentCompletion((int)Questionnaire.CGI_I_Teacher_Rating, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.CGI_I_Teacher_Rating).ToString()));
+                                        if (showHideSurvey(qCGITeacher) == true)
+                                        {
+                                            <div class="col-md-12 text-left">CGI-I: Teacher Rating&nbsp;@(Html.Raw(qCGITeacher))</div>
+                                        }
+
+                                        var ssist = getPercentCompletion((int)Questionnaire.Social_Skills_Improvement_System_Teacher, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Social_Skills_Improvement_System_Teacher).ToString()));
+                                        if (showHideSurvey(ssist) == true)
+                                        {
+                                            <div class="col-md-12 text-left">Social Skills Improvement System (Teacher)&nbsp;@(Html.Raw(ssist))</div>
+                                        }
+
+                                        var scast = getPercentCompletion((int)Questionnaire.SCAS_Teacher, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.SCAS_Teacher).ToString()));
+                                        if (showHideSurvey(scast) == true)
+                                        {
+                                            <div class="col-md-12 text-left">SCAS - Teacher&nbsp;@(Html.Raw(scast))</div>
+                                        }
+                                    }
+                                    @{
+                                        var abbsensoryprofile = getPercentCompletion((int)Questionnaire.Abbreviated_sensory_profile, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Abbreviated_sensory_profile).ToString()));
+                                        if (showHideSurvey(abbsensoryprofile) == true)
+                                        {
+                                            <div class="col-md-12 text-left">Abbreviated sensory profile &nbsp;@(Html.Raw(abbsensoryprofile))</div>
+
+                                        }
+                                        var CaregiverQuestionair = getPercentCompletion((int)Questionnaire.Caregiver_Strain_Questionnaire, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Caregiver_Strain_Questionnaire).ToString()));
+                                        if (showHideSurvey(CaregiverQuestionair) == true)
+                                        {
+                                            <div class="col-md-12 text-left">Caregiver Strain Questionnaire&nbsp;@(Html.Raw(CaregiverQuestionair))</div>
+                                        }
+                                        var GISeverityIndex = getPercentCompletion((int)Questionnaire.GI_Severity_Index, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.GI_Severity_Index).ToString()));
+                                        if (showHideSurvey(GISeverityIndex) == true)
+                                        {
+                                            <div class="col-md-12 text-left">GI Severity Index &nbsp;@(Html.Raw(GISeverityIndex))</div>
+                                        }
+                                        var abbehaviourchk = getPercentCompletion((int)Questionnaire.Aberrant_Behavior_Checklist, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Aberrant_Behavior_Checklist).ToString()));
+                                        if (showHideSurvey(abbehaviourchk) == true)
+                                        {
+                                            <div class="col-md-12 text-left">Aberrant Behavior Checklist&nbsp;@(Html.Raw(abbehaviourchk))</div>
+                                        }
+
+                                        var socialResponsivenies = getPercentCompletion((int)Questionnaire.Social_Responsiveness_Scale, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Social_Responsiveness_Scale).ToString()));
+                                        if (showHideSurvey(socialResponsivenies) == true)
+                                        {
+                                            <div class="col-md-12 text-left">Social Responsiveness Scale&nbsp;@(Html.Raw(socialResponsivenies))</div>
+                                        }
+
+                                        if (age <= 4)
+                                        {
+                                            var pedsqty = getPercentCompletion((int)Questionnaire.Peds_quality_of_life_6, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Peds_quality_of_life_6).ToString()));
+                                            if (showHideSurvey(pedsqty) == true)
+                                            {
+                                            <div class="col-md-12 text-left">Peds quality of life for 2yrs-4yrs&nbsp;@(Html.Raw(pedsqty))</div>
+                                            }
+                                        }
+                                        else if (age <= 7 && age >= 5)
+                                        {
+                                            var pdsqtylife = getPercentCompletion((int)Questionnaire.Peds_quality_of_life_7, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Peds_quality_of_life_7).ToString()));
+                                            if (showHideSurvey(pdsqtylife) == true)
+                                            {
+                                            <div class="col-md-12 text-left">Peds quality of life for 5yrs-7yrs&nbsp;@(Html.Raw(pdsqtylife))</div>
+                                            }
+                                        }
+                                        else if (age <= 12 && age >= 8)
+                                        {
+                                            var pdsqty8yr = getPercentCompletion((int)Questionnaire.Peds_quality_of_life_8, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Peds_quality_of_life_8).ToString()));
+                                            if (showHideSurvey(pdsqty8yr) == true)
+                                            {
+                                            <div class="col-md-12 text-left">Peds quality of life for 8yrs -12yrs&nbsp;@(Html.Raw(pdsqty8yr))</div>
+                                            }
+
+                                            var ssis812 = getPercentCompletion((int)Questionnaire.Social_Skills_Improvement_System_62, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Social_Skills_Improvement_System_62).ToString()));
+                                            if (showHideSurvey(ssis812) == true)
+                                            {
+                                            <div class="col-md-12 text-left">Social Skills Improvement System for 8yrs -12yrs&nbsp;@(Html.Raw(ssis812))</div>
+                                            }
+                                        }
+                                        else if (age >= 13 && age <= 18)
+                                        {
+                                            var pdsqty13year = getPercentCompletion((int)Questionnaire.Peds_quality_of_life_9, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Peds_quality_of_life_9).ToString()));
+                                            if (showHideSurvey(pdsqty13year) == true)
+                                            {
+                                            <div class="col-md-12 text-left">Peds quality of life for 13yrs -18yrs&nbsp;@(Html.Raw(pdsqty13year))</div>
+                                            }
+
+
+                                            var ssis1318 = getPercentCompletion((int)Questionnaire.Social_Skills_Improvement_System_63, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Social_Skills_Improvement_System_63).ToString()));
+                                            if (showHideSurvey(ssis1318) == true)
+                                            {
+                                            <div class="col-md-12 text-left">Social Skills Improvement System for 13yrs -18yrs&nbsp;@(Html.Raw(ssis1318))</div>
+                                            }
+                                        }
+                                        else if (age >= 19)
+                                        {
+                                            var pdsqty19year = getPercentCompletion((int)Questionnaire.Peds_quality_of_life, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Peds_quality_of_life).ToString()));
+                                            if (showHideSurvey(pdsqty19year) == true)
+                                            {
+                                            <div class="col-md-12 text-left">Peds quality of life for 19yrs and older&nbsp;@(Html.Raw(pdsqty19year))</div>
+                                            }
+                                        }
+                                        var shrtlngprofile = getPercentCompletion((int)Questionnaire.Short_language_profile, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Short_language_profile).ToString()));
+                                        if (showHideSurvey(shrtlngprofile) == true)
+                                        {
+                                            <div class="col-md-12 text-left">Short language profile &nbsp;@(Html.Raw(shrtlngprofile))</div>
+                                        }
+                                        var socialcommqstions = getPercentCompletion((int)Questionnaire.Social_communication_Questionnaire_life_time, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Social_communication_Questionnaire_life_time).ToString()));
+                                        if (showHideSurvey(socialcommqstions) == true)
+                                        {
+                                            <div class="col-md-12 text-left">Social communication Questionnaire – life time&nbsp;@(Html.Raw(socialcommqstions))</div>
+                                        }
+                                        var Insomniaseverity = getPercentCompletion((int)Questionnaire.Insomnia_Severity_Index, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Insomnia_Severity_Index).ToString()));
+                                        if (showHideSurvey(Insomniaseverity) == true)
+                                        {
+                                            <div class="col-md-12 text-left">Insomnia Severity Index&nbsp;@(Html.Raw(Insomniaseverity))</div>
+                                        }
+                                        var connordavidson = getPercentCompletion((int)Questionnaire.Connor_Davidson_Resilience_Scale_10, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Connor_Davidson_Resilience_Scale_10).ToString()));
+                                        if (showHideSurvey(connordavidson) == true)
+                                        {
+                                            <div class="col-md-12 text-left">Connor-Davidson Resilience Scale 10&nbsp;@(Html.Raw(connordavidson))</div>
+                                        }
+
+                                        var familyempowermentscale = getPercentCompletion((int)Questionnaire.Family_Empowerment_Scale, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Family_Empowerment_Scale).ToString()));
+                                        if (showHideSurvey(familyempowermentscale) == true)
+                                        {
+                                            <div class="col-md-12 text-left">Family Empowerment Scale&nbsp;@(Html.Raw(familyempowermentscale))</div>
+                                        }
+
+                                        var feedbackquestionair = getPercentCompletion((int)Questionnaire.Feedback_Questionnaire, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Feedback_Questionnaire).ToString()));
+                                        if (showHideSurvey(feedbackquestionair) == true)
+                                        {
+                                            <div class="col-md-4 text-left" style="display:none;">Feedback Questionnaire&nbsp;@(Html.Raw(feedbackquestionair))</div>
+
+                                        }
+
+                                        var monthlyTeacher = getPercentCompletion((int)Questionnaire.Monthly_Teacher, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Monthly_Teacher).ToString()));
+                                        if (showHideSurvey(monthlyTeacher) == true)
+                                        {
+                                            <div class="col-md-12 text-left">Monthly Teacher&nbsp;@(Html.Raw(monthlyTeacher))</div>
+                                        }
+
+                                        var vanderbilt = getPercentCompletion((int)Questionnaire.Vanderbilt_ADHD_Diagnostic_Teacher_Rating_Scale, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Vanderbilt_ADHD_Diagnostic_Teacher_Rating_Scale).ToString()));
+                                        if (showHideSurvey(vanderbilt) == true)
+                                        {
+                                            <div class="col-md-12 text-left">Vanderbilt Adhd Diagnostic Teacher Rating Scale&nbsp;@(Html.Raw(vanderbilt))</div>
+                                        }
+                                        var pvanderbilt = getPercentCompletion((int)Questionnaire.Vanderbilt_ADHD_Scale_Parent, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Vanderbilt_ADHD_Scale_Parent).ToString()));
+                                        if (showHideSurvey(pvanderbilt) == true)
+                                        {
+                                            <div class="col-md-12 text-left">Vanderbilt ADHD Scale – Parent&nbsp;@(Html.Raw(pvanderbilt))</div>
+                                        }
+
+                                        var anxiety = getPercentCompletion((int)Questionnaire.Anxiety_Depression_and_Mood_Scale, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Anxiety_Depression_and_Mood_Scale).ToString()));
+                                        if (showHideSurvey(anxiety) == true)
+                                        {
+                                            <div class="col-md-12 text-left">Anxiety Depression and Mood Scale&nbsp;@(Html.Raw(anxiety))</div>
+                                        }
+
+                                        var pas = getPercentCompletion((int)Questionnaire.Parent_Assessment_Summary, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Parent_Assessment_Summary).ToString()));
+                                        if (showHideSurvey(pas) == true)
+                                        {
+                                            <div class="col-md-12 text-left">Parent Assessment Summary&nbsp;@(Html.Raw(pas))</div>
+                                        }
+                                        var qTeacher = getPercentCompletion((int)Questionnaire.CAS_Academic_Progress_Reading_and_Writing, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.CAS_Academic_Progress_Reading_and_Writing).ToString()));
+                                        if (showHideSurvey(qTeacher) == true)
+                                        {
+                                            <div class="col-md-12 text-left">CAS Academic Progress: Reading and Writing&nbsp;@(Html.Raw(qTeacher))</div>
+                                        }
+                                        var qTeacherMath = getPercentCompletion((int)Questionnaire.CAS_Academic_Progress_Math_and_Science, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.CAS_Academic_Progress_Math_and_Science).ToString()));
+                                        if (showHideSurvey(qTeacherMath) == true)
+                                        {
+                                            <div class="col-md-12 text-left">CAS Academic Progress: Math and Science&nbsp;@(Html.Raw(qTeacherMath))</div>
+                                        }
+                                        var qTeacherSkills = getPercentCompletion((int)Questionnaire.CAS_Academic_Progress_Other_Skills, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.CAS_Academic_Progress_Other_Skills).ToString()));
+                                        if (showHideSurvey(qTeacherSkills) == true)
+                                        {
+                                            <div class="col-md-12 text-left">CAS Academic Progress: Other Skills&nbsp;@(Html.Raw(qTeacherSkills))</div>
+                                        }
+
+                                        if (age <= 10)
+                                        {
+                                            var qStrengths = getPercentCompletion((int)Questionnaire.Strengths_and_Difficulties_Questionnaire_51, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Strengths_and_Difficulties_Questionnaire_51).ToString()));
+                                            if (showHideSurvey(qStrengths) == true)
+                                            {
+                                            <div class="col-md-12 text-left">Strengths and Difficulties Questionnaire for 4yrs -10yrs&nbsp;@(Html.Raw(qStrengths))</div>
+                                            }
+                                        }
+                                        else if (age >= 11)
+                                        {
+                                            var qStrengths1117 = getPercentCompletion((int)Questionnaire.Strengths_and_Difficulties_Questionnaire_52, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Strengths_and_Difficulties_Questionnaire_52).ToString()));
+                                            if (showHideSurvey(qStrengths1117) == true)
+                                            {
+                                            <div class="col-md-12 text-left">Strengths and Difficulties Questionnaire for 11yrs -17yrs&nbsp;@(Html.Raw(qStrengths1117))</div>
+                                            }
+                                        }
+
+                                        var qCGISelf = getPercentCompletion((int)Questionnaire.CGI_I_Self_Rating, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.CGI_I_Self_Rating).ToString()));
+                                        if (showHideSurvey(qCGISelf) == true)
+                                        {
+                                            <div class="col-md-12 text-left">CGI-I: Self-Rating&nbsp;@(Html.Raw(qCGISelf))</div>
+                                        }
+
+                                        var qLifeUpdate = getPercentCompletion((int)Questionnaire.Life_Update, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Life_Update).ToString()));
+                                        if (showHideSurvey(qLifeUpdate) == true)
+                                        {
+                                            <div class="col-md-12 text-left">Life Update&nbsp;@(Html.Raw(qLifeUpdate))</div>
+                                        }
+
+                                        var InterventionsUpdate = getPercentCompletion((int)Questionnaire.Interventions_Update, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Interventions_Update).ToString()));
+                                        if (showHideSurvey(InterventionsUpdate) == true)
+                                        {
+                                            <div class="col-md-12 text-left">Interventions Update&nbsp;@(Html.Raw(InterventionsUpdate))</div>
+                                        }
+                                        var mood = getPercentCompletion((int)Questionnaire.Mood_And_Feelings_Qestionnaire_Short_Version, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Mood_And_Feelings_Qestionnaire_Short_Version).ToString()));
+                                        if (showHideSurvey(mood) == true)
+                                        {
+                                            <div class="col-md-12 text-left">Mood And Feelings Qestionnaire: Short Version&nbsp;@(Html.Raw(mood))</div>
+                                        }
+                                    }
+
+                                    @if (roles[0] != "Teacher")
+                                    {
+                                        @*string percentGen = getIntakeCompletion((int)drch["ID"], url.Replace("__", "16"));
+                                            if (!String.IsNullOrEmpty(percentGen))
+                                            {
+                                                <div class="col-md-12 text-left">Parent Intake Form (OHS)@(Html.Raw(percentGen))</div>
+                                            }*@
+
+                                        @*string percentM = getPercentCompletion(21, (int)drch["ID"], url.Replace("__", "21"));
+                                            if (!String.IsNullOrEmpty(percentM))
+                                            {
+                                                <div class="col-md-12 text-left">Parent Follow-Up Form (OHS)@(Html.Raw(percentM))</div>
+                                            }*@
+                                        var vinelandParent = getPercentCompletion((int)Questionnaire.Vineland_3_Parent, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Vineland_3_Parent).ToString()));
+                                        if (showHideSurvey(vinelandParent) == true)
+                                        {
+                                            <div class="col-md-12 text-left">Vineland-3 (Parent)&nbsp;@(Html.Raw(vinelandParent))</div>
+                                        }
+                                        var qCGIParent = getPercentCompletion((int)Questionnaire.CGI_I_Caregiver_Rating, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.CGI_I_Caregiver_Rating).ToString()));
+                                        if (showHideSurvey(qCGIParent) == true)
+                                        {
+                                            <div class="col-md-12 text-left">CGI-I: Caregiver Rating&nbsp;@(Html.Raw(qCGIParent))</div>
+                                        }
+                                        var ssisp = getPercentCompletion((int)Questionnaire.Social_Skills_Improvement_System_Parent, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Social_Skills_Improvement_System_Parent).ToString()));
+                                        if (showHideSurvey(ssisp) == true)
+                                        {
+                                            <div class="col-md-12 text-left">Social Skills Improvement System (Parent)&nbsp;@(Html.Raw(ssisp))</div>
+                                        }
+                                    }
+
+                                    @if (roles[0] == "Parent")
+                                    {
+                                        var rcads = getPercentCompletion((int)Questionnaire.Revised_Childrens_Anxiety_and_Depression_Scale_RCADS_25, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Revised_Childrens_Anxiety_and_Depression_Scale_RCADS_25).ToString()));
+                                        if (showHideSurvey(rcads) == true)
+                                        {
+                                            <div class="col-md-12 text-left">Revised Children’s Anxiety and Depression Scale (RCADS-25)&nbsp;@(Html.Raw(rcads))</div>
+                                        }
+                                    }
+                                </div>
+                                <div class="col-sm-5">
+
+
+                                    @*
+                                        <div class="col-md-4 text-left">Adverse Reaction@(Html.Raw(getPercentCompletion(28, (int)drch["ID"], url.Replace("__", "28"))))</div>
+                                        <div class="col-md-4 text-left">Life Events@(Html.Raw(getPercentCompletion(29, (int)drch["ID"], url.Replace("__", "29"))))</div>*@
+
+                                </div>
+
+                            }
+                        }
+                        else
+                        {
+                            <div class="alert alert-info">
+                                <strong>Info!</strong>No child is assosisated with this @roles[0]
+                            </div>
+                        }
                     </div>
                 </td>
                 @if (role != "Student")
@@ -724,7 +759,7 @@
 
                         <div style="clear:both;"></div>
 
-                        <div class="col-md-@(roles[0] == "Parent" && inPer == "" && (schoolId == 1 || schoolId == 2) ? "12" : "6") text-left lifeevents boxitem" style="background: rgb(151, 201, 93) ;">
+                        <div class="col-md-@(roles[0] == "Parent" && inPer == "" ? "12" : "6") text-left lifeevents boxitem" style="background: rgb(151, 201, 93) ;">
                             <div class="boxheading" style="background: rgb(139, 195, 74);">
                                 <i class="ion-android-calendar" style="position: absolute; top: 7px; left: 12px; font-size: 16px;"></i>Life Events <span style="float: right;"><a class="btnAdd btn btn-link" style="color:#FFF;" href="@Url.Action("Question", "UserQuestion", new { surveyID = 29, ChildId = childID, ChildName = childName })">Add</a></span>
                             </div>
@@ -738,10 +773,12 @@
                                             @*<div style="text-transform:capitalize;"><b>@dr["EventCategory"]</b></div>*@
                                             <div style="overflow:hidden;position:relative;@( @dr["EventName"].ToString() == "" ? "display:none;" : "") " title="@dr["EventCategory"]" data-toggle='tooltip'>
                                                 <div style="float:left;font-weight:bold;">@dr["EventName"]</div><br />
-                                                <div style="text-align:right;float:left;text-align:left;@(@dr["EventDate"].ToString() == "" ? "display:none;" : "") ">Started: @dr["EventDate"] 
-                                                @if (dr["EventEndDate"] != DBNull.Value && string.IsNullOrEmpty(dr["EventEndDate"].ToString()) == false) {
-                                                    <span>, Ended: @dr["EventEndDate"]</span>
-                                                }
+                                                <div style="text-align:right;float:left;text-align:left;@(@dr["EventDate"].ToString() == "" ? "display:none;" : "") ">
+                                                    Started: @dr["EventDate"]
+                                                    @if (dr["EventEndDate"] != DBNull.Value && string.IsNullOrEmpty(dr["EventEndDate"].ToString()) == false)
+                                                    {
+                                                        <span>, Ended: @dr["EventEndDate"]</span>
+                                                    }
                                                 </div>
                                                 <a href="javascript:void(0);" class="redCrossInItem" onclick="event.stopPropagation();deleteListItem(this, @dr["ID"], 'lifeevent', '@dr["EventName"]', function(){ location.reload(true); });"><i class="ion-close" style="color:#FFF;"></i></a>
                                             </div>
@@ -897,7 +934,7 @@
 
 
                     </td>
-                }                
+                }
             </tr>
         </table>
     </div>
@@ -923,43 +960,43 @@
             var type = parseInt($(elem).attr("type"));
             var itemIndex = 0;
             var box;
-            if(src == 1){ box = $(".levents"); }
-            if(src == 2){ box = $(".classroominterventions"); }
+            if (src == 1) { box = $(".levents"); }
+            if (src == 2) { box = $(".classroominterventions"); }
             if (src == 3) { box = $(".adversereactions"); }
             if (src == 4) { box = $(".medicationhistory"); }
             if (src == 5) { box = $(".therapies"); }
-            
+
             var totalItems = $(box).find(".item").length;
 
             if (type == 1) {
-                $(box).find(".item").each(function (index, obj) {                    
+                $(box).find(".item").each(function (index, obj) {
                     $(obj).show();
                 });
-                
+
                 $(elem).html("View Less&nbsp;<i class='ion-chevron-up'></i>");
                 $(elem).attr("type", "2");
             }
-            else{
+            else {
                 $(box).find(".item").each(function (index, obj) {
                     if (parseInt($(obj).attr("indexer")) <= 5) {
                         $(obj).show();
                     }
-                    else{
+                    else {
                         $(obj).hide();
                     }
                 });
-                
-                $(elem).html("View More&nbsp;<i class='ion-chevron-down'></i>");                
+
+                $(elem).html("View More&nbsp;<i class='ion-chevron-down'></i>");
                 $(elem).attr("type", "1");
             }
-            
+
         }
     </script>
 }
 else
 {
     <style type="text/css">
-        .highlightError{
+        .highlightError {
             background-color: #FFF0F0 !important;
             color: #444 !important;
         }
@@ -972,5 +1009,6 @@ else
             $("#ddlChildren").addClass("allchildren");
             $(".allchildren").addClass("highlightError");
         });
+            //publish test
     </script>
 }

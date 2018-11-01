@@ -1461,6 +1461,18 @@ namespace SurveyApp
             cmd.CommandText = "SurveyQuestion_GetAllForSurvey";
             return DataHelper.ExecuteCommandAsDataSet(cmd);
         }
+
+        public static DataSet SurveyQuestion_GetSurveySections(int surveyId)
+        {
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.Parameters.Add("@SurveyId", SqlDbType.Int);
+            cmd.Parameters["@SurveyId"].Value = surveyId;
+
+            cmd.CommandText = "SurveyQuestion_GetSurveySections";
+            return DataHelper.ExecuteCommandAsDataSet(cmd);
+        }
         #endregion
 
     }

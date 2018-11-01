@@ -4,11 +4,32 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 
     int surveyId = string.IsNullOrEmpty(Request.QueryString["surveyId"]) == false ? Convert.ToInt32(Request.QueryString["surveyId"]) : 0;
+
+
+    int index = 0;
+    List<PossibleAnswer> lstPA = new List<PossibleAnswer>();
+    if (string.IsNullOrEmpty(Model.PossibleAnswers) == false)
+    {
+        foreach (var pa in Model.PossibleAnswers.Split('|'))
+        {
+            string score = "";
+            if (Model.Score != null)
+            {
+                score = Model.Score.Split('|')[index].ToString();
+                index++;
+            }
+
+            lstPA.Add(new PossibleAnswer() { Answer = pa, Score = score });
+        }
+    }
 }
+
 @model SurveyApp.Models.SurveyQuestion
 
 
-<h2><a href="javascript:void(0);" id="back" class="btnBack" title="Back to Questions List" data-toggle="tooltip"></a> &nbsp;Question Editor</h2>
+<h2>
+    <a href="javascript:void(0);" id="back" class="btnBack" title="Back to Questions List" data-toggle="tooltip"></a> &nbsp;Question Editor
+</h2>
 
 <style>
     ._panel {
@@ -17,6 +38,31 @@
         padding: 10px;
         border-radius: 6px;
     }
+
+    .possibleAnswers {
+        background-color: #f9f9f9;
+        padding-top: 15px;
+        padding-bottom: 15px;
+        border-radius: 8px;
+    }
+
+        .possibleAnswers .answer .key,
+        .possibleAnswers .answer .value {
+            display: inline-block;
+        }
+
+            .possibleAnswers .answer .value a i {
+                margin: 12px 0px;
+                color: #b10808;
+            }
+
+    .addAnswer {
+        color: #337ab7 !important;
+        text-decoration: underline;
+        padding: 4px;
+        display: inline-block;
+        margin-left: 27px;
+    }
 </style>
 <br />
 
@@ -24,13 +70,146 @@
 {
     @Html.ValidationSummary()
     @Html.HiddenFor(m => m.ID, new { name = "hdnQuestionId", value = Model.ID })
+    @Html.HiddenFor(m => m.PossibleAnswers, new { value = Model.PossibleAnswers })
+    @Html.HiddenFor(m => m.Score, new { value = Model.Score })
+    @Html.HiddenFor(m => m.Section, new { value = Model.Section })
+    @Html.HiddenFor(m => m.Style, new { value = Model.Style })
+    @Html.HiddenFor(m => m.Qclass, new { value = Model.Qclass })
+    @Html.HiddenFor(m => m.Aclass, new { value = Model.Aclass })
+    @Html.HiddenFor(m => m.SurveyID, new { value = Model.SurveyID })
+
     <div class="form-group">
         <label class="control-label col-sm-4">Question:*</label>
         <div class="col-sm-8">
             @Html.TextAreaFor(m => m.Question, new { id = "txtQuestion", @class = "form-control", placeholder = "Question", @maxlength = "1000", @style = "height:240px" })
         </div>
     </div>
-    
+
+
+    <div class="form-group">
+        <label class="control-label col-sm-4">Question Header Information:</label>
+        <div class="col-sm-8">
+            @Html.TextBoxFor(m => m.QuestionGroup, new { id = "txtSeq", @class = "form-control", placeholder = "Question Header Information", @maxlength = "1000" })
+        </div>
+    </div>
+
+
+    <div class="form-group">
+        <label class="control-label col-sm-4" data-toggle="tooltip" title="Order of the question at which position it will appear in the questionnaire.">Question Order:*</label>
+        <div class="col-sm-8">
+            @Html.TextBoxFor(m => m.Seq, new { id = "txtSeq", @class = "form-control", placeholder = "Sequence", @maxlength = "100" })
+        </div>
+    </div>
+
+
+    <div class="form-group">
+        <label class="control-label col-sm-4">Question Type:</label>
+        <div class="col-sm-8">
+            <select id="ddlQuestionType" class="form-control" onchange="removeError(this);">
+                <option value="">Select Question Type</option>
+                <option value="col" @(Model.Style == "col" ? "selected='select'" : "")>Column</option>
+                <option value="row" @(Model.Style == "row" ? "selected='select'" : "")>Single Line</option>
+                <option value="multirow" @(Model.Style == "multirow" ? "selected='select'" : "")>Multiline</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-sm-4">Answer Option Type:*</label>
+        <div class="col-sm-8">
+            @Html.DropDownListFor(m => m.InputType, new SelectList(Question_InputType.getInputTypes(), "Id", "Type"), "Select Answer Option Type", new { id = "ddlInputType", @class = "form-control", onchange = "setPossibleAnswers(this);" })
+        </div>
+    </div>
+
+
+    <div class="form-group" id="divPossibleAnswers">
+        <label class="control-label col-sm-4">Possible Answers:</label>
+        <div class="col-sm-8">
+            <div class="possibleAnswers col-sm-12" style="@(Model.InputType == "radio" || Model.InputType == "checkbox" || Model.InputType == "select" ? "" : "displa:none;")">
+                @foreach (PossibleAnswer objPA in lstPA)
+                {
+                    <div class="answer">
+                        <div class="key col-sm-10">
+                            <input type="text" style="margin-bottom:4px;width:45%;" class="form-control col-sm-5 pa" value="@objPA.Answer" placeholder="Answer" />
+                            <input type="text" style="margin-bottom:4px;margin-left: 4px;width:45%;" class="form-control col-sm-5 score" value="@objPA.Score" placeholder="Score" />
+                        </div>
+                        <div class="value col-sm-2">
+                            <a href="javascript:void(0);" data-toggle="tooltip" title="Remove Answer" onclick="removeAnswer(this);"><i class="fa fa-close"></i></a>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div style="clear:both;"></div>
+            <a href="javascript:void(0);" onclick="addAnswer(this);" class="addAnswer" data-toggle="tooltip" title="Add New Answer">Add Answer</a>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-sm-4">Questionnaire Section:</label>
+        <div class="col-sm-8">
+            <select id="ddlSection" class="form-control">
+                <option value="">Select Questionnaire Section</option>
+                @foreach (System.Data.DataRow dr in SurveyApp.DataHelper.SurveyQuestion_GetSurveySections(surveyId).Tables[0].Rows)
+                {
+                    <option value="@dr["Section"]" @(dr["Section"].ToString() == Model.Section ? "selected='selected'" : "")>@dr["Section"]</option>
+                }
+            </select>
+        </div>
+    </div>
+
+
+    <div class="form-group">
+        <label class="control-label col-sm-4">Question Styling Class:*</label>
+        <div class="col-sm-8">
+            <select id="ddlQClass" class="form-control" onchange="removeError(this);">
+                <option>Select Question Styling Class</option>
+                <option value="col-sm-2 _vcenter" @(Model.Qclass == "col-sm-2 _vcenter" ? "selected='selected'" : "")>col-sm-2 _vcenter</option>
+                <option value="col-sm-2" @(Model.Qclass == "col-sm-2" ? "selected='selected'" : "")>col-sm-2</option>
+                <option value="col-sm-3 _vcenter" @(Model.Qclass == "col-sm-3 _vcenter" ? "selected='selected'" : "")>col-sm-3 _vcenter</option>
+                <option value="col-sm-3" @(Model.Qclass == "col-sm-3" ? "selected='selected'" : "")>col-sm-3</option>
+                <option value="col-sm-4 _vcenter" @(Model.Qclass == "col-sm-4 _vcenter" ? "selected='selected'" : "")>col-sm-4 _vcenter</option>
+                <option value="col-sm-4" @(Model.Qclass == "col-sm-4" ? "selected='selected'" : "")>col-sm-4</option>
+                <option value="col-sm-5" @(Model.Qclass == "col-sm-5" ? "selected='selected'" : "")>col-sm-5</option>
+                <option value="col-sm-6 _vcenter" @(Model.Qclass == "col-sm-6 _vcenter" ? "selected='selected'" : "")>col-sm-6 _vcenter</option>
+                <option value="col-sm-6 subquestion" @(Model.Qclass == "col-sm-6 subquestion" ? "selected='selected'" : "")>col-sm-6 subquestion</option>
+                <option value="col-sm-6" @(Model.Qclass == "col-sm-6" ? "selected='selected'" : "")>col-sm-6</option>
+                <option value="col-sm-7 _vcenter" @(Model.Qclass == "col-sm-7 _vcenter" ? "selected='selected'" : "")>col-sm-7 _vcenter</option>
+                <option value="col-sm-8 _vcenter" @(Model.Qclass == "col-sm-8 _vcenter" ? "selected='selected'" : "")>col-sm-8 _vcenter</option>
+                <option value="col-sm-8" @(Model.Qclass == "col-sm-8" ? "selected='selected'" : "")>col-sm-8</option>
+                <option value="col-sm-10 _vcenter" @(Model.Qclass == "col-sm-10 _vcenter" ? "selected='selected'" : "")>col-sm-10 _vcenter</option>
+                <option value="col-sm-10" @(Model.Qclass == "col-sm-10" ? "selected='selected'" : "")>col-sm-10</option>
+                <option value="col-sm-12 _vcenter" @(Model.Qclass == "col-sm-12 _vcenter" ? "selected='selected'" : "")>col-sm-12 _vcenter</option>
+                <option value="col-sm-12" @(Model.Qclass == "col-sm-12" ? "selected='selected'" : "")>col-sm-12</option>
+
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-sm-4">Answer Styling Class:*</label>
+        <div class="col-sm-8">
+            <select id="ddlAClass" class="form-control" onchange="removeError(this);">
+                <option>Select Answer Styling Class</option>
+                <option value="col-sm-1 _center" @(Model.Aclass == "col-sm-1 _center" ? "selected='selected'" : "")>col-sm-1 _center</option>
+                <option value="col-sm-1 _vcenter" @(Model.Aclass == "col-sm-1 _vcenter" ? "selected='selected'" : "")>col-sm-1 _vcenter</option>
+                <option value="col-sm-1" @(Model.Aclass == "col-sm-1" ? "selected='selected'" : "")>col-sm-1</option>
+                <option value="col-sm-1-5 _center" @(Model.Aclass == "col-sm-1-5 _center" ? "selected='selected'" : "")>col-sm-1-5 _center</option>
+                <option value="col-sm-1-5" @(Model.Aclass == "col-sm-1-5" ? "selected='selected'" : "")>col-sm-1-5</option>
+                <option value="col-sm-2 _center" @(Model.Aclass == "col-sm-2 _center" ? "selected='selected'" : "")>col-sm-2 _center</option>
+                <option value="col-sm-2 subanswer" @(Model.Aclass == "col-sm-2 subanswer" ? "selected='selected'" : "")>col-sm-2 subanswer</option>
+                <option value="col-sm-2" @(Model.Aclass == "col-sm-2" ? "selected='selected'" : "")>col-sm-2</option>
+                <option value="col-sm-3" @(Model.Aclass == "col-sm-3" ? "selected='selected'" : "")>col-sm-3</option>
+                <option value="col-sm-4" @(Model.Aclass == "col-sm-4" ? "selected='selected'" : "")>col-sm-4</option>
+                <option value="col-sm-5" @(Model.Aclass == "col-sm-5" ? "selected='selected'" : "")>col-sm-5</option>
+                <option value="col-sm-6" @(Model.Aclass == "col-sm-6" ? "selected='selected'" : "")>col-sm-6</option>
+                <option value="col-sm-10" @(Model.Aclass == "col-sm-10" ? "selected='selected'" : "")>col-sm-10</option>
+                <option value="col-sm-12 _left" @(Model.Aclass == "col-sm-12 _left" ? "selected='selected'" : "")>col-sm-12 _left</option>
+                <option value="col-sm-12" @(Model.Aclass == "col-sm-12" ? "selected='selected'" : "")>col-sm-12</option>
+
+            </select>
+        </div>
+    </div>
+
 
     <div class="form-group">
         <label class="control-label col-sm-4"> </label>
@@ -42,7 +221,63 @@
 }
 
 <script type="text/javascript">
-    $(function () {
+        $(function () {
+
+            setPossibleAnswers($("#ddlInputType"));
+
+            $("#btnSaveSurveyQuestion").click(function () {
+                var possibleAnswers = "", scores = "";
+
+                $(".possibleAnswers .answer").each(function (index, obj) {
+                    var pa = $(obj).find(".pa").val();
+                    if (pa != "") {
+                        possibleAnswers += pa + "|";
+                    }
+
+                    var score = $(obj).find(".score").val();
+                    if (score != "") {
+                        scores += score + "|";
+                    }
+                });
+
+                possibleAnswers = possibleAnswers.substring(0, possibleAnswers.length - 1);
+                scores = scores.substring(0, scores.length - 1);
+
+                $("#PossibleAnswers").val(possibleAnswers == null ? "" : possibleAnswers);
+                $("#Score").val(scores);
+
+
+                //form validation
+                var inError = false;
+                var qClass = $("#ddlQClass").val();
+                var aClass = $("#ddlAClass").val();
+                var style = $("#ddlQuestionType").val();
+
+                if (qClass == "") {
+                    $("#txtQclass").addClass("input-validation-error");
+                    inError = true;
+                }
+                if (aClass == "") {
+                    $("#txtAclass").addClass("input-validation-error");
+                    inError = true;
+                }
+                if (style == "") {
+                    $("#ddlQuestionType").addClass("input-validation-error");
+                    inError = true;
+                }
+
+                if (inError) {
+                    return false;
+                }
+
+                $("#Section").val($("#ddlSection").val());
+                $("#Style").val($("#ddlQuestionType").val());
+                $("#Qclass").val($("#ddlQClass").val());
+                $("#Aclass").val($("#ddlAClass").val());
+                $("#SurveyID").val(@(Model.SurveyID <= 0 ? surveyId : Model.SurveyID));
+
+            });
+
         $(".btnBack").click(function(){
             bootbox.dialog({
                 message: "Would you like to save the changes?",
@@ -55,7 +290,7 @@
                     success: {
                         label: "Yes",
                         className: "btn-primary",
-                        callback: function() {
+                        callback: function () {
                             $("#btnSaveSurveyQuestion").click();
                         }
                     },
@@ -77,4 +312,27 @@
             return $(this).attr('title').replace(/_NEWLINE_/g, "<br/>");
         },
     });
+
+    function removeAnswer(elem) {
+        $(elem).closest(".answer").remove();
+    }
+
+    function addAnswer(elem) {
+        $(".possibleAnswers").append('<div class="answer"><div class="key col-sm-10"><input type="text" style="margin-bottom:4px;width:45%;" class="form-control col-sm-5 pa" value="" placeholder="Answer" /><input type="text" style="margin-bottom:4px;margin-left: 4px;width:45%;" class="form-control col-sm-5 score" value="" placeholder="Score" /></div><div class="value col-sm-2"><a href="javascript:void(0);" onclick="removeAnswer(this);"><i class="fa fa-close"></i></a></div></div>');
+        $(".possibleAnswers .answer").last().find(".pa").focus();
+    }
+
+    function setPossibleAnswers(elem) {
+        if ($(elem).val() == "radio" || $(elem).val() == "checkbox" || $(elem).val() == "select") {
+            $("#divPossibleAnswers").slideDown();
+        }
+        else {
+            $("#divPossibleAnswers").slideUp();
+        }
+    }
+
+    function removeError(elem) {
+        $(elem).removeClass("input-validation-error");
+    }
+
 </script>

@@ -19,8 +19,9 @@ namespace SurveyApp.Controllers
             Database.SetInitializer<SurveyContext>(null);            
         }
 
+        #region Survey
         public ActionResult Index()
-        {            
+        {
             return View();
         }
         public ActionResult Survey(int? surveyID)
@@ -34,7 +35,7 @@ namespace SurveyApp.Controllers
         }
 
         public ActionResult SurveyAddEdit(int? id)
-        {            
+        {
             Survey objSurvey = new Survey();
             if (id.HasValue)
             {
@@ -63,6 +64,9 @@ namespace SurveyApp.Controllers
                 return View(model);
             }
 
+            string title = string.Empty, tagline = string.Empty, abbreviation = string.Empty, style = string.Empty;
+            int surveyId = 0;
+
             using (var db = new SurveyContext())
             {
                 Survey survey = null;
@@ -71,19 +75,44 @@ namespace SurveyApp.Controllers
                     var result = db.Surveys.SingleOrDefault(s => s.Id == model.Id);
                     if (result != null)
                     {
+                        surveyId = result.Id;
+                        title = result.Title;
+                        tagline = result.Tagline;
+                        abbreviation = result.Title_Abbr;
+                        style = result.Style;
+
                         result.Title = model.Title;
                         result.Style = model.Style;
                         result.Tagline = model.Tagline;
                         result.Title_Abbr = model.Title_Abbr;
-                    }                    
+                    }
                 }
                 else
                 {
+                    surveyId = model.Id;
+                    title = model.Title;
+                    tagline = model.Tagline;
+                    abbreviation = model.Title_Abbr;
+                    style = model.Style;
+
                     survey = new Survey { Title = model.Title, Tagline = model.Tagline, Style = model.Style, Title_Abbr = model.Title_Abbr };
                     db.Surveys.Add(survey);
                 }
-                                           
+
                 db.SaveChanges();
+
+            }
+
+            using (var acContext = new ActivityLogContext())
+            {
+                ActivityLog objALog = new ActivityLog();
+                objALog.Activity = "SurveyAddUpdate";
+                objALog.Date = DateTime.Now;
+                objALog.Information = "SurveyId: " + surveyId + " Title : " + title + " Tagline: " + tagline + " Abbreviation: " + abbreviation + " Style: " + style;
+                objALog.UserId = WebSecurity.CurrentUserId;
+
+                acContext.Activities.Add(objALog);
+                acContext.SaveChanges();
             }
 
 
@@ -106,10 +135,17 @@ namespace SurveyApp.Controllers
             return result;
         }
 
+        #endregion
+
         #region SurveyQuestion
-        public ActionResult SurveyQuestionList(int surveyId)
+        public ActionResult SurveyQuestionList(int? surveyId)
         {
-            return View(surveyId);
+            if(surveyId.HasValue == false || surveyId.Value <= 0)
+            {
+                return RedirectToAction("Index", "Survey");
+            }
+            
+            return View(surveyId);                        
         }
 
         public ActionResult SurveyQuestionAddEdit(int? id)
@@ -136,7 +172,12 @@ namespace SurveyApp.Controllers
                 return View(model);
             }
 
-            int surveyId = 0;
+            int surveyId = 0, questionId = 0;
+            string question = string.Empty, possibleAnswers = string.Empty, aClass = string.Empty, 
+                score = string.Empty, seq = string.Empty, style = string.Empty, inputType = string.Empty,
+                section = string.Empty, parentAnswerlike = string.Empty, nClass = string.Empty,
+                questionGroup = string.Empty;
+
             using (var db = new SurveyQuestionContext())
             {                
                 if (model.ID > 0)
@@ -144,12 +185,80 @@ namespace SurveyApp.Controllers
                     var result = db.SurveyQuestions.SingleOrDefault(s => s.ID == model.ID);
                     if (result != null)
                     {
+                        questionId = result.ID;
+                        question = result.Question;
+                        possibleAnswers = result.PossibleAnswers;
+                        aClass = result.Aclass;
+                        score = result.Score;
+                        seq = result.Seq.ToString();
+                        style = result.Style;
+                        inputType = result.InputType;
+                        section = result.Section;
+                        parentAnswerlike = result.PAnswerLike;
+                        nClass = result.Nclass;
+                        questionGroup = result.QuestionGroup;
+
+
+                        //update question
                         result.Question = model.Question;
+                        result.PossibleAnswers = string.IsNullOrEmpty(model.PossibleAnswers) == true ? string.Empty : model.PossibleAnswers;
+                        result.Aclass = model.Aclass;
+                        result.Qclass = model.Qclass;
+                        result.Score = model.Score;
+                        result.InputType = model.InputType;
+                        result.Seq = model.Seq;
+                        result.Section = model.Section;
+                        result.PAnswerLike = string.IsNullOrEmpty(model.PAnswerLike) == true ? string.Empty : model.PAnswerLike;
+                        result.QuestionGroup = string.IsNullOrEmpty(model.QuestionGroup) == true ? string.Empty : model.QuestionGroup;
+                        result.Style = string.IsNullOrEmpty(model.Style) == true ? string.Empty : model.Style;
+                        result.Nclass = string.IsNullOrEmpty(model.Nclass) == true ? "col-sm-12" : model.Nclass;
+                        result.QuestionGroup = string.IsNullOrEmpty(model.QuestionGroup) == true ? string.Empty : model.QuestionGroup;
+
                         surveyId = result.SurveyID;
                     }
                 }
+                else
+                {
+                    SurveyQuestion surveyQuestion = new SurveyQuestion {
+                        Question = model.Question,
+                        InputType = model.InputType,
+                        PossibleAnswers = string.IsNullOrEmpty(model.PossibleAnswers) == true ? string.Empty : model.PossibleAnswers,
+                        Section = model.Section,
+                        Qclass = model.Qclass,
+                        Aclass = model.Aclass,
+                        Score = model.Score,
+                        Seq = model.Seq,
+                        SurveyID = model.SurveyID,
+                        PAnswerLike = string.IsNullOrEmpty(model.PAnswerLike) == true ? string.Empty : model.PAnswerLike,
+                        QuestionGroup = string.IsNullOrEmpty(model.QuestionGroup) == true ? string.Empty : model.QuestionGroup,
+                        Style = string.IsNullOrEmpty(model.Style) == true ? string.Empty : model.Style,
+                        Nclass = string.IsNullOrEmpty(model.Nclass) == true ? string.Empty : model.Nclass
+
+                    };
+
+                    surveyId = model.SurveyID;
+
+                    db.SurveyQuestions.Add(surveyQuestion);
+
+                }
                 
                 db.SaveChanges();
+            }
+
+            using (var acContext = new ActivityLogContext())
+            {
+                ActivityLog objALog = new ActivityLog();
+                objALog.Activity = "SurveyQuestionAddEdit";
+                objALog.Date = DateTime.Now;
+                objALog.Information = "SurveyId: " + surveyId + " QuestionId: " + questionId + 
+                    " Question: " + question + " PossibleAnswers: " + possibleAnswers + 
+                    " Qclass: " + aClass + " Score: " + score + " InoutType: " + inputType + 
+                    " Section: " + section + " ParentAnswerlike: " + parentAnswerlike + 
+                    " NClass: " + nClass + " QuestionGroup: " + questionGroup;
+                objALog.UserId = WebSecurity.CurrentUserId;
+
+                acContext.Activities.Add(objALog);
+                acContext.SaveChanges();
             }
 
 

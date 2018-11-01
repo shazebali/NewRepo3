@@ -220,6 +220,24 @@ namespace SurveyApp.Controllers
                             isSuccessful = false;
                         }
                     }
+                    else if (type == "question")
+                    {
+                        try
+                        {
+                            using (var sqContext = new SurveyQuestionContext())
+                            {
+                                SurveyQuestion sQuestion = sqContext.SurveyQuestions.SingleOrDefault(sq => sq.ID == idToBeDeleted); //Find(idToBeDeleted);
+                                sQuestion.DeletedSurveyID = sQuestion.SurveyID;
+                                sQuestion.SurveyID = 0;                                
+                                sqContext.SaveChanges();
+                            }
+                            isSuccessful = true;
+                        }
+                        catch (Exception ex)
+                        {
+                            isSuccessful = false;
+                        }
+                    }
                 }
 
                 catch (Exception ex)
