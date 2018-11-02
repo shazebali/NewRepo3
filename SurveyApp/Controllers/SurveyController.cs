@@ -172,6 +172,19 @@ namespace SurveyApp.Controllers
                 return View(model);
             }
 
+            if (string.IsNullOrEmpty(model.InputType) == true)
+            {
+                //ModelState.AddModelError("", "This survey already exists, please provide different details.");
+                ModelState.AddModelError("", "Please Select Answer Option Type.");
+                return View(model);
+            }
+            if (model.Seq <= 0)
+            {
+                //ModelState.AddModelError("", "This survey already exists, please provide different details.");
+                ModelState.AddModelError("", "Please provide order in which Question should appear in the Questionnaire.");
+                return View(model);
+            }
+
             int surveyId = 0, questionId = 0;
             string question = string.Empty, possibleAnswers = string.Empty, aClass = string.Empty, 
                 score = string.Empty, seq = string.Empty, style = string.Empty, inputType = string.Empty,
