@@ -398,6 +398,14 @@
                                                 <div class="col-md-12 text-left" style="background-color: #c7dbff;padding: 6px 6px;"><i class="ion-flag" style="font-size: 16px;vertical-align: middle;"></i>&nbsp;Parent Intake Form (CAS)@(Html.Raw(percentGenCAS))</div>
                                             }
                                         }
+                                        if (schoolId == 21)
+                                        {
+                                            string percentAAIntake = getPercentCompletion((int)Questionnaire.Intake_Form_Athena_Academy, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.Intake_Form_Athena_Academy).ToString()));
+                                            if (showHideSurvey(percentAAIntake) == true)
+                                            {
+                                                <div class="col-md-12 text-left" style="background-color: #c7dbff;padding: 6px 6px;"><i class="ion-flag" style="font-size: 16px;vertical-align: middle;"></i>&nbsp;Parent Intake Form (Athena Academy)@(Html.Raw(percentAAIntake))</div>
+                                            }
+                                        }
                                         var casParent = getPercentCompletion((int)Questionnaire.CAS_Grit_and_Resilience_Parent, (int)drch["ID"], url.Replace("__", ((int)Questionnaire.CAS_Grit_and_Resilience_Parent).ToString()));
                                         if (showHideSurvey(casParent) == true)
                                         {

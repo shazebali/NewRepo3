@@ -63,8 +63,17 @@
         display: inline-block;
         margin-left: 27px;
     }
+
     textarea.input-validation-error {
         border: 1px solid #e80c4d;
+    }
+
+    p.help-block {
+        font-size: 11px;
+        margin: 16px 0px 10px 0px;
+        border-bottom: solid 1px #CCC;
+        padding: 0px 10px 8px 20px;
+        cursor: help;
     }
 </style>
 <br />
@@ -101,6 +110,14 @@
         </div>
     </div>
 
+
+    <div class="form-group">
+        <label class="control-label col-sm-4"></label>
+        <p class="help-block col-sm-8">
+            <i class="fa fa-info-circle">&nbsp;</i>Help:<br />
+            <b>Question Header Information</b> is displayed with blue background on top the question.
+        </p>
+    </div>
 
     <div class="form-group">
         <label class="control-label col-sm-4" data-toggle="tooltip" title="Order of the question at which position it will appear in the questionnaire.">Question Order:*</label>
@@ -165,6 +182,13 @@
         </div>
     </div>
 
+    <div class="form-group">
+        <label class="control-label col-sm-4"></label>
+        <p class="help-block col-sm-8">
+            <i class="fa fa-info-circle">&nbsp;</i>Help:<br />
+            <b>Questionnaire Section</b> is used to group different question for scoring purpose in charts section, this does not appear on questionnaire itself.
+        </p>
+    </div>
 
     <div class="form-group">
         <label class="control-label col-sm-4">Question Styling Class:*</label>
@@ -180,6 +204,7 @@
                 <option value="col-sm-1-5 _vcenter" @(Model.Qclass == "col-sm-1-5 _vcenter" ? "selected='selected'" : "")>col-sm-1-5 _vcenter</option>
 
                 <option value="col-sm-2" @(Model.Qclass == "col-sm-2" ? "selected='selected'" : "")>col-sm-2</option>
+                <option value="col-sm-2 _center" @(Model.Qclass == "col-sm-2 _center" ? "selected='selected'" : "")>col-sm-2 _center</option>
                 <option value="col-sm-2 _vcenter" @(Model.Qclass == "col-sm-2 _vcenter" ? "selected='selected'" : "")>col-sm-2 _vcenter</option>
 
                 <option value="col-sm-3" @(Model.Qclass == "col-sm-3" ? "selected='selected'" : "")>col-sm-3</option>
@@ -219,45 +244,46 @@
             <select id="ddlAClass" class="form-control" onchange="removeError(this);">
                 <option value="">Select Answer Styling Class</option>
 
-                <option value="col-sm-1" @(Model.Qclass == "col-sm-1" ? "selected='selected'" : "")>col-sm-1</option>
+                <option value="col-sm-1" @(Model.Aclass == "col-sm-1" ? "selected='selected'" : "")>col-sm-1</option>
                 <option value="col-sm-1 _center" @(Model.Aclass == "col-sm-1 _center" ? "selected='selected'" : "")>col-sm-1 _center</option>
-                <option value="col-sm-1 _vcenter" @(Model.Qclass == "col-sm-1 _vcenter" ? "selected='selected'" : "")>col-sm-1 _vcenter</option>
+                <option value="col-sm-1 _vcenter" @(Model.Aclass == "col-sm-1 _vcenter" ? "selected='selected'" : "")>col-sm-1 _vcenter</option>
 
-                <option value="col-sm-1-5" @(Model.Qclass == "col-sm-1-5" ? "selected='selected'" : "")>col-sm-1-5</option>
-                <option value="col-sm-1-5 _vcenter" @(Model.Qclass == "col-sm-1-5 _vcenter" ? "selected='selected'" : "")>col-sm-1-5 _vcenter</option>
-                <option value="col-sm-1-5 _center" @(Model.Qclass == "col-sm-1-5 _center" ? "selected='selected'" : "")>col-sm-1-5 _center</option>
+                <option value="col-sm-1-5" @(Model.Aclass == "col-sm-1-5" ? "selected='selected'" : "")>col-sm-1-5</option>
+                <option value="col-sm-1-5 _vcenter" @(Model.Aclass == "col-sm-1-5 _vcenter" ? "selected='selected'" : "")>col-sm-1-5 _vcenter</option>
+                <option value="col-sm-1-5 _center" @(Model.Aclass == "col-sm-1-5 _center" ? "selected='selected'" : "")>col-sm-1-5 _center</option>
 
-                <option value="col-sm-2" @(Model.Qclass == "col-sm-2" ? "selected='selected'" : "")>col-sm-2</option>
-                <option value="col-sm-2 _vcenter" @(Model.Qclass == "col-sm-2 _vcenter" ? "selected='selected'" : "")>col-sm-2 _vcenter</option>
+                <option value="col-sm-2" @(Model.Aclass == "col-sm-2" ? "selected='selected'" : "")>col-sm-2</option>
+                <option value="col-sm-2 _center" @(Model.Aclass == "col-sm-2 _center" ? "selected='selected'" : "")>col-sm-2 _center</option>
+                <option value="col-sm-2 _vcenter" @(Model.Aclass == "col-sm-2 _vcenter" ? "selected='selected'" : "")>col-sm-2 _vcenter</option>
                 <option value="col-sm-2 subanswer" @(Model.Aclass == "col-sm-2 subanswer" ? "selected='selected'" : "")>col-sm-2 subanswer</option>
 
-                <option value="col-sm-3" @(Model.Qclass == "col-sm-3" ? "selected='selected'" : "")>col-sm-3</option>
-                <option value="col-sm-3 _vcenter" @(Model.Qclass == "col-sm-3 _vcenter" ? "selected='selected'" : "")>col-sm-3 _vcenter</option>
+                <option value="col-sm-3" @(Model.Aclass == "col-sm-3" ? "selected='selected'" : "")>col-sm-3</option>
+                <option value="col-sm-3 _vcenter" @(Model.Aclass == "col-sm-3 _vcenter" ? "selected='selected'" : "")>col-sm-3 _vcenter</option>
 
-                <option value="col-sm-4" @(Model.Qclass == "col-sm-4" ? "selected='selected'" : "")>col-sm-4</option>
-                <option value="col-sm-4 _vcenter" @(Model.Qclass == "col-sm-4 _vcenter" ? "selected='selected'" : "")>col-sm-4 _vcenter</option>
+                <option value="col-sm-4" @(Model.Aclass == "col-sm-4" ? "selected='selected'" : "")>col-sm-4</option>
+                <option value="col-sm-4 _vcenter" @(Model.Aclass == "col-sm-4 _vcenter" ? "selected='selected'" : "")>col-sm-4 _vcenter</option>
 
-                <option value="col-sm-5" @(Model.Qclass == "col-sm-5" ? "selected='selected'" : "")>col-sm-5</option>
-                <option value="col-sm-5 _vcenter" @(Model.Qclass == "col-sm-5 _vcenter" ? "selected='selected'" : "")>col-sm-5 _vcenter</option>
+                <option value="col-sm-5" @(Model.Aclass == "col-sm-5" ? "selected='selected'" : "")>col-sm-5</option>
+                <option value="col-sm-5 _vcenter" @(Model.Aclass == "col-sm-5 _vcenter" ? "selected='selected'" : "")>col-sm-5 _vcenter</option>
 
-                <option value="col-sm-6" @(Model.Qclass == "col-sm-6" ? "selected='selected'" : "")>col-sm-6</option>
-                <option value="col-sm-6 _vcenter" @(Model.Qclass == "col-sm-6 _vcenter" ? "selected='selected'" : "")>col-sm-6 _vcenter</option>
-                <option value="col-sm-6 subquestion" @(Model.Qclass == "col-sm-6 subquestion" ? "selected='selected'" : "")>col-sm-6 subquestion</option>
+                <option value="col-sm-6" @(Model.Aclass == "col-sm-6" ? "selected='selected'" : "")>col-sm-6</option>
+                <option value="col-sm-6 _vcenter" @(Model.Aclass == "col-sm-6 _vcenter" ? "selected='selected'" : "")>col-sm-6 _vcenter</option>
+                <option value="col-sm-6 subquestion" @(Model.Aclass == "col-sm-6 subquestion" ? "selected='selected'" : "")>col-sm-6 subquestion</option>
 
-                <option value="col-sm-7" @(Model.Qclass == "col-sm-7" ? "selected='selected'" : "")>col-sm-7</option>
-                <option value="col-sm-7 _vcenter" @(Model.Qclass == "col-sm-7 _vcenter" ? "selected='selected'" : "")>col-sm-7 _vcenter</option>
+                <option value="col-sm-7" @(Model.Aclass == "col-sm-7" ? "selected='selected'" : "")>col-sm-7</option>
+                <option value="col-sm-7 _vcenter" @(Model.Aclass == "col-sm-7 _vcenter" ? "selected='selected'" : "")>col-sm-7 _vcenter</option>
 
-                <option value="col-sm-8" @(Model.Qclass == "col-sm-8" ? "selected='selected'" : "")>col-sm-8</option>
-                <option value="col-sm-8 _vcenter" @(Model.Qclass == "col-sm-8 _vcenter" ? "selected='selected'" : "")>col-sm-8 _vcenter</option>
+                <option value="col-sm-8" @(Model.Aclass == "col-sm-8" ? "selected='selected'" : "")>col-sm-8</option>
+                <option value="col-sm-8 _vcenter" @(Model.Aclass == "col-sm-8 _vcenter" ? "selected='selected'" : "")>col-sm-8 _vcenter</option>
 
-                <option value="col-sm-9" @(Model.Qclass == "col-sm-9" ? "selected='selected'" : "")>col-sm-9</option>
-                <option value="col-sm-9 _vcenter" @(Model.Qclass == "col-sm-9 _vcenter" ? "selected='selected'" : "")>col-sm-9 _vcenter</option>
+                <option value="col-sm-9" @(Model.Aclass == "col-sm-9" ? "selected='selected'" : "")>col-sm-9</option>
+                <option value="col-sm-9 _vcenter" @(Model.Aclass == "col-sm-9 _vcenter" ? "selected='selected'" : "")>col-sm-9 _vcenter</option>
 
-                <option value="col-sm-10" @(Model.Qclass == "col-sm-10" ? "selected='selected'" : "")>col-sm-10</option>
-                <option value="col-sm-10 _vcenter" @(Model.Qclass == "col-sm-10 _vcenter" ? "selected='selected'" : "")>col-sm-10 _vcenter</option>
+                <option value="col-sm-10" @(Model.Aclass == "col-sm-10" ? "selected='selected'" : "")>col-sm-10</option>
+                <option value="col-sm-10 _vcenter" @(Model.Aclass == "col-sm-10 _vcenter" ? "selected='selected'" : "")>col-sm-10 _vcenter</option>
 
-                <option value="col-sm-12" @(Model.Qclass == "col-sm-12" ? "selected='selected'" : "")>col-sm-12</option>
-                <option value="col-sm-12 _vcenter" @(Model.Qclass == "col-sm-12 _vcenter" ? "selected='selected'" : "")>col-sm-12 _vcenter</option>
+                <option value="col-sm-12" @(Model.Aclass == "col-sm-12" ? "selected='selected'" : "")>col-sm-12</option>
+                <option value="col-sm-12 _vcenter" @(Model.Aclass == "col-sm-12 _vcenter" ? "selected='selected'" : "")>col-sm-12 _vcenter</option>
                 <option value="col-sm-12 _left" @(Model.Aclass == "col-sm-12 _left" ? "selected='selected'" : "")>col-sm-12 _left</option>
 
 
@@ -265,6 +291,17 @@
         </div>
     </div>
 
+    <div class="form-group">
+        <label class="control-label col-sm-4"></label>
+        <p class="help-block col-sm-8">
+            <i class="fa fa-info-circle">&nbsp;</i>Help:<br />
+            Total available space for a question is divided into 12 parts.<br />
+            Usually question section takes up 6 parts so Question Styling Class should be <b>col-sm-6</b>.<br />
+            Remaining 6 parts are divided into answer options, so if there are 3 answer options then Answer Styling Class should be <b>col-sm-2</b><br />
+            If <b>_center</b> is selected then question or answer will be centered horizontally in the available space<br />
+            If <b>_vcenter</b> is selected then question or answer will be centered vertically in the available space
+        </p>
+    </div>
 
     <div class="form-group">
         <label class="control-label col-sm-4"> </label>
@@ -311,7 +348,7 @@
                 var input = $("#ddlInputType").val();
                 var question = $("#txtQuestion").val();
                 var sequence = $("#txtSeq").val();
-                
+
                 if (qClass == "") {
                     //$("#ddlQclass").addClass("input-validation-error");
                     $("#ddlQClass").addClass("input-validation-error");
