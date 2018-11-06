@@ -147,18 +147,25 @@ namespace SurveyApp.Controllers
             }
         }
 
-        public ActionResult SurveyHistory(int childId)
+        public ActionResult _SurveyHistory()
+        {
+            if (Request.IsAuthenticated)
+            {
+                return PartialView("_SurveyHistory");
+            }
+            else
+            {
+                return new EmptyResult();
+            }
+        }
+
+        
+
+        public ActionResult SurveyHistory(int childId,  int surveyId)
         {            
             ViewBag.ChildId = childId;
-            string childName = string.Empty;
-            using (var cContext = new ChildContext())
-            {
-                childName = cContext.Children.SingleOrDefault(c => c.Id == childId).Name;
-            }
-
-            ViewBag.ChildName = childName;
-            DataSet dsSurveys = SurveyApp.DataHelper.SurveyGetHistory(WebSecurity.CurrentUserId, childId);
-
+            ViewBag.SurveyId = surveyId;
+            DataSet dsSurveys = SurveyApp.DataHelper.SurveyGetHistory(WebSecurity.CurrentUserId, childId, surveyId);
             return View(dsSurveys);
         }
     }

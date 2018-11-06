@@ -243,6 +243,7 @@
     <Compile Include="Models\Generic.cs" />
     <Compile Include="Models\LifeEvent.cs" />
     <Compile Include="Models\Survey.cs" />
+    <Compile Include="Models\SurveyQuestion.cs" />
     <Compile Include="SMTPHelper.cs" />
     <Content Include="404.html" />
     <Content Include="App_Data\aspnet-SurveyApp-20160130102437.mdf" />
@@ -314,6 +315,8 @@
     <Content Include="Content\images\ui-icons_777777_256x240.png" />
     <Content Include="Content\images\ui-icons_cc0000_256x240.png" />
     <Content Include="Content\images\ui-icons_ffffff_256x240.png" />
+    <Content Include="Content\jQRangeSlider\iThing-min.css" />
+    <Content Include="Content\jQRangeSlider\jQAllRangeSliders-min.js" />
     <Content Include="Content\scroller\jquery.mCustomScrollbar.concat.min.js" />
     <Content Include="Content\scroller\jquery.mCustomScrollbar.min.css" />
     <Content Include="Content\scroller\mCSB_buttons.png" />
@@ -401,6 +404,8 @@
     <Content Include="Content\summernote\font\summernote.eot" />
     <Content Include="Content\summernote\font\summernote.ttf" />
     <Content Include="Content\summernote\font\summernote.woff" />
+    <None Include="Properties\PublishProfiles\demoucsfebit - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\demoucsfebit - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Properties\PublishProfiles\ucsfebit - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\ucsfebit - Web Deploy.pubxml" />
@@ -421,7 +426,9 @@
     <Content Include="Scripts\dataTables.bootstrap.min.js" />
     <Content Include="Scripts\dataTables.buttons.min.js" />
     <Content Include="Scripts\HighCharts\exporting.js" />
+    <Content Include="Scripts\HighCharts\highcharts-more.js" />
     <Content Include="Scripts\HighCharts\highcharts.js" />
+    <Content Include="Scripts\HighCharts\solid-gauge.js" />
     <Content Include="Scripts\jquery-2.2.0.min.js" />
     <Content Include="Content\jquery-ui.min.css" />
     <Content Include="Scripts\jquery-ui.min.js" />
@@ -529,6 +536,12 @@
     <Content Include="Views\Child\_StatusHistory.cshtml" />
     <Content Include="Views\Report\SurveyScore.cshtml" />
     <Content Include="Views\UserQuestion\SurveyHistory.cshtml" />
+    <Content Include="Views\Report\ActivityLog.cshtml" />
+    <Content Include="Views\Survey\SurveyAddEdit.cshtml" />
+    <Content Include="Views\Survey\SurveyList.cshtml" />
+    <Content Include="Views\Survey\SurveyQuestionAddEdit.cshtml" />
+    <Content Include="Views\Survey\SurveyQuestionList.cshtml" />
+    <Content Include="Views\UserQuestion\_SurveyHistory.cshtml" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

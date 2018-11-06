@@ -10,6 +10,7 @@
     ViewBag.Title = dsSurvey.Tables[0].Rows[0]["Title"].ToString();
     Layout = "~/Views/Shared/_Layout.cshtml";
     var childname = Request.QueryString["ChildName"];
+    string dob = string.Empty;
 
     int criid = String.IsNullOrEmpty(Request.QueryString["criid"]) == false ? Convert.ToInt32(Request.QueryString["criid"]) : 0;
     System.Data.DataSet dsCRIs = null;
@@ -43,8 +44,9 @@
         if (childId > 0)
         {
             var cContext = new SurveyApp.Models.ChildContext();
-            objChild = cContext.Children.Find(childId);
+            objChild = cContext.Children.FirstOrDefault(c => c.Id == childId);
             gender = objChild.Gender;
+            dob = objChild.dob.ToShortDateString();
         }
     }
 
@@ -177,9 +179,15 @@
     if (SurveyID == 51) { tileprefix = " for 4yrs - 10yrs"; }
     if (SurveyID == 52) { tileprefix = " for 11yrs - 17yrs"; }
 }
-<h2><a href="javascript:void(0);" id="back" onclick="goBack(this);"></a> &nbsp;@dsSurvey.Tables[0].Rows[0]["Title"].ToString().Replace("[Child]", childname) @tileprefix</h2>
-<p style="font-size:16px;">
-    @Html.Raw(dsSurvey.Tables[0].Rows[0]["TagLine"].ToString().Replace("[Child]", childname))
+<h2>
+    @if (string.IsNullOrEmpty(Request.QueryString["of"]) == true)
+    {
+        <a href="javascript:void(0);" id="back" onclick="goBack(this);"></a>
+    }
+    &nbsp;@dsSurvey.Tables[0].Rows[0]["Title"].ToString().Replace("[Child]", childname) @tileprefix
+</h2>
+<p style="font-size:16px;" dob="@dob">
+    @Html.Raw(dsSurvey.Tables[0].Rows[0]["TagLine"].ToString().Replace("[Child]", childname).Replace("[dob]", dob))
 </p>
 <div class="form-group" style="position:relative;">
     @if (SurveyApp.Controllers.HomeController.isAdminRole())

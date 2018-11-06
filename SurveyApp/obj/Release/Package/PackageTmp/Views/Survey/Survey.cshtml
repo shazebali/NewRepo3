@@ -126,6 +126,7 @@
     <strong>Success! </strong>
     Survey is submitted successfully
 </div>
+
 @{
     string tileprefix = string.Empty;
     if (SurveyID == 6) { tileprefix = " for 2yrs - 4yrs"; }
@@ -138,7 +139,10 @@
     if (SurveyID == 62) { tileprefix = " for 8yrs - 12yrs"; }
     if (SurveyID == 63) { tileprefix = " for 13yrs - 18yrs"; }
 }
-<h2><a href="javascript:void(0);" id="back" onclick="history.go(-1);"></a> &nbsp;@dsSurvey.Tables[0].Rows[0]["Title"].ToString().Replace("[Child]", childname) @tileprefix</h2>
+<h2>
+    <a href="javascript:void(0);" id="back" onclick="history.go(-1);"></a> &nbsp;
+    @dsSurvey.Tables[0].Rows[0]["Title"].ToString().Replace("[Child]", childname) @tileprefix
+</h2>
 <p style="font-size:16px;">
     @Html.Raw(dsSurvey.Tables[0].Rows[0]["TagLine"].ToString().Replace("[Child]", childname))
 </p>

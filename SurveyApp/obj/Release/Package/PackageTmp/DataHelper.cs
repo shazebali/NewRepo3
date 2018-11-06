@@ -100,11 +100,30 @@ namespace SurveyApp
             return DataHelper.ExecuteCommandAsDataSet(cmd);
         }
 
-        public static DataSet SurveyGetAll()
+        public static DataSet SurveyGetAll(int? schoolId = null, int? childId = null)
         {
             SqlCommand cmd = new SqlCommand();
             cmd.CommandType = CommandType.StoredProcedure;
-            
+
+            cmd.Parameters.Add("@SchoolID", SqlDbType.Int);
+            if(schoolId.HasValue && schoolId.Value > 0)
+            {
+                cmd.Parameters["@SchoolID"].Value = schoolId.Value;
+            }
+            else
+            {
+                cmd.Parameters["@SchoolID"].Value = DBNull.Value;
+            }
+
+            cmd.Parameters.Add("@ChildID", SqlDbType.Int);
+            if (childId.HasValue && childId.Value > 0)
+            {
+                cmd.Parameters["@ChildID"].Value = childId.Value;
+            }
+            else
+            {
+                cmd.Parameters["@ChildID"].Value = DBNull.Value;
+            }
 
             cmd.CommandText = "Survey_GetAll";
             return DataHelper.ExecuteCommandAsDataSet(cmd);
@@ -304,6 +323,54 @@ namespace SurveyApp
             cmd.CommandText = "Child_GetAll";
             return DataHelper.ExecuteCommandAsDataSet(cmd);
         }
+
+        public static List<Models.Child> ChildGetBySchoolId(int? schoolId = null)
+        {
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.Parameters.Add("@SchoolID", SqlDbType.Int);
+            if (schoolId.HasValue && schoolId.Value > 0)
+            {
+                cmd.Parameters["@SchoolID"].Value = schoolId.Value;
+            }
+            else
+            {
+                cmd.Parameters["@SchoolID"].Value = DBNull.Value;
+            }
+
+            cmd.CommandText = "Child_GetBySchoolId";
+            DataSet dsChildren = DataHelper.ExecuteCommandAsDataSet(cmd);
+
+            List<Models.Child> lstChildren = new List<Models.Child>();
+            if(dsChildren != null && dsChildren.Tables != null && dsChildren.Tables.Count > 0 && dsChildren.Tables[0].Rows.Count > 0)
+            {                
+                foreach(DataRow drChild in dsChildren.Tables[0].Rows)
+                {
+                    Models.Child objChild = new Models.Child();
+
+                    objChild.Id = drChild["Id"] != DBNull.Value ? Convert.ToInt32(drChild["Id"]) : 0;
+                    objChild.Gender = drChild["Gender"] != DBNull.Value ? Convert.ToInt32(drChild["Gender"]) : 0;
+                    objChild.SchoolId = drChild["SchoolId"] != DBNull.Value ? Convert.ToInt32(drChild["SchoolId"]) : 0;
+                    objChild.ParentId = drChild["ParentId"] != DBNull.Value ? Convert.ToInt32(drChild["ParentId"]) : 0;
+                    objChild.StatusId = drChild["StatusId"] != DBNull.Value ? Convert.ToInt32(drChild["StatusId"]) : 0;
+                    objChild.Name = drChild["Name"] != DBNull.Value ? Convert.ToString(drChild["Name"]) : string.Empty;
+                    objChild.dob = drChild["dob"] != DBNull.Value ? Convert.ToDateTime(drChild["dob"]) : DateTime.MinValue;
+                    objChild.EnrollmentDate = drChild["EnrollmentDate"] != DBNull.Value ? Convert.ToDateTime(drChild["EnrollmentDate"]) : DateTime.MinValue;
+                    objChild.AgreeDate = drChild["AgreeDate"] != DBNull.Value ? Convert.ToDateTime(drChild["AgreeDate"]) : DateTime.MinValue;
+                    objChild.Email = drChild["Email"] != DBNull.Value ? Convert.ToString(drChild["Email"]) : string.Empty;
+                    objChild.Consent = drChild["Consent"] != DBNull.Value ? Convert.ToBoolean(drChild["Consent"]) : false;
+                    objChild.Consent = drChild["Agreed"] != DBNull.Value ? Convert.ToBoolean(drChild["Agreed"]) : false;
+                    objChild.Account = drChild["Account"] != DBNull.Value ? Convert.ToBoolean(drChild["Account"]) : false;
+                    objChild.Consent = drChild["IsDeleted"] != DBNull.Value ? Convert.ToBoolean(drChild["IsDeleted"]) : false;
+
+                    lstChildren.Add(objChild);
+                }
+            }
+
+            return lstChildren;
+        }
+
         public static int SaveuserQuestions(int UserID, string  questionid, string answerid, string score, string childid, string SurveyID, string status, string percentage, DateTime dtSchedule, int scheduleId)
         {
             SqlCommand cmd = new SqlCommand();
@@ -934,7 +1001,7 @@ namespace SurveyApp
             return DataHelper.ExecuteCommandAsDataSet(cmd);
         }
 
-        public static DataSet getSubmittedData(int studyId, int userId, int? surveyId = 0)
+        public static DataSet getSubmittedData(int studyId, int userId, int? surveyId = 0, int? schoolId = 0, int? childId = 0, DateTime? minDate = null, DateTime? maxDate = null)
         {
             SqlCommand cmd = new SqlCommand();
             cmd.CommandType = CommandType.StoredProcedure;
@@ -942,6 +1009,10 @@ namespace SurveyApp
             cmd.Parameters.Add("@StudyID", SqlDbType.Int);
             cmd.Parameters.Add("@SurveyID", SqlDbType.Int);
             cmd.Parameters.Add("@UserID", SqlDbType.Int);
+            cmd.Parameters.Add("@SchoolID", SqlDbType.Int);
+            cmd.Parameters.Add("@ChildID", SqlDbType.Int);
+            cmd.Parameters.Add("@MinDate", SqlDbType.DateTime);
+            cmd.Parameters.Add("@MaxDate", SqlDbType.DateTime);
 
             if (studyId > 0)
             {
@@ -949,7 +1020,7 @@ namespace SurveyApp
             }
             else
             {
-                cmd.Parameters["@StudyID"].Value = null;
+                cmd.Parameters["@StudyID"].Value = DBNull.Value;
             }
 
             if (userId > 0)
@@ -958,16 +1029,52 @@ namespace SurveyApp
             }
             else
             {
-                cmd.Parameters["@UserID"].Value = null;
+                cmd.Parameters["@UserID"].Value = DBNull.Value;
             }
 
-            if (surveyId.HasValue)
+            if (surveyId.HasValue && surveyId.Value > 0)
             {
-                cmd.Parameters["@SurveyID"].Value = surveyId;
+                cmd.Parameters["@SurveyID"].Value = surveyId.Value;
             }
             else
             {
-                cmd.Parameters["@SurveyID"].Value = null;
+                cmd.Parameters["@SurveyID"].Value = DBNull.Value;
+            }
+
+            if (schoolId.HasValue && schoolId.Value > 0)
+            {
+                cmd.Parameters["@SchoolID"].Value = schoolId;
+            }
+            else
+            {
+                cmd.Parameters["@SchoolID"].Value = DBNull.Value;
+            }
+
+            if (childId.HasValue && childId.Value > 0)
+            {
+                cmd.Parameters["@ChildID"].Value = childId;
+            }
+            else
+            {
+                cmd.Parameters["@ChildID"].Value = DBNull.Value;
+            }
+
+            if (minDate.HasValue && minDate.Value != DateTime.MinValue)
+            {
+                cmd.Parameters["@MinDate"].Value = minDate.Value;
+            }
+            else
+            {
+                cmd.Parameters["@MinDate"].Value = DBNull.Value;
+            }
+
+            if (maxDate.HasValue && maxDate.Value != DateTime.MinValue)
+            {
+                cmd.Parameters["@MaxDate"].Value = maxDate.Value;
+            }
+            else
+            {
+                cmd.Parameters["@MaxDate"].Value = DBNull.Value;
             }
 
             cmd.CommandText = "Data_getSubmittedData";
@@ -1224,6 +1331,17 @@ namespace SurveyApp
             cmd.CommandText = "Report_GetAccountRequests";
             return DataHelper.ExecuteCommandAsDataSet(cmd);
         }
+
+        public static DataSet getActivityLog()
+        {
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.CommandText = "Report_GetActivityLog";
+            return DataHelper.ExecuteCommandAsDataSet(cmd);
+        }
+
+        
         public static DataSet getSurveyScore(int? studyId = null, int? userId = null, int? surveyId = null, int? childId = null, int? schoolId = null, bool? includeTestRepondent = null)
         {
             SqlCommand cmd = new SqlCommand();
@@ -1314,7 +1432,7 @@ namespace SurveyApp
             return DataHelper.ExecuteCommandAsDataSet(cmd);
         }
 
-        public static DataSet SurveyGetHistory(int userId, int childId)
+        public static DataSet SurveyGetHistory(int userId, int? childId = 0, int? surveyId = 0)
         {
             SqlCommand cmd = new SqlCommand();
             cmd.CommandType = CommandType.StoredProcedure;
@@ -1324,11 +1442,38 @@ namespace SurveyApp
 
             cmd.Parameters.Add("@ChildId", SqlDbType.Int);
             cmd.Parameters["@ChildId"].Value = childId;
-        
+
+            cmd.Parameters.Add("@SurveyId", SqlDbType.Int);
+            cmd.Parameters["@SurveyId"].Value = surveyId;
+            
             cmd.CommandText = "Survey_GetHistory";
             return DataHelper.ExecuteCommandAsDataSet(cmd);
         }
-        
+
+        #region SurveyQuestion
+        public static DataSet SurveyQuestionGetAllForSurvey(int surveyId) {
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandType = CommandType.StoredProcedure;
+            
+            cmd.Parameters.Add("@SurveyId", SqlDbType.Int);
+            cmd.Parameters["@SurveyId"].Value = surveyId;
+
+            cmd.CommandText = "SurveyQuestion_GetAllForSurvey";
+            return DataHelper.ExecuteCommandAsDataSet(cmd);
+        }
+
+        public static DataSet SurveyQuestion_GetSurveySections(int surveyId)
+        {
+            SqlCommand cmd = new SqlCommand();
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.Parameters.Add("@SurveyId", SqlDbType.Int);
+            cmd.Parameters["@SurveyId"].Value = surveyId;
+
+            cmd.CommandText = "SurveyQuestion_GetSurveySections";
+            return DataHelper.ExecuteCommandAsDataSet(cmd);
+        }
+        #endregion
 
     }
 }

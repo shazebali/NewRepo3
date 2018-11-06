@@ -21,11 +21,15 @@
     }
     else
     {
-        using (StudyContext sContext = new StudyContext())
+        bool isSelected = false;
+        foreach (Study objStd in Study.StudyGetAllByUserId(WebSecurity.CurrentUserId))
         {
-            Study objStd = sContext.Studies.FirstOrDefault();
-            studyId = objStd.Id;
-            studyName = objStd.Name;
+            if(isSelected == false)
+            {
+                studyId = objStd.Id;
+                studyName = objStd.Name;
+                isSelected = true;
+            }
         }
     }
 

@@ -1,12 +1,14 @@
-﻿@using System.Data;
+﻿
+@using System.Data;
 @{
-    ViewBag.Title = "eBit - Survey History";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    
+    Layout = null;
 
-    DataSet ds = (DataSet)Model;
+    int childIdts = string.IsNullOrEmpty(Request.QueryString["childIdts"]) == false ? Convert.ToInt32(Request.QueryString["childIdts"]) : 0;
+    string childName = string.IsNullOrEmpty(Request.QueryString["child"]) == false ? Request.QueryString["child"].ToString() : string.Empty;
+    DataSet ds = SurveyApp.DataHelper.SurveyGetHistory(WebSecurity.CurrentUserId, childIdts);
+    
 
-    string childName = string.Empty, survey = string.Empty;
-   
 }
 
 <script type="text/javascript">
@@ -15,19 +17,6 @@
     });
 </script>
 
-<div>
-    <h3 class="col-sm-11" style="margin: 0px;padding: 0px;">
-        @if(ViewBag.ChildId > 0)
-        {
-            <a href="javascript:void(0);" id="back" onclick="location.href='@Url.Action("Index", "UserQuestion")?childIdts=@ViewBag.ChildId'"></a>
-        }
-        else
-        {
-            <a href="javascript:void(0);" id="back" onclick="goBack(this);"></a>
-        }
-        &nbsp;Questionnaire History
-    </h3>
-</div>
 <div style="clear:both;"></div>
 <br />
 <style>
@@ -74,7 +63,7 @@
 <script type="text/javascript">
     function goToSurveyPage(surveyId, childId, childName, scheduleDate, schid) {
         if (childName != "") {
-            location.href = "@Url.Action("Question", "UserQuestion")?surveyID=" + surveyId +"&ChildId=" + childId +"&ChildName=" + childName +"&perioddate=" + scheduleDate +"&schid=" + schid;
+            window.open("@Url.Action("Question", "UserQuestion")?surveyID=" + surveyId + "&ChildId=" + childId + "&ChildName=" + childName + "&perioddate=" + scheduleDate + "&schid=" + schid + "&of=1");
         }
     }
 </script>

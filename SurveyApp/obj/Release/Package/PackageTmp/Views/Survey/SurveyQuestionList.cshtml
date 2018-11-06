@@ -1,0 +1,100 @@
+﻿@using SurveyApp.Models;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "eBit - Questions";
+
+    int surveyId = string.IsNullOrEmpty(Request.QueryString["surveyId"]) == false ? Convert.ToInt32(Request.QueryString["surveyId"]) : 0;
+
+    string surveyTitle = string.Empty;
+    if (surveyId > 0)
+    {
+
+        var sContext = new SurveyContext();
+        Survey objSurvey = sContext.Surveys.Find(surveyId);
+        surveyTitle = objSurvey.Title;
+    }
+
+}
+
+
+
+<script type="text/javascript">
+    $(function () {
+        $("#tblQuestions").DataTable({
+            dom: 'Bfrtip',
+            buttons: [{
+                extend: 'excel',
+                text: "Export to Excel",
+                title: 'Questions',
+                exportOptions: {
+                    modifier: {
+                        search: 'none',
+                        order: 'original'
+                    }
+                }
+            }],
+            "oLanguage": {
+                "sInfo": "Displaying _START_ to _END_ of _TOTAL_ Questions"
+            },
+            "order": [[1, "asc"]]
+        });
+
+        $('[data-toggle="tooltip"]').tooltip({
+            track: true,
+            content: function () {
+                return $(this).attr('title').replace(/_NEWLINE_/g, "<br/>");
+            },
+        });
+    });
+</script>
+<div>
+    <h2 class="col-sm-11" style="margin: 0px;padding: 0px;">
+        <a href="@Url.Action("SurveyAddEdit", "Survey")?id=@surveyId" id="back" class="btnBack" title="Back to @surveyTitle Editor" data-toggle="tooltip"></a>
+        &nbsp;@surveyTitle - Questions
+        &nbsp;<a href="@Url.Action("Survey", "Survey", new { surveyId = surveyId })" class="preview" target="_blank" title="Preview <b>@surveyTitle</b>" data-toggle="tooltip">PREVIEW</a>
+    </h2>
+    <a href="@Url.Action("SurveyQuestionAddEdit", "Survey")?surveyId=@surveyId" class="btn btn-default" style="float:right;"><i class="fa fa-book"></i>&nbsp;Add Question</a>
+</div>
+<div style="clear:both;"></div>
+<br />
+<style>
+    .table-hover tbody tr {
+        cursor: default;
+    }
+        .table-hover tbody tr td.number {
+            width: 50px;
+        }
+
+    .preview {
+        margin: 0px;
+        display: inline-block;
+        text-decoration: underline;
+        color: #7b7eff !important;
+        font-size: 16px;
+        text-transform: uppercase;
+    }
+</style>
+<table class="table table-striped table-hover questions" id="tblQuestions">
+    <thead>
+        <tr>
+            <th class="number"><nobr>Sr. #</nobr></th>
+            <th class="number">Sequence</th>
+            <th class="title">Question</th>
+            <th style="width: 50px;">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (SurveyQuestion objSurveyQuestion in SurveyQuestion.SurveyQuestionGetAllForSurvey(surveyId))
+        {
+            <tr>
+                <td class="number">@objSurveyQuestion.ID</td>
+                <td class="number">@objSurveyQuestion.Seq</td>
+                <td class="name">@objSurveyQuestion.Question</td>
+                <td style="text-align: center;vertical-align:middle;">
+                    <a href="javascript:void(0);" title="Edit Question" data-toggle="tooltip" onclick="location.href = '@Url.Action("SurveyQuestionAddEdit", "Survey", new { id = objSurveyQuestion.ID, surveyId = surveyId })';"><i class="fa fa-edit"></i></a>
+                    <a href="javascript:void(0);" class="redCross" onclick="event.stopPropagation();deleteListItem(this, @objSurveyQuestion.ID, 'question', '@objSurveyQuestion.Question.ToString().Replace("'", "")', function(){ location.href = location.href; });"><i class="fa fa-close"></i></a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,122 @@
+﻿@using SurveyApp.Models;
+@{
+    ViewBag.Title = "eBit - Questionnaire Information Editor";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int surveyId = string.IsNullOrEmpty(Request.QueryString["id"]) == false ? Convert.ToInt32(Request.QueryString["id"]) : 0;
+    string title = Model.Title;
+}
+@model SurveyApp.Models.Survey
+
+
+<h2>
+    <a href="javascript:void(0);" id="back" class="btnBack" title="Back to Questionnaire Manager" data-toggle="tooltip"></a> &nbsp;
+    
+    @if (surveyId > 0)
+    {
+        <span>Questionnaire Information Editor&nbsp;</span>
+        <a href="@Url.Action("SurveyQuestionList", "Survey", new { surveyId = surveyId })" class="viewQuestions" title="View Questions List for @title" data-toggle="tooltip">VIEW QUESTIONS</a>
+    }
+    else
+    {
+        <span>Add Questionnaire</span>
+    }
+</h2>
+<br />
+<style>
+    ._panel {
+        background: #fafafa;
+        border: solid 1px #cccccc;
+        padding: 10px;
+        border-radius: 6px;
+    }
+    .viewQuestions {
+        margin: 0px;
+        display: inline-block;
+        text-decoration: underline;
+        color: #7b7eff !important;
+        font-size: 16px;
+        text-transform: uppercase;
+    }
+</style>
+<br />
+
+@using (Html.BeginForm("SurveyAddEdit", "Survey", FormMethod.Post, new { style = "width:800px;", @class = "form-horizontal" }))
+{
+    @Html.ValidationSummary()
+    @Html.HiddenFor(m => m.Id, new { name = "hdnSurveyId", value = Model.Id })
+    <div class="form-group">
+        <label class="control-label col-sm-4">Title:*</label>
+        <div class="col-sm-8">
+            @Html.TextBoxFor(m => m.Title, null, new { id = "txtTitle", @class = "form-control", placeholder = "Title", @maxlength = "100" })
+        </div>
+
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-sm-4">Tagline: </label>
+        <div class="col-sm-8" style="text-align: right;">
+            @Html.TextAreaFor(m => m.Tagline, new { id = "txtTagline", @class = "form-control", placeholder = "Tagline", @maxlength = "1000", @style = "height:140px" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-sm-4">Abbreviation:* </label>
+        <div class="col-sm-8" style="text-align: right;">
+            @Html.TextBoxFor(m => m.Title_Abbr, new { id = "txtAbbreviation", @class = "form-control", placeholder = "Abbreviation", @maxlength = "100" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-sm-4">Style:*</label>
+        <div class="col-sm-8" style="text-align: right;">
+            @Html.DropDownListFor(m => m.Style, new SelectList(SurveyStyle.SurveyStyle_GetAll(), "Style", "Style"), "Select Questionnaire Style", new { id = "ddlSurveyStyle", @class = "form-control" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-sm-4"> </label>
+        <div class="col-sm-offset-4 col-sm-8" style="margin-top:10px;">
+            <button type="submit" id="btnSaveSurvey" class="btn btn-default">Save Information</button>
+            <button type="button" class="btn btn-default" onclick="location.href='@Url.Action("Index", "Survey")';">Cancel</button>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+    $(function () {
+        $(".btnBack").click(function(){
+            bootbox.dialog({
+                message: "Would you like to save the changes?",
+                title: "Save Changes!",
+                closeButton: false,
+                onEscape: function() {
+                    location.href = "@Url.Action("Index", "Survey")";
+                },
+                buttons: {
+                    success: {
+                        label: "Yes",
+                        className: "btn-primary",
+                        callback: function() {
+                            $("#btnSaveSurvey").click();
+                        }
+                    },
+                    danger: {
+                        label: "No",
+                        className: "btn-default",
+                        callback: function() {
+                            location.href = "@Url.Action("Index", "Survey")";
+                        }
+                    }
+                }
+            });
+        });
+    });
+
+    $('[data-toggle="tooltip"]').tooltip({
+        track: true,
+        content: function () {
+            return $(this).attr('title').replace(/_NEWLINE_/g, "<br/>");
+        },
+    });
+</script>

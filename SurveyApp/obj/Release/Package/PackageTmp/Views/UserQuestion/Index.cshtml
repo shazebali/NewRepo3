@@ -117,6 +117,9 @@
                 <a href="#2" onclick="loadCharts(this);">Graphs Over Time</a>
             </li>    
             }
+            <li>
+                <a href="#9" onclick="loadSurveyHistory(this);">History</a>
+            </li>
             <li style="float:right;">
                 <div style="height: 38px;display:none;" class="col-md-6 topControls">
                     <table>
@@ -173,7 +176,7 @@
     <div class="graphsDetails __tabs" style="opacity:0;">
         <div class="separator"></div>
         <div class="col-sm-12">
-            <p style="margin-bottom: 50px;margin-top: 10px;">These graphs show student changes on eBit surveys over time</p>
+            <p style="margin-bottom: 50px;margin-top: 10px;">These graphs show student changes on eBit surveys over time.</p>
             <div id="divCharts"></div>
             @*@{Html.RenderPartial("~/Views/Home/_Charts.cshtml", new ViewDataDictionary { { "studyId", studyId }, { "studyName", studyName }, { "childIdts", childIdts } });}*@
         </div>
@@ -185,8 +188,14 @@
             @*@{Html.RenderPartial("_ChildDetails", new ViewDataDictionary { { "studyId", studyId }, { "studyName", studyName }, { "childIdts", childIdts } });}*@
         </div>        
     </div>
+    <div class="historyDetails __tabs" style="opacity:0;">
+        <div class="col-sm-12">
+            <p style="margin-bottom: 50px;margin-top: 10px;">You have submitted these questionnaires on eBit over time.</p>
+            <div id="divHistoryDetails"></div>
+        </div>
+    </div>
 
-<script type="text/javascript">
+    <script type="text/javascript">
     var isStudent = @(role == "Student" ? "true" : "false");
     $(window).load(function () {
         $(".waiting").hide();
@@ -197,17 +206,29 @@
         if (window.location.hash) {
             hash = window.location.hash.substring(1);
         }
-
-        if(isStudent == true){
-            $(".tabdashboard").find("li:eq(" + (hash > 2 ? 2 : 0) + ")").find("a").click();
-        }
-        else{
-            $(".tabdashboard").find("li:eq(" + (hash > 2 ? 2 : hash) + ")").find("a").click();
-        }        
         
-        if (hash > 2) {
+        if (isStudent == true) {
+            if (hash == 9) {
+                $(".tabdashboard").find("li:eq(" + (hash - 6) + ")").find("a").click();            
+            }
+            else {
+                $(".tabdashboard").find("li:eq(" + (hash > 2 ? 2 : 0) + ")").find("a").click();                        
+            }
+            
+        }
+        else {
+            if (hash == 9) {
+                $(".tabdashboard").find("li:eq(" + (hash - 6) + ")").find("a").click();
+            }
+            else {
+                $(".tabdashboard").find("li:eq(" + (hash > 2 ? 2 : hash) + ")").find("a").click();            
+            }            
+        }
+
+        if (hash > 2 && hash != 9) {
             $(".graphTabs .graphSections").find("li:eq(" + (hash - 3) + ")").find("a").click();
         }
+
         $(".__tabs").css("opacity", "1");
     });
 
@@ -215,6 +236,7 @@
         if ($(".dashboardDetails").is(":visible") == true) { return 0; }
         if ($(".quesDetails").is(":visible") == true) { return 1; }
         if ($(".graphsDetails").is(":visible") == true) { return getInnerVisibleDiv(); }
+        if ($(".historyDetails").is(":visible") == true) { return 9; }
     }
 
     function getInnerVisibleDiv() {
@@ -310,7 +332,7 @@
         $('.tabdashboard a').removeClass('selected');
         $(elem).addClass('selected');
         $('.__tabs').hide();
-        $('.childrendropdown').hide();
+        $('.childrendropdown').hide();        
         $('.quesDetails').show();
         $('.dashboard-controls').show();
         $('.allchildren').addClass('highlightError');
@@ -320,7 +342,7 @@
             $.ajax({
                 url: "@Url.Action("_ChildDetails", "UserQuestion")?studyId=@studyId&studyName=@studyName&childIdts=@childIdts&child=@childName",
                 dataType: "html",
-                success: function (data) {                    
+                success: function (data) {
                     if(isSessionValid(data) == true){
                         $(".quesDetails").addClass("loaded");
                         $("#divQuestionDetails").html(data);
@@ -330,5 +352,31 @@
             });
         }
     }
-</script>
+
+    
+        function loadSurveyHistory(elem) {            
+        $('.tabdashboard a').removeClass('selected');
+        $(elem).addClass('selected');
+        $('.__tabs').hide();
+        $('.childrendropdown').hide();        
+        $('.historyDetails').show();
+        $('.dashboard-controls').show();
+        $('.allchildren').addClass('highlightError');
+
+        if ($(".historyDetails").hasClass("loaded") == false)
+        {
+            $.ajax({
+                url: "@Url.Action("_SurveyHistory", "UserQuestion")?studyId=@studyId&studyName=@studyName&childIdts=@childIdts&child=@childName",
+                dataType: "html",
+                success: function (data) {
+                    if(isSessionValid(data) == true){
+                        $(".historyDetails").addClass("loaded");
+                        $("#divHistoryDetails").html(data);
+                    }
+                    checkTimeout(data, 3);
+                }
+            });
+        }
+    }
+    </script>
     

@@ -94,6 +94,9 @@
 
     string dtRCADSp = "", rCADSAnxietyPScore = "", rCADSDepressionPScore = "";
 
+    string dSCAS = "", pSCAS = "", dSCAST = "", tSCAS = "";
+    string dMood = "", dMoodT = "", pMood = "", tMood = "";
+
     #region populatingGraphs
     if (dsCharts != null && dsCharts.Tables != null && dsCharts.Tables.Count > 0)
     {
@@ -177,6 +180,37 @@
             tASP += dr["Score"] + ",";
         }
         #endregion
+
+        #region SCAS
+        DataRow[] drSCASP = dsCharts.Tables[0].Select("SURVEYid = 71");
+        foreach (DataRow dr in drSCASP)
+        {
+            dSCAS += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            pSCAS += dr["Score"] + ",";
+        }
+        DataRow[] drSCAST = dsCharts.Tables[1].Select("SURVEYid = 72");
+        foreach (DataRow dr in drSCAST)
+        {
+            dSCAST += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            tSCAS += dr["Score"] + ",";
+        }
+        #endregion
+
+        #region Mood And Feelings Qestionnaire: Short Version
+        DataRow[] drMOODP = dsCharts.Tables[0].Select("SURVEYid = 69");
+        foreach (DataRow dr in drMOODP)
+        {
+            dMood += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            pMood += dr["Score"] + ",";
+        }
+        DataRow[] drMOODT = dsCharts.Tables[1].Select("SURVEYid = 69");
+        foreach (DataRow dr in drMOODT)
+        {
+            dMoodT += "'" + (dr["ScheduleDate"] != DBNull.Value ? Convert.ToDateTime(dr["ScheduleDate"]).ToString("MM/dd/yyyy") : "") + "',";
+            tMood += dr["Score"] + ",";
+        }
+        #endregion
+
 
         #region Anxiety Depression and Mood Scale
         DataRow[] drPADAM = dsCharts.Tables[0].Select("SURVEYid = 35");
@@ -2958,6 +2992,118 @@
         //-----------------------------------------End----------------------------------------
     });
     </script>
+
+    <script type="text/javascript">
+    $(function () {
+        //-----------------------------------------SCAS--TEACHER--------------------------------------
+    $('#divSCASTeacher').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'SCAS - Teacher'
+        },
+        //subtitle: {
+        //    text: '*Lower is Better'
+        //},
+        xAxis: {
+            categories: [@Html.Raw(dSCAST.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(tSCAS.TrimEnd(','))],
+            color: '#cc0000'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
+
+    <script type="text/javascript">
+    $(function () {
+        //-----------------------------------------Mood And Feelings Qestionnaire: Short Version--TEACHER--------------------------------------
+    $('#divMoodTeacher').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Mood And Feelings Qestionnaire: Short Version'
+        },
+        //subtitle: {
+        //    text: '*Lower is Better'
+        //},
+        xAxis: {
+            categories: [@Html.Raw(dMoodT.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(tMood.TrimEnd(','))],
+            color: '#cc0000'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+    </script>
 }
 
 <script type="text/javascript">
@@ -3885,6 +4031,118 @@
                 symbol: 'square'
             },
             data: [@Html.Raw(pADAM.TrimEnd(','))],
+            color: '#cc0000'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        //-----------------------------------------SCAS--PARENT--------------------------------------
+    $('#divSCASParent').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'SCAS - Parent'
+        },
+        //subtitle: {
+        //    text: '*Lower is Better'
+        //},
+        xAxis: {
+            categories: [@Html.Raw(dSCAS.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(pSCAS.TrimEnd(','))],
+            color: '#cc0000'
+
+        }],
+    });
+        //-----------------------------------------End----------------------------------------
+    });
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        //-----------------------------------------Mood And Feelings Qestionnaire: Short Version--PARENT--------------------------------------
+    $('#divMoodParent').highcharts({
+        chart: {
+            type: 'spline'
+        },
+        title: {
+            text: 'Mood And Feelings Qestionnaire: Short Version'
+        },
+        //subtitle: {
+        //    text: '*Lower is Better'
+        //},
+        xAxis: {
+            categories: [@Html.Raw(dMood.TrimEnd(','))]
+        },
+        yAxis: {
+            title: {
+                text: 'Scores'
+            },
+            labels: {
+                formatter: function () {
+                    return this.value + '';
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: true
+        },
+        plotOptions: {
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Scores',
+            marker: {
+                symbol: 'square'
+            },
+            data: [@Html.Raw(pMood.TrimEnd(','))],
             color: '#cc0000'
 
         }],
@@ -5002,13 +5260,13 @@
                     }
 
                     @if (isSurveyAssigned(68, "Parent"))
-                    {                        
+                    {
                         <div class="col-sm-12 parent" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
                             <div id="divRCADSParent" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="42" class="surveygraph"></div>
                         </div>
                         isAssignedToParent = true;
                     }
-                    
+
                 </div>
 
                 @if (role != "" && role != "Parent")
@@ -5066,6 +5324,20 @@
                     {
                         <div class="col-sm-12 parent" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
                             <div id="CaregiverStrainQuesionaire" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="2" class="surveygraph"></div>
+                        </div>
+                        isAssignedToParent = true;
+                    }
+                    @if (isSurveyAssigned(71, "Parent"))
+                    {
+                        <div class="col-sm-12 parent" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                            <div id="divSCASParent" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="42" class="surveygraph"></div>
+                        </div>
+                        isAssignedToParent = true;
+                    }
+                    @if (isSurveyAssigned(69, "Parent"))
+                    {
+                        <div class="col-sm-12 parent" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                            <div id="divMoodParent" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="42" class="surveygraph"></div>
                         </div>
                         isAssignedToParent = true;
                     }
@@ -5156,6 +5428,7 @@
                         <div class="col-sm-12" style="padding-top:8px;margin:0px 0px 10px 0px;"><div id="divpVanderbiltADHD" surveyid="56" class="surveygraph"></div></div>
                         isAssignedToParent = true;
                     }
+
                 </div>
 
                 @if (role != "" && role != "Parent")
@@ -5318,6 +5591,22 @@
                             </div>
                             <div class="col-sm-12 teacher" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
                                 <div id="divSSISTeacherSection" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="42" class="surveygraph"></div>
+                            </div>
+                            isAssignedToTeacher = true;
+                        }
+
+                        @if (isSurveyAssigned(72, "Teacher"))
+                        {
+                            <div class="col-sm-12 teacher" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                                <div id="divSCASTeacher" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="42" class="surveygraph"></div>
+                            </div>
+                            isAssignedToTeacher = true;
+                        }
+
+                        @if (isSurveyAssigned(69, "Teacher"))
+                        {
+                            <div class="col-sm-12 teacher" style="background-color:transparent;padding-top:8px;margin:0px 0px 10px 0px;">
+                                <div id="divMoodTeacher" style="min-width: 310px; height: 400px; margin: 0 auto" surveyid="42" class="surveygraph"></div>
                             </div>
                             isAssignedToTeacher = true;
                         }

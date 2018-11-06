@@ -31,6 +31,12 @@ namespace SurveyApp.Controllers
             return View();
         }
 
+        public ActionResult ActivityLog()
+        {
+            return View();
+        }
+        
+
         public ActionResult SurveyScore()
         {
             if (!Roles.IsUserInRole(WebSecurity.CurrentUserName, "Administrator"))
@@ -51,10 +57,15 @@ namespace SurveyApp.Controllers
             }
 
             int surveyId = collection["hdnSurveyId"] != null ? Convert.ToInt32(collection["hdnSurveyId"]) : 0;
+            int schoolId = collection["hdnSchoolId"] != null ? Convert.ToInt32(collection["hdnSchoolId"]) : 0;
+            int childId = collection["hdnChildId"] != null ? Convert.ToInt32(collection["hdnChildId"]) : 0;
+            DateTime minDate = collection["hdnMinDate"] != null ? Convert.ToDateTime(collection["hdnMinDate"]) : DateTime.MinValue;
+            DateTime maxDate = collection["hdnMaxDate"] != null ? Convert.ToDateTime(collection["hdnMaxDate"]) : DateTime.MinValue;
+
             string fileName = collection["hdnFileName"];
             if (WebSecurity.IsAuthenticated)
             {
-                DataSet ds = DataHelper.getSubmittedData(0, WebSecurity.CurrentUserId, surveyId);
+                DataSet ds = DataHelper.getSubmittedData(0, WebSecurity.CurrentUserId, surveyId, schoolId, childId, minDate, maxDate);
 
                 using (XLWorkbook wb = new XLWorkbook())
                 {
